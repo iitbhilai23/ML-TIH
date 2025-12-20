@@ -1,0 +1,211 @@
+
+
+.mapWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+
+.leaflet-container .leaflet-interactive {
+  transition: 
+    stroke 200ms ease,
+    stroke-width 200ms ease,
+    fill-opacity 200ms ease,
+    fill 200ms ease;
+}
+
+
+.district-tooltip {
+  background: #0a68ff !important;
+  color: #ffffff !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  border: 2px solid white !important;
+  letter-spacing: 0.5px;
+  z-index: 999999;
+}
+
+
+.district-tooltip.leaflet-tooltip-top:before {
+  border-top-color: #0a68ff !important;
+}
+
+.block-tooltip {
+  background: #166534 !important;
+  color: #ffffff !important;
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25) !important;
+  border: 1px solid white !important;
+}
+
+.block-tooltip.leaflet-tooltip-top:before {
+  border-top-color: #166534 !important;
+}
+
+
+.sidebarBox {
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+}
+
+.sidebarTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.sidebarList {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-left: 14px;
+}
+
+.sidebarList li {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+
+
+.mapButton {
+  padding: 8px 14px;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.mapButton:hover {
+  background: #1e4fcc;
+}
+
+.mapButtonGreen {
+  padding: 8px 14px;
+  background: #10b981;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.mapButtonGreen:hover {
+  background: #0e9c68;
+}
+
+/* ============================= */
+/* IMPROVED SCROLLBAR */
+/* ============================= */
+
+.sidebarList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebarList::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 4px;
+}
+
+.sidebarList::-webkit-scrollbar-thumb:hover {
+  background: #a5a5a5;
+}
+
+
+
+.cg-map-search {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1400;
+  pointer-events: auto;
+}
+
+.cg-map-search-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  width: 100%;
+}
+
+.cg-map-search-input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 14px;
+  padding: 6px 4px;
+  background: transparent;
+}
+
+.cg-map-search-icon { font-size: 14px; color: #6b7280; }
+
+.cg-suggestions {
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(16,24,40,0.08);
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+.cg-suggestion {
+  padding: 10px 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  transition: background 140ms ease;
+}
+.cg-suggestion:hover { background: rgba(25,118,210,0.04); }
+
+.cg-suggestion-type {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  width: 70px;
+}
+.cg-suggestion-text { font-weight: 600; color: #0f172a; }
+
+/* tooltips */
+.district-tooltip {
+  background: #263238;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 6px 14px rgba(2,6,23,0.24);
+}
+.block-tooltip {
+  background: #1b5e20;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 6px 14px rgba(2,6,23,0.24);
+}
+
+
+.leaflet-container .leaflet-interactive {
+  transition: stroke 220ms cubic-bezier(.2,.9,.2,1), stroke-width 220ms cubic-bezier(.2,.9,.2,1), fill-opacity 220ms cubic-bezier(.2,.9,.2,1);
+}
+
+.cg-suggestions::-webkit-scrollbar { width: 8px; }
+.cg-suggestions::-webkit-scrollbar-thumb { background: rgba(2,6,23,0.06); border-radius: 8px; }

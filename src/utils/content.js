@@ -1,0 +1,45 @@
+import { LayoutDashboard, Users, BookOpen, MapPin, FileText, Settings, LogOut } from 'lucide-react';
+
+const content = {
+  // Global App Config
+  appTitle: "CG Training Portal",
+  appSubtitle: "Marketplace Literacy Chhattisgarh",
+  
+  // Navigation 
+  nav: [
+    { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard }, 
+    { label: "Trainers", path: "/admin/trainers", icon: Users },
+     { label: "Locations", path: "/admin/locations", icon: MapPin },
+     { label: "Trainings", path: "/admin/trainings", icon: BookOpen },
+     { label: "Participants", path: "/admin/participants", icon: Users },
+    { label: "Subjects", path: "/admin/trainings/subjects", icon: BookOpen }, 
+    { label: "Reports", path: "/", icon: FileText }, 
+  ],
+
+  common: {
+    logout: "Logout",
+    loading: "Loading data...",
+    error: "Something went wrong. Please try again.",
+    save: "Save Details",
+    cancel: "Cancel"
+  },
+
+  //  Report Section Texts
+  reports: {
+    pageTitle: "Public Impact Report",
+    pageSubtitle: "Live monitoring of skill development programs across the state.",
+    sections: {
+      charts: "District-wise Performance",
+      demographics: "Demographics (Category)",
+      map: "Live Training Locations"
+    },
+    kpi: {
+      beneficiaries: "Total Beneficiaries",
+      completed: "Trainings Completed",
+      districts: "Districts Covered",
+      trainers: "Active Trainers"
+    }
+  }
+};
+
+export default content;

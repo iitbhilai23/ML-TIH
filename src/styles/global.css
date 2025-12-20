@@ -1,0 +1,33 @@
+:root {
+
+  --primary: #4f46e5;      
+  --primary-dark: #312e81; 
+  --bg-body: #f3f4f6;      
+  --bg-surface: #ffffff;   
+  --text-main: #111827;
+  --border-color: #e5e7eb;
+  
+  /* Layout Config */
+  --sidebar-width: 240px;
+  --header-height: 60px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  font-size: 14px; 
+ 
+}
+
+/* Helpers */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.h-screen { height: 100vh; }
+.w-full { width: 100%; }
+.overflow-auto { overflow: auto; }
+
+
+

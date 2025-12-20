@@ -1,0 +1,68 @@
+
+.container {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pageTitle { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+
+/* Filter Bar */
+.filterBar {
+    display: flex;
+    gap: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+.searchInput {
+    padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+    outline: none; font-size: 0.9rem; min-width: 250px;
+}
+
+/* Table */
+.tableCard {
+    background: white; border: 1px solid #e2e8f0; border-radius: 8px;
+    flex: 1; overflow: hidden; display: flex; flex-direction: column;
+}
+.tableWrapper { overflow-y: auto; flex: 1; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th {
+    background: #f8fafc; color: #475569; padding: 12px; 
+    text-align: left; position: sticky; top: 0; border-bottom: 2px solid #e2e8f0;
+}
+.table td { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+
+/* Buttons & Badges */
+.btn {
+    padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none;
+    display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+}
+.primary { background: var(--primary); color: white; }
+.iconBtn { padding: 6px; border-radius: 4px; border: none; cursor: pointer; }
+.edit { background: #eff6ff; color: var(--primary); }
+.delete { background: #fef2f2; color: #ef4444; }
+
+/* Modal */
+.modalOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+}
+.modalBox {
+    background: white; width: 450px; padding: 25px; border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.formGroup { margin-bottom: 15px; }
+.label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 500; color: #475569; }
+.input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical; }
+.row { display: flex; gap: 10px; }

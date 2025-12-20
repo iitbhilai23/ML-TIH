@@ -1,0 +1,31 @@
+
+.container { padding: 20px; height: 100%; display: flex; flex-direction: column; gap: 15px; }
+.headerRow { display: flex; justify-content: space-between; align-items: center; }
+.title { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+
+/* Status Badges */
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.scheduled { background: #e0f2fe; color: #0369a1; }
+.ongoing { background: #fef3c7; color: #b45309; }
+.completed { background: #dcfce7; color: #15803d; }
+.cancelled { background: #fee2e2; color: #b91c1c; }
+
+/* Table Styles */
+.tableCard { background: white; border: 1px solid #e2e8f0; border-radius: 8px; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.tableWrapper { overflow-y: auto; flex: 1; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th { background: #f8fafc; color: #475569; padding: 12px; text-align: left; position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; }
+.table td { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: middle; }
+
+/* Filter Bar */
+.filterBar { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; align-items: center; }
+.select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem; background: white; }
+.btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; }
+
+/* Modal */
+.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; justify-content: center; }
+.modalBox { background: white; width: 600px; padding: 25px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; }
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.formGroup { margin-bottom: 15px; }
+.label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 500; color: #475569; }
+.input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
