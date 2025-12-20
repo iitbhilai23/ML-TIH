@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { trainerService } from '../../services/trainerService';
 import TrainerForm from './TrainerForm';
 import styles from './Trainers.module.css';
-import { Plus, Search, Pencil, Trash2, Phone, Mail } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Phone, Mail, User, Users } from 'lucide-react';
 
 const TrainerList = () => {
   const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrainer, setEditingTrainer] = useState(null);
 
@@ -16,46 +16,24 @@ const TrainerList = () => {
     fetchTrainers();
   }, [searchTerm]);
 
-const fetchTrainers = async () => {
-  setLoading(true);
-  try {
-    const data = await trainerService.getAllTrainers(searchTerm);
+  const fetchTrainers = async () => {
+    setLoading(true);
+    try {
+      const data = await trainerService.getAllTrainers(searchTerm);
 
-    //  FORCE RE-RENDER (NO MANUAL REFRESH NEEDED)
-    setTrainers(Array.isArray(data) ? [...data] : []);
-  } catch (error) {
-    console.error('Failed to fetch trainers:', error);
-    alert('Failed to fetch trainers');
-  } finally {
-    setLoading(false);
-  }
-};
+      //  FORCE RE-RENDER (NO MANUAL REFRESH NEEDED)
+      setTrainers(Array.isArray(data) ? [...data] : []);
+    } catch (error) {
+      console.error('Failed to fetch trainers:', error);
+      alert('Failed to fetch trainers');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-//   const handleSave = async (formData) => {
-//   try {
-//     if (editingTrainer) {
-//       await trainerService.updateTrainer(editingTrainer.id, formData);
-//       alert('Trainer updated successfully!');
-//     } else {
-//       await trainerService.createTrainer(formData);
-//       alert('Trainer created successfully!');
-//     }
-//     setIsModalOpen(false);
-//     setEditingTrainer(null);
-//     fetchTrainers(); // Force refresh after save
-//   } catch (error) {
-//     console.error('Error saving trainer:', error);
-//     alert('Error saving trainer: ' + error.message);
-//   }
-// };
-
-const handleSave = async () => {
-  // setIsModalOpen(false);
-  // setEditingTrainer(null);
-  await fetchTrainers(); // list refresh
-};
-
+  const handleSave = async () => {
+    await fetchTrainers(); // list refresh
+  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this trainer?')) {
@@ -82,93 +60,332 @@ const handleSave = async () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Trainer Management</h2>
-        <button className={`${styles.btn} ${styles.primary}`} onClick={openAddModal}>
-          <Plus size={18} /> Add New Trainer
-        </button>
-      </div>
+      {/* Modern Header with Search and Add Button */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        marginBottom: '24px'
+      }}>
+        {/* Header Section */}
+        <div style={{
+          background: 'white',
+          padding: '20px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.3rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: 0,
+              marginBottom: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <Users size={24} style={{ color: '#6366f1' }} />
+              Trainer Management
+            </h2>
+            <p style={{
+              fontSize: '0.9rem',
+              color: '#64748b',
+              margin: 0
+            }}>
+              Manage trainers and their profiles
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+            }}>
+              <div style={{
+                fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '2px'
+              }}>
+                Total Trainers
+              </div>
+              <div style={{
+                fontSize: '1.8rem',
+                fontWeight: 800,
+                color: 'white',
+                lineHeight: 1
+              }}>
+                {trainers.length}
+              </div>
+            </div>
+            <button
+              onClick={openAddModal}
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0. 9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+              }}
+            >
+              <Plus size={18} /> Add Trainer
+            </button>
+          </div>
+        </div>
 
-      <div className={styles.header}>
-        <div style={{position: 'relative'}}>
-            <Search size={16} style={{position: 'absolute', left: 10, top: 10, color: '#94a3b8'}}/>
-            <input 
-              type="text" 
-              className={styles.searchBox} 
-              placeholder="Search by name, email or phone..." 
-              style={{paddingLeft: '35px'}}
+        {/* Search Bar */}
+        <div style={{
+          background: 'white',
+          padding: '16px 20px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}>
+          <div style={{ position: 'relative', maxWidth: '500px' }}>
+            <Search size={18} style={{
+              position: 'absolute',
+              left: '14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#94a3b8'
+            }} />
+            <input
+              type="text"
+              placeholder="Search by name, email or phone..."
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 14px 12px 44px',
+                border: '2px solid #e2e8f0',
+                borderRadius: '10px',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                color: '#334155',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             />
+          </div>
         </div>
       </div>
 
+      {/* Enhanced Table */}
       <div className={styles.tableCard}>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Trainer Name</th>
-                <th>Email</th>
-                <th>Contact</th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <User size={14} />
+                    Trainer
+                  </div>
+                </th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Mail size={14} />
+                    Email
+                  </div>
+                </th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Phone size={14} />
+                    Contact
+                  </div>
+                </th>
                 <th>Bio / Specialization</th>
-                <th>Profile Image</th>
-                <th style={{textAlign:'center'}}>Actions</th>
+                <th style={{ textAlign: 'center' }}>Profile</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                 <tr><td colSpan="6" style={{textAlign:'center', padding: '20px'}}>Loading...</td></tr>
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                  <div>Loading trainers...</div>
+                </td></tr>
               ) : trainers.length === 0 ? (
-                 <tr><td colSpan="6" style={{textAlign:'center', padding: '20px'}}>No trainers found</td></tr>
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '60px' }}>
+                  <Users size={64} style={{ margin: '0 auto 16px', opacity: 0.2, color: '#94a3b8' }} />
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b', marginBottom: '8px' }}>
+                    No Trainers Found
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+                    {searchTerm ? 'Try adjusting your search' : 'Add your first trainer to get started'}
+                  </div>
+                </td></tr>
               ) : (
                 trainers.map((trainer) => (
                   <tr key={trainer.id}>
                     <td>
-                      <div className="flex items-center">
-                        <span style={{fontWeight: 500}}>{trainer.name}</span>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}>
+                        {trainer.profile_image_url ? (
+                          <img
+                            src={`${trainer.profile_image_url}?t=${Date.now()}`}
+                            alt={trainer.name}
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid #e2e8f0'
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '1.1rem'
+                          }}>
+                            {trainer.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span style={{ fontWeight: 600, color: '#1e293b' }}>{trainer.name}</span>
                       </div>
                     </td>
                     <td>
-                      <div className="flex items-center gap-2">
-                        <Mail size={12}/>
+                      <div style={{
+                        fontSize: '0.9rem',
+                        color: '#475569',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <Mail size={14} style={{ color: '#94a3b8' }} />
                         {trainer.email}
                       </div>
                     </td>
                     <td>
-                      <div className="flex items-center gap-2">
-                        <Phone size={12}/>
+                      <div style={{
+                        fontSize: '0.9rem',
+                        color: '#475569',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <Phone size={14} style={{ color: '#94a3b8' }} />
                         {trainer.phone || 'N/A'}
                       </div>
                     </td>
-                    <td style={{maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                      {trainer.bio || 'N/A'}
+                    <td style={{
+                      maxWidth: '250px',
+                      fontSize: '0.85rem',
+                      color: '#64748b',
+                      lineHeight: '1.4'
+                    }}>
+                      {trainer.bio || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>No bio provided</span>}
                     </td>
-                    <td>
-                      {trainer.profile_image_url ? (
-                        <img 
-                          src={`${trainer.profile_image_url}?t=${Date.now()}`}
-                          className={styles.avatar}
-                        alt={trainer.name}
-                        />
-                      ) : (
-                        <div className={styles.avatar}>
-                          {trainer.name.charAt(0).toUpperCase()}
-                        </div>
+                    <td style={{ textAlign: 'center' }}>
+                      {trainer.profile_image_url && (
+                        <span style={{
+                          background: '#dcfce7',
+                          color: '#166534',
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600
+                        }}>
+                          ✓ Set
+                        </span>
                       )}
                     </td>
                     <td>
-                      <div className="flex justify-center gap-2">
-                        <button 
-                          className={`${styles.btn} ${styles.edit}`} 
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}>
+                        <button
                           onClick={() => openEditModal(trainer)}
+                          style={{
+                            padding: '8px 12px',
+                            background: '#eff6ff',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: '8px',
+                            color: '#1e40af',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#dbeafe';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#eff6ff';
+                          }}
                         >
-                          <Pencil size={16} />
+                          <Pencil size={14} /> Edit
                         </button>
-                        <button 
-                          className={`${styles.btn} ${styles.danger}`} 
+                        <button
                           onClick={() => handleDelete(trainer.id)}
+                          style={{
+                            padding: '8px 12px',
+                            background: '#fef2f2',
+                            border: '1px solid #fecaca',
+                            borderRadius: '8px',
+                            color: '#991b1b',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#fee2e2';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#fef2f2';
+                          }}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} /> Delete
                         </button>
                       </div>
                     </td>
@@ -180,10 +397,10 @@ const handleSave = async () => {
         </div>
       </div>
 
-      <TrainerForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSubmit={handleSave} 
+      <TrainerForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSave}
         initialData={editingTrainer}
       />
     </div>

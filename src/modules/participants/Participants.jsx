@@ -4,12 +4,13 @@ import { trainingService } from '../../services/trainingService';
 import ParticipantForm from './ParticipantForm';
 import styles from './Participants.module.css';
 import { Plus, Pencil, Trash2, User, Phone, Filter } from 'lucide-react';
+import '../../styles/shared.css';
 
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
   const [trainings, setTrainings] = useState([]); // Filter dropdown ke liye
   const [loading, setLoading] = useState(false);
-  
+
   // Filter State
   const [selectedTrainingId, setSelectedTrainingId] = useState('');
 
@@ -29,9 +30,9 @@ const Participants = () => {
 
   const loadTrainings = async () => {
     try {
-       const data = await trainingService.getAll();
-       setTrainings(data);
-    } catch(e) {}
+      const data = await trainingService.getAll();
+      setTrainings(data);
+    } catch (e) { }
   };
 
   const loadParticipants = async () => {
@@ -46,59 +47,189 @@ const Participants = () => {
 
 
 
-const handleSave = async (data) => {
-  if (editingData) {
-    const { training_id, ...updateData } = data; // 🔥 REMOVE
-    await participantService.update(editingData.id, updateData);
-  } else {
-    await participantService.create(data);
-  }
+  const handleSave = async (data) => {
+    if (editingData) {
+      const { training_id, ...updateData } = data; // 🔥 REMOVE
+      await participantService.update(editingData.id, updateData);
+    } else {
+      await participantService.create(data);
+    }
 
-  setIsModalOpen(false);
-  setEditingData(null);
-  await loadParticipants();
-};
+    setIsModalOpen(false);
+    setEditingData(null);
+    await loadParticipants();
+  };
 
 
-const handleDelete = async (id) => {
-  if (window.confirm('Are You Sure Delete?')) {
-    await participantService.delete(id);
-    await loadParticipants(); //  MUST
-  }
-};
+  const handleDelete = async (id) => {
+    if (window.confirm('Are You Sure Delete?')) {
+      await participantService.delete(id);
+      await loadParticipants(); //  MUST
+    }
+  };
 
   return (
     <div className={styles.container}>
-      <div className={styles.headerRow}>
-        <h2 className={styles.title}>Participants / Beneficiaries</h2>
-        <button className={styles.btn} onClick={() => { setEditingData(null); setIsModalOpen(true); }}>
-          <Plus size={18}/> New Registration
-        </button>
-      </div>
-
-      {/* Filter Bar */}
-      <div className={styles.filterBar}>
-        <div className="flex items-center gap-2 text-indigo-700">
-           <Filter size={20}/>
-           <span className={styles.filterLabel}>Filter List:</span>
+      {/* Modern Header Section */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        marginBottom: '24px'
+      }}>
+        {/* Header Card */}
+        <div style={{
+          background: 'white',
+          padding: '20px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.3rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: 0,
+              marginBottom: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <User size={24} style={{ color: '#6366f1' }} />
+              Participants / Beneficiaries
+            </h2>
+            <p style={{
+              fontSize: '0.9rem',
+              color: '#64748b',
+              margin: 0
+            }}>
+              Manage participant registrations and attendance
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+            }}>
+              <div style={{
+                fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '2px'
+              }}>
+                Total Participants
+              </div>
+              <div style={{
+                fontSize: '1.8rem',
+                fontWeight: 800,
+                color: 'white',
+                lineHeight: 1
+              }}>
+                {participants.length}
+              </div>
+            </div>
+            <button
+              onClick={() => { setEditingData(null); setIsModalOpen(true); }}
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+              }}
+            >
+              <Plus size={18} /> New Registration
+            </button>
+          </div>
         </div>
-        <select 
-          className={styles.select} 
-          value={selectedTrainingId} 
-          onChange={(e) => setSelectedTrainingId(e.target.value)}
-        >
-          <option value="">-- Show All Participants --</option>
-          {trainings.map(t => (
-            <option key={t.id} value={t.id}>
-              {t.subject_name} ({t.location_details?.district})
-            </option>
-          ))}
-        </select>
-        {selectedTrainingId && (
-            <span className="text-sm text-gray-500 ml-2">
-                Showing {participants.length} students
+
+        {/* Filter Bar */}
+        <div className={styles.filterBar} style={{
+          background: 'white',
+          padding: '16px 20px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            paddingRight: '16px',
+            borderRight: '2px solid #e2e8f0',
+            minWidth: '100px'
+          }}>
+            <Filter size={18} style={{ color: '#6366f1' }} />
+            <span style={{
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              color: '#1e293b',
+              letterSpacing: '0.5px'
+            }}>FILTER</span>
+          </div>
+          <select
+            className={styles.select}
+            value={selectedTrainingId}
+            onChange={(e) => setSelectedTrainingId(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              color: '#334155',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              minWidth: '300px',
+              cursor: 'pointer',
+              background: 'white'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#6366f1';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <option value="">-- Show All Participants --</option>
+            {trainings.map(t => (
+              <option key={t.id} value={t.id}>
+                {t.subject_name} ({t.location_details?.district})
+              </option>
+            ))}
+          </select>
+          {selectedTrainingId && (
+            <span style={{ fontSize: '0.875rem', color: '#64748b', marginLeft: '8px' }}>
+              Showing {participants.length} students
             </span>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -111,77 +242,77 @@ const handleDelete = async (id) => {
                 <th>Training Program</th>
                 <th>Category</th>
                 <th>Attendance</th>
-                <th style={{textAlign:'center'}}>Actions</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading ? <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr> : 
-               participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
-                participants.map(p => (
-                  <tr key={p.id}>
-                    <td>
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                           {p.name.charAt(0)}
-                         </div>
-                         <div>
-                           <div className="font-bold">{p.name}</div>
-                           <div className="text-xs text-gray-500 flex items-center gap-1">
-                             <Phone size={10}/> {p.phone || 'N/A'}
-                           </div>
-                         </div>
-                      </div>
-                    </td>
-
-
-      
-
-
-<td>
-  <b>{p.training_details?.subject_name}</b>
-  <div className="text-xs">
-    Trainer: {p.training_details?.trainer_name}
-  </div>
-  <div className="text-xs">
-    Village: {p.training_details?.location_details?.village}
-  </div>
-</td>
+              {loading ? <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr> :
+                participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
+                  participants.map(p => (
+                    <tr key={p.id}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                            {p.name.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-bold">{p.name}</div>
+                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                              <Phone size={10} /> {p.phone || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
 
 
 
-                    <td>
-                       <span className="text-xs bg-gray-100 px-2 py-1 rounded border border-gray-200">
+
+
+                      <td>
+                        <b>{p.training_details?.subject_name}</b>
+                        <div className="text-xs">
+                          Trainer: {p.training_details?.trainer_name}
+                        </div>
+                        <div className="text-xs">
+                          Village: {p.training_details?.location_details?.village}
+                        </div>
+                      </td>
+
+
+
+                      <td>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded border border-gray-200">
                           {p.category} / {p.caste}
-                       </span>
-                    </td>
-                    <td>
-                      <span className={`${styles.badge} ${styles[p.attendance_status]}`}>
-                        {p.attendance_status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="flex justify-center gap-2">
-                         <button className="p-1 text-blue-600" onClick={() => { setEditingData(p); setIsModalOpen(true); }}>
-                           <Pencil size={16}/>
-                         </button>
-                         <button className="p-1 text-red-600" onClick={() => handleDelete(p.id)}>
-                           <Trash2 size={16}/>
-                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`${styles.badge} ${styles[p.attendance_status]}`}>
+                          {p.attendance_status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex justify-center gap-2">
+                          <button className="p-1 text-blue-600" onClick={() => { setEditingData(p); setIsModalOpen(true); }}>
+                            <Pencil size={16} />
+                          </button>
+                          <button className="p-1 text-red-600" onClick={() => handleDelete(p.id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
             </tbody>
           </table>
         </div>
       </div>
 
-      <ParticipantForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSubmit={handleSave} 
-        initialData={editingData} 
+      <ParticipantForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSave}
+        initialData={editingData}
       />
     </div>
   );

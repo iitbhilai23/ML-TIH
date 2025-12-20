@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { dashboardService } from '../../services/dashboardService';
 import styles from './Dashboard.module.css';
-import { Users, BookOpen, MapPin, Calendar, Filter, Eye, TrendingUp, Map, Table, BarChart2, PieChart, LineChart, Dot, ChevronDown } from 'lucide-react';
+import { Users, BookOpen, MapPin, Calendar, Filter, Eye, TrendingUp, Map, Table, BarChart2, PieChart, LineChart, Dot, ChevronDown, BarChart3, UserCheck, User } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -11,10 +11,10 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  PieChart as RechartsPieChart, 
+  PieChart as RechartsPieChart,
   Pie,
   Cell,
-  LineChart as RechartsLineChart, 
+  LineChart as RechartsLineChart,
   Line,
   ResponsiveContainer
 } from 'recharts';
@@ -42,13 +42,13 @@ const Dashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const [summaryData, viewDataResult] = await Promise.all([
         dashboardService.getDashboardData(filters),
         dashboardService.getDashboardViewData(filters)
       ]);
-      
+
       setData(summaryData);
       setViewData(viewDataResult);
     } catch (error) {
@@ -97,42 +97,54 @@ const Dashboard = () => {
 
   return (
     <div className={styles.dashboardGrid}>
-      
+
       {/* ===== TAB NAVIGATION ===== */}
       <div className={styles.tabNavigation}>
-        <button 
+        <button
           className={`${styles.tabButton} ${activeTab === 'summary' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('summary')}
         >
           <TrendingUp size={16} className="mr-2" /> Summary
         </button>
-        <button 
+        <button
           className={`${styles.tabButton} ${activeTab === 'detailed' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('detailed')}
         >
           <Table size={16} className="mr-2" /> Detailed View
         </button>
-        <button 
+        {/* <button
           className={`${styles.tabButton} ${activeTab === 'analytics' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
           <Eye size={16} className="mr-2" /> Analytics
         </button>
-        <button 
+        <button
           className={`${styles.tabButton} ${activeTab === 'map' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('map')}
         >
           <Map size={16} className="mr-2" /> Map View
-        </button>
+        </button> */}
       </div>
 
       {/* ===== FILTERS ===== */}
       <div className={styles.filterBar}>
-        <div className="flex items-center gap-2">
-          <Filter size={16} />
-          <span className="font-bold">Filters:</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          paddingRight: '16px',
+          borderRight: '2px solid #e2e8f0',
+          minWidth: '100px'
+        }}>
+          <Filter size={18} style={{ color: '#6366f1' }} />
+          <span style={{
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            color: '#1e293b',
+            letterSpacing: '0.5px'
+          }}>FILTERS</span>
         </div>
-        
+
         <select name="district" className={styles.selectInput} onChange={handleFilterChange} value={filters.district}>
           <option value="">All Districts</option>
           <option value="Khairagarh">Khairagarh</option>
@@ -148,23 +160,24 @@ const Dashboard = () => {
           <option value="Bilaspur">Bilaspur Block</option>
         </select>
 
-        <input 
-          type="date" 
-          name="start_date" 
-          className={styles.selectInput} 
-          onChange={handleFilterChange} 
-          value={filters.start_date}
-          placeholder="Start Date"
-        />
-
-        <input 
-          type="date" 
-          name="end_date" 
-          className={styles.selectInput} 
-          onChange={handleFilterChange} 
-          value={filters.end_date}
-          placeholder="End Date"
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Calendar size={16} style={{ color: '#64748b' }} />
+          <input
+            type="date"
+            name="start_date"
+            className={styles.selectInput}
+            onChange={handleFilterChange}
+            value={filters.start_date}
+          />
+          <span style={{ color: '#94a3b8', fontWeight: 600 }}>to</span>
+          <input
+            type="date"
+            name="end_date"
+            className={styles.selectInput}
+            onChange={handleFilterChange}
+            value={filters.end_date}
+          />
+        </div>
 
         <select name="status" className={styles.selectInput} onChange={handleFilterChange} value={filters.status}>
           <option value="">All Status</option>
@@ -178,8 +191,8 @@ const Dashboard = () => {
       {/* ===== CONTENT BASED ON ACTIVE TAB ===== */}
       {activeTab === 'summary' && <SummaryTab summary={summary} training_stats={training_stats} participant_stats={participant_stats} />}
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} filters={filters} />}
-      {activeTab === 'analytics' && <AnalyticsTab data={data} filters={filters} COLORS={COLORS} trainingStatusData={trainingStatusData} participantCategoryData={participantCategoryData} participantEducationData={participantEducationData} locationData={locationData} />}
-      {activeTab === 'map' && <MapTab viewData={viewData} />}
+      {/* {activeTab === 'analytics' && <AnalyticsTab data={data} filters={filters} COLORS={COLORS} trainingStatusData={trainingStatusData} participantCategoryData={participantCategoryData} participantEducationData={participantEducationData} locationData={locationData} />}
+      {activeTab === 'map' && <MapTab viewData={viewData} />} */}
     </div>
   );
 };
@@ -189,32 +202,32 @@ const SummaryTab = ({ summary, training_stats, participant_stats }) => (
   <div className="space-y-6">
 
     <div className={styles.statsRow}>
-      <StatCard 
-        title="Total Trainers" 
-        value={summary.total_trainers} 
-        icon={Users} 
-        color="#4f46e5" 
+      <StatCard
+        title="Total Trainers"
+        value={summary.total_trainers}
+        icon={Users}
+        color="#4f46e5"
         change="+5% from last month"
       />
-      <StatCard 
-        title="Total Participants" 
-        value={summary.total_participants} 
-        icon={Users} 
-        color="#10b981" 
+      <StatCard
+        title="Total Participants"
+        value={summary.total_participants}
+        icon={Users}
+        color="#10b981"
         change="+12% from last month"
       />
-      <StatCard 
-        title="Active Trainings" 
-        value={summary.active_trainings} 
-        icon={BookOpen} 
-        color="#f59e0b" 
+      <StatCard
+        title="Active Trainings"
+        value={summary.active_trainings}
+        icon={BookOpen}
+        color="#f59e0b"
         change="+3 from last month"
       />
-      <StatCard 
-        title="Locations Covered" 
-        value={summary.total_locations} 
-        icon={MapPin} 
-        color="#ec4899" 
+      <StatCard
+        title="Locations Covered"
+        value={summary.total_locations}
+        icon={MapPin}
+        color="#ec4899"
         change="+2 from last month"
       />
     </div>
@@ -230,51 +243,250 @@ const SummaryTab = ({ summary, training_stats, participant_stats }) => (
 
 // DETAILED TAB: Table View
 const DetailedTab = ({ viewData, filters }) => (
-  <div className={styles.detailedView}>
-    <h3 className={styles.cardTitle}>Training Data Table</h3>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    {/* Header Section */}
+    <div style={{
+      background: 'white',
+      padding: '20px 24px',
+      borderRadius: '12px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}>
+      <div>
+        <h3 style={{
+          fontSize: '1.3rem',
+          fontWeight: 700,
+          color: '#1e293b',
+          margin: 0,
+          marginBottom: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <Table size={24} style={{ color: '#6366f1' }} />
+          Training Data Directory
+        </h3>
+        <p style={{
+          fontSize: '0.9rem',
+          color: '#64748b',
+          margin: 0
+        }}>
+          Complete list of all training sessions and participants
+        </p>
+      </div>
+      <div style={{
+        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        padding: '12px 20px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+      }}>
+        <div style={{
+          fontSize: '0.75rem',
+          color: 'rgba(255,255,255,0.9)',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          marginBottom: '2px'
+        }}>
+          Total Records
+        </div>
+        <div style={{
+          fontSize: '1.8rem',
+          fontWeight: 800,
+          color: 'white',
+          lineHeight: 1
+        }}>
+          {viewData?.data?.length || 0}
+        </div>
+      </div>
+    </div>
+
+    {/* Table Section */}
     <div className={styles.tableView}>
       {viewData && viewData.data && viewData.data.length > 0 ? (
         <table className={styles.dataTable}>
           <thead>
             <tr>
-              <th>Training ID</th>
-              <th>Trainer</th>
-              <th>Subject</th>
-              <th>Location</th>
-              <th>District</th>
-              <th>Block</th>
-              <th>Participants</th>
-              <th>Status</th>
-              <th>Date</th>
+              <th style={{ width: '80px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={14} />
+                  ID
+                </div>
+              </th>
+              <th>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Users size={14} />
+                  Trainer & Subject
+                </div>
+              </th>
+              <th>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <MapPin size={14} />
+                  Location
+                </div>
+              </th>
+              <th>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Users size={14} />
+                  Participants
+                </div>
+              </th>
+              <th>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={14} />
+                  Status
+                </div>
+              </th>
+              <th>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={14} />
+                  Start Date
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
             {viewData.data.map((row, index) => (
               <tr key={row.training_id || index}>
-                <td>{row.training_id}</td>
-                <td>{row.trainer_name}</td>
-                <td>{row.subject_name}</td>
-                <td>{row.village || 'N/A'}, {row.block || 'N/A'}</td>
-                <td>{row.district}</td>
-                <td>{row.block}</td>
-                <td>{row.total_participants}</td>
                 <td>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    row.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    row.status === 'ongoing' ? 'bg-yellow-100 text-yellow-800' :
-                    row.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.85rem',
+                    color: '#6366f1',
+                    fontWeight: 600,
+                    background: '#eef2ff',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    display: 'inline-block'
+                  }}>
+                    #{row.training_id}
+                  </span>
+                </td>
+                <td>
+                  <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
+                    {row.subject_name}
+                  </div>
+                  <div style={{
+                    fontSize: '0.85rem',
+                    color: '#64748b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <User size={12} />
+                    {row.trainer_name}
+                  </div>
+                </td>
+                <td>
+                  <div style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 500 }}>
+                    {row.village || '-'}
+                  </div>
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: '#94a3b8',
+                    marginTop: '2px'
+                  }}>
+                    {row.district}, {row.block}
+                  </div>
+                </td>
+                <td>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <div style={{
+                      width: '50px',
+                      height: '6px',
+                      background: '#e5e7eb',
+                      borderRadius: '3px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${(row.total_participants / row.max_participants) * 100}%`,
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #10b981, #059669)',
+                        borderRadius: '3px'
+                      }}></div>
+                    </div>
+                    <span style={{
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      color: '#0f172a'
+                    }}>
+                      {row.total_participants}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    display: 'inline-block',
+                    ...(row.status === 'completed' ? {
+                      background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
+                      color: '#166534',
+                      border: '1px solid #86efac'
+                    } : row.status === 'ongoing' ? {
+                      background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                      color: '#92400e',
+                      border: '1px solid #fcd34d'
+                    } : row.status === 'scheduled' ? {
+                      background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+                      color: '#1e40af',
+                      border: '1px solid #93c5fd'
+                    } : {
+                      background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+                      color: '#475569',
+                      border: '1px solid #cbd5e1'
+                    })
+                  }}>
                     {row.status}
                   </span>
                 </td>
-                <td>{new Date(row.start_date).toLocaleDateString()}</td>
+                <td style={{
+                  fontSize: '0.9rem',
+                  color: '#475569',
+                  fontWeight: 500
+                }}>
+                  {new Date(row.start_date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
-        <div className="text-center p-10 text-gray-500">No data available for current filters</div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '60px 20px',
+          color: '#94a3b8'
+        }}>
+          <Table size={64} style={{ marginBottom: '16px', opacity: 0.3 }} />
+          <div style={{
+            fontSize: '1.1rem',
+            fontWeight: 600,
+            color: '#64748b',
+            marginBottom: '8px'
+          }}>
+            No Training Data Available
+          </div>
+          <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+            No data matches your current filter criteria
+          </div>
+        </div>
       )}
     </div>
   </div>
@@ -433,8 +645,8 @@ const MapTab = ({ viewData }) => (
       <Map size={48} className="text-gray-400" />
       <p>Interactive Map View (Coming Soon)</p>
       <div className="text-sm text-gray-500 mt-2">
-        {viewData && viewData.data ? 
-          `${viewData.data.filter(row => row.latitude && row.longitude).length} locations with coordinates` : 
+        {viewData && viewData.data ?
+          `${viewData.data.filter(row => row.latitude && row.longitude).length} locations with coordinates` :
           '0 locations available'
         }
       </div>
@@ -444,19 +656,30 @@ const MapTab = ({ viewData }) => (
 
 //  HELPER COMPONENTS 
 const StatCard = ({ title, value, icon: Icon, color, change }) => (
-  <div className={styles.statCard} style={{ borderLeft: `4px solid ${color}` }}>
+  <div className={styles.statCard} style={{ color }}>
     <div>
       <div className={styles.statValue} style={{ color }}>{value}</div>
       <div className={styles.statTitle}>{title}</div>
-      {change && <div className="text-xs text-green-600 mt-1">{change}</div>}
     </div>
-    <Icon size={24} color={color} opacity={0.2} />
+    <div style={{
+      background: `${color}15`,
+      padding: '14px',
+      borderRadius: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <Icon size={28} color={color} strokeWidth={2} />
+    </div>
   </div>
 );
 
 const TrainingStatusCard = ({ training_stats, summary }) => (
   <div className={styles.card}>
-    <h3 className={styles.cardTitle}>Training Status</h3>
+    <h3 className={styles.cardTitle}>
+      <BarChart3 size={20} style={{ color: '#6366f1' }} />
+      Training Status
+    </h3>
     <div className={styles.statusList}>
       <StatusRow label="Scheduled" value={training_stats.by_status.scheduled} color="#6366f1" total={summary.total_trainings} />
       <StatusRow label="Ongoing" value={training_stats.by_status.ongoing} color="#f59e0b" total={summary.total_trainings} />
@@ -468,56 +691,257 @@ const TrainingStatusCard = ({ training_stats, summary }) => (
 
 const ParticipantDemographicsCard = ({ participant_stats, summary }) => (
   <div className={styles.card}>
-    <h3 className={styles.cardTitle}>Participant Demographics</h3>
-    
-    <div className="mb-4">
-      <h4 className="text-xs text-gray-500 mb-2 uppercase">By Category</h4>
+    <h3 className={styles.cardTitle}>
+      <Users size={20} style={{ color: '#8b5cf6' }} />
+      Demographics
+    </h3>
+
+    <div style={{ marginBottom: '24px' }}>
+      <div className={styles.sectionHeader} style={{ color: '#8b5cf6' }}>By Category</div>
       {participant_stats.by_category.slice(0, 3).map((item, idx) => (
-         <ProgressBar key={idx} label={item.category} value={item.count} total={summary.total_participants} color="#8b5cf6" />
+        <ProgressBar key={idx} label={item.category} value={item.count} total={summary.total_participants} color="#8b5cf6" />
       ))}
     </div>
 
     <div>
-      <h4 className="text-xs text-gray-500 mb-2 uppercase">By Education</h4>
+      <div className={styles.sectionHeader} style={{ color: '#ec4899' }}>By Education</div>
       {participant_stats.by_education.slice(0, 3).map((item, idx) => (
-         <ProgressBar key={idx} label={item.education} value={item.count} total={summary.total_participants} color="#ec4899" />
+        <ProgressBar key={idx} label={item.education} value={item.count} total={summary.total_participants} color="#ec4899" />
       ))}
     </div>
   </div>
 );
 
-const AttendanceOverviewCard = ({ participant_stats }) => (
-  <div className={styles.card}>
-    <h3 className={styles.cardTitle}>Attendance Overview</h3>
-    <div className="flex justify-center items-center h-full flex-col gap-4">
-      <div className={styles.bigStat}>
-         <span style={{color: '#166534'}}>{participant_stats.attendance_stats.present}</span>
-         <small>Present</small>
-      </div>
-      <div className="flex gap-4">
-        <div className="text-center">
-          <div className="font-bold text-red-600">{participant_stats.attendance_stats.absent}</div>
-          <div className="text-xs text-gray-500">Absent</div>
+const AttendanceOverviewCard = ({ participant_stats }) => {
+  const totalAttendance = participant_stats.attendance_stats.present +
+    participant_stats.attendance_stats.absent +
+    participant_stats.attendance_stats.late;
+
+  const presentPercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.present / totalAttendance) * 100) : 0;
+  const absentPercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.absent / totalAttendance) * 100) : 0;
+  const latePercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.late / totalAttendance) * 100) : 0;
+
+  return (
+    <div className={styles.card}>
+      <h3 className={styles.cardTitle}>
+        <UserCheck size={20} style={{ color: '#10b981' }} />
+        Attendance Overview
+      </h3>
+
+      {/* Main Present Count with Circular Progress */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: '24px',
+        marginTop: '12px'
+      }}>
+        <div style={{ position: 'relative', width: '140px', height: '140px' }}>
+          {/* Background Circle */}
+          <svg width="140" height="140" style={{ transform: 'rotate(-90deg)' }}>
+            <circle
+              cx="70"
+              cy="70"
+              r="60"
+              fill="none"
+              stroke="#e5e7eb"
+              strokeWidth="12"
+            />
+            {/* Progress Circle */}
+            <circle
+              cx="70"
+              cy="70"
+              r="60"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="12"
+              strokeDasharray={`${2 * Math.PI * 60}`}
+              strokeDashoffset={`${2 * Math.PI * 60 * (1 - presentPercent / 100)}`}
+              strokeLinecap="round"
+              style={{ transition: 'stroke-dashoffset 1s ease' }}
+            />
+          </svg>
+          {/* Center Text */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '1.5rem',
+              fontWeight: 800,
+              color: '#10b981',
+              lineHeight: 1
+            }}>
+              {presentPercent}%
+            </div>
+            <div style={{
+              fontSize: '0.5rem',
+              color: '#64748b',
+              fontWeight: 600,
+              marginTop: '6px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Present
+            </div>
+            <div style={{
+              fontSize: '0.9rem',
+              color: '#94a3b8',
+              fontWeight: 500,
+              marginTop: '2px'
+            }}>
+              {participant_stats.attendance_stats.present}/{totalAttendance}
+            </div>
+          </div>
         </div>
-        <div className="text-center">
-          <div className="font-bold text-orange-500">{participant_stats.attendance_stats.late}</div>
-          <div className="text-xs text-gray-500">Late</div>
+      </div>
+
+      {/* Absent and Late Stats */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '12px',
+        marginTop: 'auto'
+      }}>
+        {/* Absent */}
+        <div style={{
+          padding: '16px',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+          border: '2px solid #fecaca',
+          textAlign: 'center',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 8px 16px rgba(220, 38, 38, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            background: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 8px'
+          }}>
+            <UserCheck size={20} style={{ color: '#dc2626' }} strokeWidth={2.5} />
+          </div>
+          <div style={{
+            fontSize: '1.8rem',
+            fontWeight: 800,
+            color: '#dc2626',
+            marginBottom: '4px'
+          }}>
+            {participant_stats.attendance_stats.absent}
+          </div>
+          <div style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            color: '#991b1b',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: '4px'
+          }}>
+            Absent
+          </div>
+          <div style={{
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            color: '#b91c1c',
+            background: 'white',
+            borderRadius: '8px',
+            padding: '4px 8px',
+            display: 'inline-block'
+          }}>
+            {absentPercent}%
+          </div>
+        </div>
+
+        {/* Late */}
+        <div style={{
+          padding: '16px',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+          border: '2px solid #fde68a',
+          textAlign: 'center',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 8px 16px rgba(245, 158, 11, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            background: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 8px'
+          }}>
+            <Calendar size={20} style={{ color: '#f59e0b' }} strokeWidth={2.5} />
+          </div>
+          <div style={{
+            fontSize: '1.8rem',
+            fontWeight: 800,
+            color: '#f59e0b',
+            marginBottom: '4px'
+          }}>
+            {participant_stats.attendance_stats.late}
+          </div>
+          <div style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            color: '#92400e',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: '4px'
+          }}>
+            Late
+          </div>
+          <div style={{
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            color: '#d97706',
+            background: 'white',
+            borderRadius: '8px',
+            padding: '4px 8px',
+            display: 'inline-block'
+          }}>
+            {latePercent}%
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProgressBar = ({ label, value, total, color }) => {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
-    <div className="mb-2">
-      <div className="flex justify-between text-xs mb-1">
-        <span>{label}</span>
-        <span className="font-bold">{value} ({percent}%)</span>
+    <div className={styles.progressContainer}>
+      <div className={styles.progressLabel}>
+        <span style={{ color: '#475569', fontWeight: 600 }}>{label}</span>
+        <span style={{ color: '#1e293b', fontWeight: 700 }}>{percent}%</span>
       </div>
-      <div style={{ height: '6px', background: '#f3f4f6', borderRadius: '3px', overflow: 'hidden' }}>
-        <div style={{ width: `${percent}%`, background: color, height: '100%' }}></div>
+      <div className={styles.progressBar}>
+        <div className={styles.progressFill} style={{ width: `${percent}%`, background: color }}></div>
       </div>
     </div>
   );
@@ -526,14 +950,14 @@ const ProgressBar = ({ label, value, total, color }) => {
 const StatusRow = ({ label, value, color, total }) => {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
-    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-      <div className="flex items-center gap-2">
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }}></div>
-        <span className="text-sm text-gray-600">{label}</span>
+    <div className={styles.statusRow}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className={styles.statusDot} style={{ background: color, color: color }}></div>
+        <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#334155' }}>{label}</span>
       </div>
-      <div className="text-right">
-        <div className="font-bold text-sm">{value}</div>
-        <div className="text-xs text-gray-400">{percent}%</div>
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>{value}</div>
+        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>{percent}%</div>
       </div>
     </div>
   );

@@ -8,24 +8,24 @@ const Locations = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Filters
   const [filters, setFilters] = useState({ district: '', block: '' });
 
   // Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ 
-    id: null, 
-    state: 'Chhattisgarh', 
-    district: '', 
-    block: '', 
-    village: '', 
-    pincode: '', 
-    address_line: '' 
+  const [formData, setFormData] = useState({
+    id: null,
+    state: 'Chhattisgarh',
+    district: '',
+    block: '',
+    village: '',
+    pincode: '',
+    address_line: ''
   });
 
-  useEffect(() => { 
-    loadLocations(); 
+  useEffect(() => {
+    loadLocations();
   }, [filters]);
 
   const loadLocations = async () => {
@@ -44,45 +44,45 @@ const Locations = () => {
   };
 
   const cleanPayload = (data) => {
-  const cleaned = {};
-  Object.keys(data).forEach(key => {
-    if (
-      data[key] !== '' &&
-      data[key] !== null &&
-      data[key] !== undefined &&
-      key !== 'id'
-    ) {
-      cleaned[key] = data[key];
+    const cleaned = {};
+    Object.keys(data).forEach(key => {
+      if (
+        data[key] !== '' &&
+        data[key] !== null &&
+        data[key] !== undefined &&
+        key !== 'id'
+      ) {
+        cleaned[key] = data[key];
+      }
+    });
+    return cleaned;
+  };
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = cleanPayload(formData);
+
+      if (formData.id) {
+        await locationService.update(formData.id, payload);
+        alert('Location updated successfully');
+      } else {
+        await locationService.create(payload);
+        alert('Location created successfully');
+      }
+
+      setIsModalOpen(false);
+      loadLocations();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to save location');
     }
-  });
-  return cleaned;
-};
-
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const payload = cleanPayload(formData);
-
-    if (formData.id) {
-      await locationService.update(formData.id, payload);
-      alert('Location updated successfully');
-    } else {
-      await locationService.create(payload);
-      alert('Location created successfully');
-    }
-
-    setIsModalOpen(false);
-    loadLocations();
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || 'Failed to save location');
-  }
-};
+  };
 
 
   const handleDelete = async (id) => {
-    if(window.confirm('Delete this location? This might affect trainings linked to it.')) {
+    if (window.confirm('Delete this location? This might affect trainings linked to it.')) {
       try {
         await locationService.delete(id);
         loadLocations();
@@ -94,74 +94,223 @@ const handleSubmit = async (e) => {
   };
 
   const openAdd = () => {
-    setFormData({ 
-      id: null, 
-      state: 'Chhattisgarh', 
-      district: '', 
-      block: '', 
-      village: '', 
-      pincode: '', 
-      address_line: '' 
+    setFormData({
+      id: null,
+      state: 'Chhattisgarh',
+      district: '',
+      block: '',
+      village: '',
+      pincode: '',
+      address_line: ''
     });
     setIsModalOpen(true);
   };
 
   const openEdit = (loc) => {
-  setFormData({
-    id: loc.id,
-    state: loc.state || 'Chhattisgarh',
-    district: loc.district || '',
-    block: loc.block || '',
-    village: loc.village || '',
-    pincode: loc.pincode || '',
-    address_line: loc.address_line || '',
-    latitude: loc.latitude ?? '',
-    longitude: loc.longitude ?? ''
-  });
-  setIsModalOpen(true);
-};
+    setFormData({
+      id: loc.id,
+      state: loc.state || 'Chhattisgarh',
+      district: loc.district || '',
+      block: loc.block || '',
+      village: loc.village || '',
+      pincode: loc.pincode || '',
+      address_line: loc.address_line || '',
+      latitude: loc.latitude ?? '',
+      longitude: loc.longitude ?? ''
+    });
+    setIsModalOpen(true);
+  };
 
 
   return (
     <div className={styles.container}>
-      <div className={styles.headerRow}>
-        <h2 className={styles.pageTitle}>Locations / Centers</h2>
-        <button className={`${styles.btn} ${styles.primary}`} onClick={openAdd}>
-          <Plus size={18} /> Add Location
-        </button>
-      </div>
-
-      {/* Filter Bar */}
-      <div className={styles.filterBar}>
-        <div className="flex items-center gap-2 text-sm text-gray-500 font-bold">
-           <Filter size={16}/> Filters:
+      {/* Modern Header Section */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        marginBottom: '24px'
+      }}>
+        {/* Header Card */}
+        <div style={{
+          background: 'white',
+          padding: '20px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.3rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: 0,
+              marginBottom: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <MapPin size={24} style={{ color: '#6366f1' }} />
+              Locations / Centers
+            </h2>
+            <p style={{
+              fontSize: '0.9rem',
+              color: '#64748b',
+              margin: 0
+            }}>
+              Manage training centers and their details
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+            }}>
+              <div style={{
+                fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '2px'
+              }}>
+                Total Locations
+              </div>
+              <div style={{
+                fontSize: '1.8rem',
+                fontWeight: 800,
+                color: 'white',
+                lineHeight: 1
+              }}>
+                {locations.length}
+              </div>
+            </div>
+            <button
+              onClick={openAdd}
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+              }}
+            >
+              <Plus size={18} /> Add Location
+            </button>
+          </div>
         </div>
-        <input 
-          className={styles.searchInput} 
-          placeholder="Filter by District..." 
-          value={filters.district}
-          onChange={(e) => setFilters({...filters, district: e.target.value})} 
-        />
-        <input 
-          className={styles.searchInput} 
-          placeholder="Filter by Block..." 
-          value={filters.block}
-          onChange={(e) => setFilters({...filters, block: e.target.value})} 
-        />
+
+        {/* Filter Bar */}
+        <div className={styles.filterBar} style={{
+          background: 'white',
+          padding: '16px 20px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            paddingRight: '16px',
+            borderRight: '2px solid #e2e8f0',
+            minWidth: '100px'
+          }}>
+            <Filter size={18} style={{ color: '#6366f1' }} />
+            <span style={{
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              color: '#1e293b',
+              letterSpacing: '0.5px'
+            }}>FILTERS</span>
+          </div>
+          <input
+            placeholder="Filter by District..."
+            value={filters.district}
+            onChange={(e) => setFilters({ ...filters, district: e.target.value })}
+            style={{
+              padding: '10px 14px',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              color: '#334155',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              minWidth: '200px'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#6366f1';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          />
+          <input
+            placeholder="Filter by Block..."
+            value={filters.block}
+            onChange={(e) => setFilters({ ...filters, block: e.target.value })}
+            style={{
+              padding: '10px 14px',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              color: '#334155',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              minWidth: '200px'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#6366f1';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          />
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className={styles.errorAlert}>
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <div className={styles.loadingState}>
-          Loading locations...
+        <div style={{
+          background: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '10px',
+          padding: '14px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          color: '#991b1b'
+        }}>
+          <AlertCircle size={18} />
+          <span style={{ fontWeight: 500 }}>{error}</span>
         </div>
       )}
 
@@ -171,50 +320,131 @@ const handleSubmit = async (e) => {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>District</th>
-                <th>Block</th>
-                <th>Village</th>
-                <th>Pincode</th>
-                <th style={{textAlign: 'center'}}>Actions</th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={14} />
+                    District
+                  </div>
+                </th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={14} />
+                    Block
+                  </div>
+                </th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={14} />
+                    Village
+                  </div>
+                </th>
+                <th>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    📍 Pincode
+                  </div>
+                </th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {locations.length === 0 && !loading ? (
-                 <tr>
-                   <td colSpan="5" className="p-4 text-center text-gray-500">
-                     {error ? 'Error loading data' : 'No locations found'}
-                   </td>
-                 </tr>
+              {loading ? (
+                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                  <div>Loading locations...</div>
+                </td></tr>
+              ) : locations.length === 0 ? (
+                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '60px' }}>
+                  <MapPin size={64} style={{ margin: '0 auto 16px', opacity: 0.2, color: '#94a3b8' }} />
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b', marginBottom: '8px' }}>
+                    No Locations Found
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+                    {filters.district || filters.block ? 'Try adjusting your filters' : 'Add your first location to get started'}
+                  </div>
+                </td></tr>
               ) : (
                 locations.map(loc => (
                   <tr key={loc.id}>
-                    <td className="font-medium">{loc.district}</td>
-                    <td>{loc.block}</td>
+                    <td style={{ fontWeight: 600, color: '#1e293b' }}>{loc.district}</td>
+                    <td style={{ color: '#475569' }}>{loc.block}</td>
                     <td>
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} color="var(--primary)"/> {loc.village}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: '#334155'
+                      }}>
+                        <MapPin size={14} style={{ color: '#6366f1' }} />
+                        {loc.village}
                       </div>
                     </td>
                     <td>
-                      <span className="bg-gray-100 text-xs px-2 py-1 rounded">
+                      <span style={{
+                        background: '#f1f5f9',
+                        color: '#475569',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        fontFamily: 'monospace'
+                      }}>
                         {loc.pincode || 'N/A'}
                       </span>
                     </td>
                     <td>
-                      <div style={{display:'flex', gap:'8px', justifyContent:'center'}}>
-                        <button 
-                          className={`${styles.iconBtn} ${styles.edit}`} 
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}>
+                        <button
                           onClick={() => openEdit(loc)}
-                          title="Edit Location"
+                          style={{
+                            padding: '8px 12px',
+                            background: '#eff6ff',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: '8px',
+                            color: '#1e40af',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#dbeafe';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#eff6ff';
+                          }}
                         >
-                          <Pencil size={16} />
+                          <Pencil size={14} /> Edit
                         </button>
-                        <button 
-                          className={`${styles.iconBtn} ${styles.delete}`} 
+                        <button
                           onClick={() => handleDelete(loc.id)}
-                          title="Delete Location"
+                          style={{
+                            padding: '8px 12px',
+                            background: '#fef2f2',
+                            border: '1px solid #fecaca',
+                            borderRadius: '8px',
+                            color: '#991b1b',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#fee2e2';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#fef2f2';
+                          }}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} /> Delete
                         </button>
                       </div>
                     </td>
@@ -226,115 +456,116 @@ const handleSubmit = async (e) => {
         </div>
       </div>
 
+
       {/* --- LOCATION MODAL --- */}
       {isModalOpen && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalBox} style={{width: '600px'}}>
-             <div className="flex justify-between items-center mb-6 border-b pb-3">
-               <h3 className="font-bold text-lg">
-                 {formData.id ? 'Update Location' : 'Add New Location'}
-               </h3>
-               <button 
-                 onClick={() => setIsModalOpen(false)}
-                 className={styles.closeBtn}
-                 title="Close"
-               >
-                 <X size={20} />
-               </button>
+          <div className={styles.modalBox} style={{ width: '600px' }}>
+            <div className="flex justify-between items-center mb-6 border-b pb-3">
+              <h3 className="font-bold text-lg">
+                {formData.id ? 'Update Location' : 'Add New Location'}
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className={styles.closeBtn}
+                title="Close"
+              >
+                <X size={20} />
+              </button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div className={styles.row}>
-                <div className={styles.formGroup} style={{flex:1}}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>District *</label>
-                  <input 
-                    required 
-                    className={styles.input} 
-                    value={formData.district} 
+                  <input
+                    required
+                    className={styles.input}
+                    value={formData.district}
                     placeholder="e.g. Raipur"
-                    onChange={e => setFormData({...formData, district: e.target.value})} 
+                    onChange={e => setFormData({ ...formData, district: e.target.value })}
                   />
                 </div>
-                <div className={styles.formGroup} style={{flex:1}}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Block *</label>
-                  <input 
-                    required 
-                    className={styles.input} 
-                    value={formData.block} 
+                  <input
+                    required
+                    className={styles.input}
+                    value={formData.block}
                     placeholder="e.g. Dharsiwa"
-                    onChange={e => setFormData({...formData, block: e.target.value})} 
+                    onChange={e => setFormData({ ...formData, block: e.target.value })}
                   />
                 </div>
               </div>
 
               <div className={styles.row}>
-                <div className={styles.formGroup} style={{flex:1}}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Village *</label>
-                  <input 
-                    required 
-                    className={styles.input} 
-                    value={formData.village} 
+                  <input
+                    required
+                    className={styles.input}
+                    value={formData.village}
                     placeholder="Village Name"
-                    onChange={e => setFormData({...formData, village: e.target.value})} 
+                    onChange={e => setFormData({ ...formData, village: e.target.value })}
                   />
                 </div>
-                <div className={styles.formGroup} style={{width: '120px'}}>
+                <div className={styles.formGroup} style={{ width: '120px' }}>
                   <label className={styles.label}>Pincode</label>
-                  <input 
-                    className={styles.input} 
-                    value={formData.pincode} 
+                  <input
+                    className={styles.input}
+                    value={formData.pincode}
                     maxLength={6}
-                    onChange={e => setFormData({...formData, pincode: e.target.value})} 
+                    onChange={e => setFormData({ ...formData, pincode: e.target.value })}
                   />
                 </div>
               </div>
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Full Address Line</label>
-                <input 
-                  className={styles.input} 
-                  value={formData.address_line} 
+                <input
+                  className={styles.input}
+                  value={formData.address_line}
                   placeholder="Near School, Main Road..."
-                  onChange={e => setFormData({...formData, address_line: e.target.value})} 
+                  onChange={e => setFormData({ ...formData, address_line: e.target.value })}
                 />
               </div>
 
               {/* Hidden fields that will be saved but not shown in form */}
-              <input 
-                type="hidden" 
-                value={formData.state} 
-                onChange={e => setFormData({...formData, state: e.target.value})} 
+              <input
+                type="hidden"
+                value={formData.state}
+                onChange={e => setFormData({ ...formData, state: e.target.value })}
               />
 
               <div className={styles.row}>
-                <div className={styles.formGroup} style={{flex:1}}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Latitude</label>
-                  <input 
-                    type="number" 
-                    step="any" 
-                    className={styles.input} 
-                    value={formData.latitude || ''} 
+                  <input
+                    type="number"
+                    step="any"
+                    className={styles.input}
+                    value={formData.latitude || ''}
                     placeholder="21.2345"
-                    onChange={e => setFormData({...formData, latitude: e.target.value ? parseFloat(e.target.value) : null})} 
+                    onChange={e => setFormData({ ...formData, latitude: e.target.value ? parseFloat(e.target.value) : null })}
                   />
                 </div>
-                <div className={styles.formGroup} style={{flex:1}}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Longitude</label>
-                  <input 
-                    type="number" 
-                    step="any" 
-                    className={styles.input} 
-                    value={formData.longitude || ''} 
+                  <input
+                    type="number"
+                    step="any"
+                    className={styles.input}
+                    value={formData.longitude || ''}
                     placeholder="81.2345"
-                    onChange={e => setFormData({...formData, longitude: e.target.value ? parseFloat(e.target.value) : null})} 
+                    onChange={e => setFormData({ ...formData, longitude: e.target.value ? parseFloat(e.target.value) : null })}
                   />
                 </div>
               </div>
 
-              <button 
-                type="submit" 
-                className={`${styles.btn} ${styles.primary}`} 
-                style={{width:'100%', justifyContent:'center', marginTop:'10px'}}
+              <button
+                type="submit"
+                className={`${styles.btn} ${styles.primary}`}
+                style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}
               >
                 {formData.id ? 'Update Location' : 'Save Location'}
               </button>
