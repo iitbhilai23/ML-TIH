@@ -99,18 +99,86 @@ const Dashboard = () => {
     <div className={styles.dashboardGrid}>
 
       {/* ===== TAB NAVIGATION ===== */}
-      <div className={styles.tabNavigation}>
+      <div style={{
+        display: 'flex',
+        gap: '12px',
+        padding: '6px',
+        background: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 2px 8px rgba(106, 13, 173, 0.08)',
+        width: 'fit-content'
+      }}>
         <button
-          className={`${styles.tabButton} ${activeTab === 'summary' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('summary')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 24px',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            background: activeTab === 'summary'
+              ? 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)'
+              : 'transparent',
+            color: activeTab === 'summary' ? 'white' : '#64748b',
+            boxShadow: activeTab === 'summary'
+              ? '0 4px 12px rgba(106, 13, 173, 0.3)'
+              : 'none'
+          }}
+          onMouseEnter={(e) => {
+            if (activeTab !== 'summary') {
+              e.currentTarget.style.background = '#f5f0ff';
+              e.currentTarget.style.color = '#7B3F99';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeTab !== 'summary') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#64748b';
+            }
+          }}
         >
-          <TrendingUp size={16} className="mr-2" /> Summary
+          <TrendingUp size={18} /> Summary
         </button>
         <button
-          className={`${styles.tabButton} ${activeTab === 'detailed' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('detailed')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 24px',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            background: activeTab === 'detailed'
+              ? 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)'
+              : 'transparent',
+            color: activeTab === 'detailed' ? 'white' : '#64748b',
+            boxShadow: activeTab === 'detailed'
+              ? '0 4px 12px rgba(106, 13, 173, 0.3)'
+              : 'none'
+          }}
+          onMouseEnter={(e) => {
+            if (activeTab !== 'detailed') {
+              e.currentTarget.style.background = '#f5f0ff';
+              e.currentTarget.style.color = '#7B3F99';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeTab !== 'detailed') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#64748b';
+            }
+          }}
         >
-          <Table size={16} className="mr-2" /> Detailed View
+          <Table size={18} /> Detailed View
         </button>
         {/* <button
           className={`${styles.tabButton} ${activeTab === 'analytics' ? styles.activeTab : ''}`}
@@ -136,7 +204,7 @@ const Dashboard = () => {
           borderRight: '2px solid #e2e8f0',
           minWidth: '100px'
         }}>
-          <Filter size={18} style={{ color: '#6366f1' }} />
+          <Filter size={18} style={{ color: '#7B3F99' }} />
           <span style={{
             fontWeight: 700,
             fontSize: '0.95rem',
@@ -207,28 +275,28 @@ const SummaryTab = ({ summary, training_stats, participant_stats }) => (
         value={summary.total_trainers}
         icon={Users}
         color="#4f46e5"
-        change="+5% from last month"
+
       />
       <StatCard
         title="Total Participants"
         value={summary.total_participants}
         icon={Users}
         color="#10b981"
-        change="+12% from last month"
+
       />
       <StatCard
         title="Active Trainings"
         value={summary.active_trainings}
         icon={BookOpen}
         color="#f59e0b"
-        change="+3 from last month"
+
       />
       <StatCard
         title="Locations Covered"
         value={summary.total_locations}
         icon={MapPin}
         color="#ec4899"
-        change="+2 from last month"
+
       />
     </div>
 
@@ -277,7 +345,7 @@ const DetailedTab = ({ viewData, filters }) => (
         </p>
       </div>
       <div style={{
-        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
         padding: '12px 20px',
         borderRadius: '10px',
         boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
@@ -656,26 +724,104 @@ const MapTab = ({ viewData }) => (
 
 //  HELPER COMPONENTS 
 const StatCard = ({ title, value, icon: Icon, color, change }) => (
-  <div className={styles.statCard} style={{ color }}>
-    <div>
-      <div className={styles.statValue} style={{ color }}>{value}</div>
-      <div className={styles.statTitle}>{title}</div>
-    </div>
+  <div style={{
+    position: 'relative',
+    background: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '20px',
+    padding: '20px',
+    boxShadow: '0 8px 32px rgba(106, 13, 173, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+    transition: 'all 0.3s ease',
+    overflow: 'hidden',
+    cursor: 'pointer'
+  }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'translateY(-8px)';
+      e.currentTarget.style.boxShadow = '0 12px 40px rgba(106, 13, 173, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = '0 8px 32px rgba(106, 13, 173, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
+    }}
+  >
     <div style={{
-      background: `${color}15`,
-      padding: '14px',
-      borderRadius: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      <Icon size={28} color={color} strokeWidth={2} />
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: '150px',
+      height: '150px',
+      background: `radial-gradient(circle, ${color}15 0%, transparent 70%)`,
+      borderRadius: '50%',
+      transform: 'translate(30%, -30%)',
+      pointerEvents: 'none'
+    }}></div>
+    <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div>
+        <div style={{
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          color: '#64748b',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          marginBottom: '8px'
+        }}>
+          {title}
+        </div>
+        <div style={{
+          fontSize: '1.75rem',
+          fontWeight: 800,
+          color,
+          lineHeight: 1,
+          marginBottom: '8px'
+        }}>
+          {value}
+        </div>
+        {change && (
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#10b981',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            ↗ {change}
+          </div>
+        )}
+      </div>
+      <div style={{
+        width: '64px',
+        height: '64px',
+        background: `linear-gradient(135deg, ${color}20 0%, ${color}10 100%)`,
+        borderRadius: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: `1px solid ${color}30`,
+        boxShadow: `0 4px 12px ${color}15`,
+        transition: 'transform 0.3s ease'
+      }}>
+        <Icon size={32} color={color} strokeWidth={2} />
+      </div>
     </div>
   </div>
 );
 
 const TrainingStatusCard = ({ training_stats, summary }) => (
-  <div className={styles.card}>
+  <div style={{
+    position: 'relative',
+    background: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '20px',
+    padding: '24px',
+    boxShadow: '0 8px 32px rgba(106, 13, 173, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+    transition: 'all 0.3s ease',
+    overflow: 'hidden'
+  }}>
     <h3 className={styles.cardTitle}>
       <BarChart3 size={20} style={{ color: '#6366f1' }} />
       Training Status
@@ -690,7 +836,18 @@ const TrainingStatusCard = ({ training_stats, summary }) => (
 );
 
 const ParticipantDemographicsCard = ({ participant_stats, summary }) => (
-  <div className={styles.card}>
+  <div style={{
+    position: 'relative',
+    background: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '20px',
+    padding: '24px',
+    boxShadow: '0 8px 32px rgba(106, 13, 173, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+    transition: 'all 0.3s ease',
+    overflow: 'hidden'
+  }}>
     <h3 className={styles.cardTitle}>
       <Users size={20} style={{ color: '#8b5cf6' }} />
       Demographics
@@ -722,7 +879,18 @@ const AttendanceOverviewCard = ({ participant_stats }) => {
   const latePercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.late / totalAttendance) * 100) : 0;
 
   return (
-    <div className={styles.card}>
+    <div style={{
+      position: 'relative',
+      background: 'rgba(255, 255, 255, 0.7)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      borderRadius: '20px',
+      padding: '24px',
+      boxShadow: '0 8px 32px rgba(106, 13, 173, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+      transition: 'all 0.3s ease',
+      overflow: 'hidden'
+    }}>
       <h3 className={styles.cardTitle}>
         <UserCheck size={20} style={{ color: '#10b981' }} />
         Attendance Overview

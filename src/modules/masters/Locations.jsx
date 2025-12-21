@@ -167,7 +167,7 @@ const Locations = () => {
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
               padding: '12px 20px',
               borderRadius: '10px',
               boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
@@ -194,7 +194,7 @@ const Locations = () => {
             <button
               onClick={openAdd}
               style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
                 color: 'white',
                 padding: '12px 20px',
                 borderRadius: '10px',

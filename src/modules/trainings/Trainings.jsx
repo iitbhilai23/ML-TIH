@@ -148,7 +148,7 @@ const Trainings = () => {
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
               padding: '12px 20px',
               borderRadius: '10px',
               boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
@@ -175,7 +175,7 @@ const Trainings = () => {
             <button
               onClick={openAdd}
               style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
                 color: 'white',
                 padding: '12px 20px',
                 borderRadius: '10px',
@@ -331,18 +331,60 @@ const Trainings = () => {
                         </span>
                       </td>
                       <td>
-                        <div className="flex justify-center gap-2">
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}>
                           <button
-                            className="p-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
                             onClick={() => openEdit(t)}
+                            style={{
+                              padding: '8px 12px',
+                              background: '#eff6ff',
+                              border: '1px solid #bfdbfe',
+                              borderRadius: '8px',
+                              color: '#1e40af',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#dbeafe';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#eff6ff';
+                            }}
                           >
-                            <Pencil size={16} />
+                            <Pencil size={14} /> Edit
                           </button>
                           <button
-                            className="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"
                             onClick={() => handleDelete(details.id)}
+                            style={{
+                              padding: '8px 12px',
+                              background: '#fef2f2',
+                              border: '1px solid #fecaca',
+                              borderRadius: '8px',
+                              color: '#991b1b',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#fee2e2';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#fef2f2';
+                            }}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} /> Delete
                           </button>
                         </div>
                       </td>

@@ -8,7 +8,7 @@ import { useMatchPath } from '../../hooks/useMatchPath';
 
 const SidebarItem = ({ item, onClick, isCollapsed }) => {
   const Icon = item.icon;
-  const isActive = useMatchPath(item.path); 
+  const isActive = useMatchPath(item.path);
 
   return (
     <div className={styles.navItemWrapper}>
@@ -23,12 +23,10 @@ const SidebarItem = ({ item, onClick, isCollapsed }) => {
         {!isCollapsed && <span>{item.label}</span>}
       </NavLink>
 
-      {/* Tooltip when collapsed */}
-      {isCollapsed && (
-        <div className={styles.tooltip}>
-          {item.label}
-        </div>
-      )}
+      {/* Tooltip on hover - always visible */}
+      <div className={styles.tooltip}>
+        {item.label}
+      </div>
     </div>
   );
 };
@@ -39,7 +37,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed }) => {
   const bottomNav = content.nav.filter(item => item.bottom);
 
   const handleItemClick = () => {
-    if (!isCollapsed) return; 
+    if (!isCollapsed) return;
     onClose();
   };
 

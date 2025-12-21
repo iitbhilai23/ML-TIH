@@ -103,7 +103,7 @@ const TrainerList = () => {
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
               padding: '12px 20px',
               borderRadius: '10px',
               boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
@@ -130,7 +130,7 @@ const TrainerList = () => {
             <button
               onClick={openAddModal}
               style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
                 color: 'white',
                 padding: '12px 20px',
                 borderRadius: '10px',
@@ -271,7 +271,7 @@ const TrainerList = () => {
                             width: '40px',
                             height: '40px',
                             borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                            background: 'linear-gradient(135deg, #7B3F99, #9B59B6)',
                             color: 'white',
                             display: 'flex',
                             alignItems: 'center',
