@@ -51,6 +51,7 @@ const MainLayout = () => {
       <Sidebar
         isOpen={sidebarOpen}
         onClose={closeSidebar}
+        onToggleSidebar={toggleSidebar}
         isCollapsed={sidebarCollapsed}
       />
 

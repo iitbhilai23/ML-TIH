@@ -162,13 +162,124 @@
   align-items: center;
 }
 
-.mobileToggle {
+/* .mobileToggle {
   display: flex;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-main);
+  color: var(--bg-surface);
   margin-right: 15px;
+} */
+
+/* .mobileToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--bg-surface);
+  margin-right: 12px;
+  flex-shrink: 0; 
+}
+
+.mobileToggle:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.mobileToggle:active {
+  transform: scale(0.95);
+} */
+
+.mobileToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--bg-surface);
+  margin-right: 12px;
+  flex-shrink: 0; /* ← prevents shrinking when sidebar closes */
+}
+
+.mobileToggle:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.mobileToggle:active {
+  transform: scale(0.95);
+}
+
+/* CG Title animation */
+.portalTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-6px);
+  animation: fadeSlide 0.35s ease forwards;
+  margin-right: 10px;
+}
+
+@keyframes fadeSlide {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar open/close smooth */
+.sidebar {
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s ease;
+  overflow: hidden;
+}
+
+.sidebarExpanded {
+  width: 260px;
+}
+
+.sidebarCollapsed {
+  width: 70px;
+}
+
+@media (max-width: 768px) {
+  .sidebarCollapsed {
+    transform: translateX(-100%);
+    width: 260px;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+}
+.sidebarExpanded,
+.sidebarCollapsed {
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s ease;
+}
+
+.mobileToggle:hover {
+  transform: rotate(90deg) scale(1.05);
+}
+
+.mobileToggle:active {
+  transform: rotate(90deg) scale(0.92);
 }
 
 .headerTitle {
@@ -220,7 +331,7 @@
 .contentArea {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  /* padding: 20px; */
 }
 
 /* Collapsed Logout (floating) */

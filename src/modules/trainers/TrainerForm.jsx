@@ -6,10 +6,10 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', bio: '', profile_image_url: ''
   });
-  
+
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
-  const [isUploading, setIsUploading] = useState(false); 
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -30,75 +30,74 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
 
   const cleanPayload = (data) =>
-  Object.fromEntries(
-    Object.entries(data).filter(
-      ([_, v]) => v !== '' && v !== null && v !== undefined
-    )
-  );
+    Object.fromEntries(
+      Object.entries(data).filter(
+        ([_, v]) => v !== '' && v !== null && v !== undefined
+      )
+    );
 
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsUploading(true);
+  // new code here 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsUploading(true);
 
-  try {
-    // ============================
-    // EDIT TRAINER (OLD FLOW)
-    // ============================
-    if (initialData) {
-      await trainerService.updateTrainer(initialData.id, {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        bio: formData.bio,
-      });
+    try {
+      let trainer;
 
-      // optional image update
-      if (selectedFile) {
-        const uploadRes = await trainerService.uploadTrainerPhoto(
+      //  CREATE / UPDATE TRAINER (TEXT DATA)
+      if (initialData) {
+        trainer = await trainerService.updateTrainer(
           initialData.id,
-          selectedFile
+          cleanPayload({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            bio: formData.bio,
+          })
         );
-
-        await trainerService.updateTrainer(initialData.id, {
-          profile_image_url: uploadRes.file_url,
+      } else {
+        trainer = await trainerService.createTrainer({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          bio: formData.bio,
         });
       }
 
-      alert('Trainer updated successfully!');
-    }
-
-    // ============================
-    // ADD TRAINER (NEW FLOW)
-    // ============================
-    else {
-      const formDataToSend = new FormData();
-
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('bio', formData.bio);
 
       if (selectedFile) {
-        formDataToSend.append('image', selectedFile);
+        const uploadRes = await trainerService.uploadTrainerPhoto(
+          trainer.id,
+          selectedFile
+        );
+
+        // update trainer with image url
+        await trainerService.updateTrainer(trainer.id, {
+          profile_image_url: uploadRes.file_url,
+        });
+
       }
 
-      await trainerService.createTrainer(formDataToSend);
+      //  SUCCESS MESSAGE
+      alert(
+        initialData
+          ? 'Trainer updated successfully!'
+          : 'Trainer created successfully!'
+      );
 
-      alert('Trainer created successfully!');
+      // refresh list
+      onSubmit();
+
+      // close modal
+      onClose();
+    } catch (error) {
+      console.error(error);
+      alert(error.message || 'Something went wrong');
+    } finally {
+      setIsUploading(false);
     }
-
-    onSubmit();
-    onClose();
-  } catch (error) {
-    console.error(error);
-    alert(
-      error.response?.data?.message || 'Something went wrong'
-    );
-  } finally {
-    setIsUploading(false);
-  }
-};
+  };
 
 
 
@@ -116,79 +115,79 @@ const handleSubmit = async (e) => {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h3 className={styles.title} style={{marginBottom: '20px'}}>
+        <h3 className={styles.title} style={{ marginBottom: '20px' }}>
           {initialData ? 'Edit Trainer' : 'Add New Trainer'}
         </h3>
-        
+
         <form onSubmit={handleSubmit}>
           {/* Profile Image Upload */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Profile Image</label>
-            <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px'}}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               {filePreview && (
-                <img 
-                  src={filePreview} 
-                  alt="Preview" 
-                  style={{width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0'}}
+                <img
+                  src={filePreview}
+                  alt="Preview"
+                  style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
                 />
               )}
             </div>
-            <input 
-              type="file" 
+            <input
+              type="file"
               accept="image/*"
               onChange={handleFileChange}
               className={styles.input}
             />
-            <small style={{color: '#64748b', fontSize: '0.75rem'}}>Accepts JPG, PNG, GIF (Max 5MB)</small>
+            <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Accepts JPG, PNG, GIF (Max 5MB)</small>
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Full Name *</label>
-            <input 
-              required 
-              className={styles.input} 
-              type="text" 
-              value={formData.name} 
-              onChange={(e) => setFormData({...formData, name: e.target.value})} 
+            <input
+              required
+              className={styles.input}
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
           <div className="flex gap-2">
-            <div className={styles.formGroup} style={{flex: 1}}>
+            <div className={styles.formGroup} style={{ flex: 1 }}>
               <label className={styles.label}>Email Address *</label>
-              <input 
-                required 
-                className={styles.input} 
-                type="email" 
-                value={formData.email} 
-                onChange={(e) => setFormData({...formData, email: e.target.value})} 
+              <input
+                required
+                className={styles.input}
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
-            <div className={styles.formGroup} style={{flex: 1}}>
+            <div className={styles.formGroup} style={{ flex: 1 }}>
               <label className={styles.label}>Phone Number</label>
-              <input 
-                className={styles.input} 
-                type="text" 
-                value={formData.phone} 
-                onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+              <input
+                className={styles.input}
+                type="text"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />
             </div>
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Bio / Specialization</label>
-            <textarea 
-              className={styles.input} 
+            <textarea
+              className={styles.input}
               rows="3"
-              value={formData.bio} 
-              onChange={(e) => setFormData({...formData, bio: e.target.value})} 
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             />
           </div>
 
           <div className={styles.actions}>
-            <button type="button" onClick={onClose} className={`${styles.btn}`} style={{background:'#f1f5f9', color:'#333'}}>Cancel</button>
-            <button 
-              type="submit" 
+            <button type="button" onClick={onClose} className={`${styles.btn}`} style={{ background: '#f1f5f9', color: '#333' }}>Cancel</button>
+            <button
+              type="submit"
               className={`${styles.btn} ${styles.primary}`}
               disabled={isUploading}
             >
