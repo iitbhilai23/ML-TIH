@@ -37,67 +37,70 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   );
 
 
-// new code here 
 const handleSubmit = async (e) => {
   e.preventDefault();
   setIsUploading(true);
 
   try {
-    let trainer;
-
-    //  CREATE / UPDATE TRAINER (TEXT DATA)
+    // ============================
+    // EDIT TRAINER (OLD FLOW)
+    // ============================
     if (initialData) {
-      trainer = await trainerService.updateTrainer(
-        initialData.id,
-        cleanPayload({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          bio: formData.bio,
-        })
-      );
-    } else {
-      trainer = await trainerService.createTrainer({
+      await trainerService.updateTrainer(initialData.id, {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         bio: formData.bio,
       });
+
+      // optional image update
+      if (selectedFile) {
+        const uploadRes = await trainerService.uploadTrainerPhoto(
+          initialData.id,
+          selectedFile
+        );
+
+        await trainerService.updateTrainer(initialData.id, {
+          profile_image_url: uploadRes.file_url,
+        });
+      }
+
+      alert('Trainer updated successfully!');
     }
 
-   
-    if (selectedFile) {
-      const uploadRes = await trainerService.uploadTrainerPhoto(
-        trainer.id,
-        selectedFile
-      );
+    // ============================
+    // ADD TRAINER (NEW FLOW)
+    // ============================
+    else {
+      const formDataToSend = new FormData();
 
-      // update trainer with image url
-      await trainerService.updateTrainer(trainer.id, {
-        profile_image_url: uploadRes.file_url,
-      });
-     
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('bio', formData.bio);
+
+      if (selectedFile) {
+        formDataToSend.append('image', selectedFile);
+      }
+
+      await trainerService.createTrainer(formDataToSend);
+
+      alert('Trainer created successfully!');
     }
 
-    //  SUCCESS MESSAGE
-   alert(
-  initialData
-    ? 'Trainer updated successfully!'
-    : 'Trainer created successfully!'
-);
-
-    // refresh list
     onSubmit();
-
-    // close modal
     onClose();
   } catch (error) {
     console.error(error);
-    alert(error.message || 'Something went wrong');
+    alert(
+      error.response?.data?.message || 'Something went wrong'
+    );
   } finally {
     setIsUploading(false);
   }
 };
+
+
 
 
 
