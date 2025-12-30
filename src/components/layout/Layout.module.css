@@ -1,9 +1,7 @@
-
-
 :root {
-  --primary: #7B3F99;
+  --primary: #7b3f99;
   --primary-dark: #6a0dad;
-  --primary-light: #9B59B6;
+  --primary-light: #9b59b6;
   --bg-body: #f5f0ff;
   --bg-surface: #ffffff;
   --text-main: #111827;
@@ -30,7 +28,7 @@
 
 /* --- SIDEBAR --- */
 .sidebar {
-  background: linear-gradient(180deg, #7B3F99 0%, #6a0dad 100%);
+  background: linear-gradient(180deg, #7b3f99 0%, #6a0dad 100%);
   color: white;
   display: flex;
   flex-direction: column;
@@ -119,7 +117,11 @@
 }
 
 .navItemActive {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
   color: white;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -152,7 +154,7 @@
   padding: 0 25px;
   flex-shrink: 0;
   box-shadow: 0 1px 3px rgba(106, 13, 173, 0.05);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .headerLeft {
@@ -161,7 +163,7 @@
 }
 
 .mobileToggle {
-  display: none;
+  display: flex;
   background: none;
   border: none;
   cursor: pointer;
@@ -195,7 +197,7 @@
 .userRole {
   display: block;
   font-size: 0.75rem;
-  color: #7B3F99;
+  color: #7b3f99;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -204,7 +206,7 @@
 .avatar {
   width: 35px;
   height: 35px;
-  background: linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%);
+  background: linear-gradient(135deg, #7b3f99 0%, #9b59b6 100%);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -284,8 +286,6 @@
   }
 }
 
-
-
 /* Tooltip for sidebar items */
 .navItemWrapper {
   position: relative;
@@ -296,7 +296,7 @@
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%);
+  background: linear-gradient(135deg, #7b3f99 0%, #9b59b6 100%);
   color: white;
   padding: 8px 14px;
   border-radius: 8px;

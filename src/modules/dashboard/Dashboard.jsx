@@ -67,30 +67,30 @@ const Dashboard = () => {
   if (error) return <div className="p-20 text-red-500">Error: {error}</div>;
   if (!data) return <div className="p-20">No Data Available</div>;
 
-  const { summary, training_stats, participant_stats } = data;
+  const { summary, participant_stats } = data;
 
   // Generate colors for charts
   const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#fbbf24'];
 
   // Format data for charts
   const trainingStatusData = [
-    { name: 'Scheduled', value: training_stats.by_status.scheduled },
-    { name: 'Ongoing', value: training_stats.by_status.ongoing },
-    { name: 'Completed', value: training_stats.by_status.completed },
-    { name: 'Cancelled', value: training_stats.by_status.cancelled }
+    { name: 'Scheduled', value: viewData?.by_status?.scheduled },
+    { name: 'Ongoing', value: viewData?.by_status?.ongoing },
+    { name: 'Completed', value: viewData?.by_status?.completed },
+    { name: 'Cancelled', value: viewData?.by_status?.cancelled }
   ];
 
-  const participantCategoryData = participant_stats.by_category.map(item => ({
+  const participantCategoryData = participant_stats?.by_category?.map(item => ({
     name: item.category,
     value: item.count
   }));
 
-  const participantEducationData = participant_stats.by_education.map(item => ({
+  const participantEducationData = participant_stats?.by_education?.map(item => ({
     name: item.education,
     value: item.count
   }));
 
-  const locationData = training_stats.by_location.map(item => ({
+  const locationData = viewData?.by_location?.map(item => ({
     name: item.district,
     value: item.count
   }));
@@ -257,7 +257,7 @@ const Dashboard = () => {
       </div>
 
       {/* ===== CONTENT BASED ON ACTIVE TAB ===== */}
-      {activeTab === 'summary' && <SummaryTab summary={summary} training_stats={training_stats} participant_stats={participant_stats} />}
+      {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} participant_stats={participant_stats} />}
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} filters={filters} />}
       {/* {activeTab === 'analytics' && <AnalyticsTab data={data} filters={filters} COLORS={COLORS} trainingStatusData={trainingStatusData} participantCategoryData={participantCategoryData} participantEducationData={participantEducationData} locationData={locationData} />}
       {activeTab === 'map' && <MapTab viewData={viewData} />} */}
@@ -266,34 +266,34 @@ const Dashboard = () => {
 };
 
 // Cards and Basic Stats =====
-const SummaryTab = ({ summary, training_stats, participant_stats }) => (
+const SummaryTab = ({ summary, viewData, participant_stats }) => (
   <div className="space-y-6">
 
     <div className={styles.statsRow}>
       <StatCard
         title="Total Trainers"
-        value={summary.total_trainers}
+        value={summary?.total_trainers}
         icon={Users}
         color="#4f46e5"
 
       />
       <StatCard
         title="Total Participants"
-        value={summary.total_participants}
+        value={summary?.total_participants}
         icon={Users}
         color="#10b981"
 
       />
       <StatCard
         title="Active Trainings"
-        value={summary.active_trainings}
+        value={summary?.active_trainings}
         icon={BookOpen}
         color="#f59e0b"
 
       />
       <StatCard
         title="Locations Covered"
-        value={summary.total_locations}
+        value={summary?.total_locations}
         icon={MapPin}
         color="#ec4899"
 
@@ -302,7 +302,7 @@ const SummaryTab = ({ summary, training_stats, participant_stats }) => (
 
     {/*  DETAILED STATS  */}
     <div className={styles.detailsGrid}>
-      <TrainingStatusCard training_stats={training_stats} summary={summary} />
+      <TrainingStatusCard viewData={viewData} summary={summary} />
       <ParticipantDemographicsCard participant_stats={participant_stats} summary={summary} />
       <AttendanceOverviewCard participant_stats={participant_stats} />
     </div>
@@ -651,16 +651,16 @@ const AnalyticsTab = ({ data, filters, COLORS, trainingStatusData, participantCa
         <div className="h-48 flex items-center justify-center">
           <div className="text-center">
             <div className="text-4xl font-bold mb-2">
-              {data.participant_stats.attendance_stats.present}
+              {data.participant_stats?.attendance_stats.present}
             </div>
             <div className="text-sm text-gray-600">Present</div>
             <div className="mt-4 space-y-2">
               <div className="flex justify-between">
-                <span>Absent: {data.participant_stats.attendance_stats.absent}</span>
+                <span>Absent: {data.participant_stats?.attendance_stats.absent}</span>
                 <span className="w-20 bg-red-200 h-2 rounded"></span>
               </div>
               <div className="flex justify-between">
-                <span>Late: {data.participant_stats.attendance_stats.late}</span>
+                <span>Late: {data.participant_stats?.attendance_stats.late}</span>
                 <span className="w-20 bg-yellow-200 h-2 rounded"></span>
               </div>
             </div>
@@ -809,7 +809,7 @@ const StatCard = ({ title, value, icon: Icon, color, change }) => (
   </div>
 );
 
-const TrainingStatusCard = ({ training_stats, summary }) => (
+const TrainingStatusCard = ({ viewData, summary }) => (
   <div style={{
     position: 'relative',
     background: 'rgba(255, 255, 255, 0.7)',
@@ -827,10 +827,10 @@ const TrainingStatusCard = ({ training_stats, summary }) => (
       Training Status
     </h3>
     <div className={styles.statusList}>
-      <StatusRow label="Scheduled" value={training_stats.by_status.scheduled} color="#6366f1" total={summary.total_trainings} />
-      <StatusRow label="Ongoing" value={training_stats.by_status.ongoing} color="#f59e0b" total={summary.total_trainings} />
-      <StatusRow label="Completed" value={training_stats.by_status.completed} color="#10b981" total={summary.total_trainings} />
-      <StatusRow label="Cancelled" value={training_stats.by_status.cancelled} color="#ef4444" total={summary.total_trainings} />
+      <StatusRow label="Scheduled" value={viewData?.by_status?.scheduled} color="#6366f1" total={summary?.total_trainings} />
+      <StatusRow label="Ongoing" value={viewData?.by_status?.ongoing} color="#f59e0b" total={summary?.total_trainings} />
+      <StatusRow label="Completed" value={viewData?.by_status?.completed} color="#10b981" total={summary?.total_trainings} />
+      <StatusRow label="Cancelled" value={viewData?.by_status?.cancelled} color="#ef4444" total={summary?.total_trainings} />
     </div>
   </div>
 );
@@ -855,28 +855,28 @@ const ParticipantDemographicsCard = ({ participant_stats, summary }) => (
 
     <div style={{ marginBottom: '24px' }}>
       <div className={styles.sectionHeader} style={{ color: '#8b5cf6' }}>By Category</div>
-      {participant_stats.by_category.slice(0, 3).map((item, idx) => (
-        <ProgressBar key={idx} label={item.category} value={item.count} total={summary.total_participants} color="#8b5cf6" />
+      {participant_stats?.by_category?.slice(0, 3).map((item, idx) => (
+        <ProgressBar key={idx} label={item.category} value={item.count} total={summary?.total_participants} color="#8b5cf6" />
       ))}
     </div>
 
     <div>
       <div className={styles.sectionHeader} style={{ color: '#ec4899' }}>By Education</div>
-      {participant_stats.by_education.slice(0, 3).map((item, idx) => (
-        <ProgressBar key={idx} label={item.education} value={item.count} total={summary.total_participants} color="#ec4899" />
+      {participant_stats?.by_education?.slice(0, 3).map((item, idx) => (
+        <ProgressBar key={idx} label={item.education} value={item.count} total={summary?.total_participants} color="#ec4899" />
       ))}
     </div>
   </div>
 );
 
 const AttendanceOverviewCard = ({ participant_stats }) => {
-  const totalAttendance = participant_stats.attendance_stats.present +
-    participant_stats.attendance_stats.absent +
-    participant_stats.attendance_stats.late;
+  const totalAttendance = participant_stats?.attendance_stats.present +
+    participant_stats?.attendance_stats.absent +
+    participant_stats?.attendance_stats.late;
 
-  const presentPercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.present / totalAttendance) * 100) : 0;
-  const absentPercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.absent / totalAttendance) * 100) : 0;
-  const latePercent = totalAttendance > 0 ? Math.round((participant_stats.attendance_stats.late / totalAttendance) * 100) : 0;
+  const presentPercent = totalAttendance > 0 ? Math.round((participant_stats?.attendance_stats.present / totalAttendance) * 100) : 0;
+  const absentPercent = totalAttendance > 0 ? Math.round((participant_stats?.attendance_stats.absent / totalAttendance) * 100) : 0;
+  const latePercent = totalAttendance > 0 ? Math.round((participant_stats?.attendance_stats.late / totalAttendance) * 100) : 0;
 
   return (
     <div style={{
@@ -961,7 +961,7 @@ const AttendanceOverviewCard = ({ participant_stats }) => {
               fontWeight: 500,
               marginTop: '2px'
             }}>
-              {participant_stats.attendance_stats.present}/{totalAttendance}
+              {participant_stats?.attendance_stats.present}/{totalAttendance}
             </div>
           </div>
         </div>
@@ -1010,7 +1010,7 @@ const AttendanceOverviewCard = ({ participant_stats }) => {
             color: '#dc2626',
             marginBottom: '4px'
           }}>
-            {participant_stats.attendance_stats.absent}
+            {participant_stats?.attendance_stats.absent}
           </div>
           <div style={{
             fontSize: '0.7rem',
@@ -1071,7 +1071,7 @@ const AttendanceOverviewCard = ({ participant_stats }) => {
             color: '#f59e0b',
             marginBottom: '4px'
           }}>
-            {participant_stats.attendance_stats.late}
+            {participant_stats?.attendance_stats.late}
           </div>
           <div style={{
             fontSize: '0.7rem',

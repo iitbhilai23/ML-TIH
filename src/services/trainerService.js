@@ -48,21 +48,21 @@ export const trainerService = {
   },
 
   // Upload Trainer Photo
-uploadTrainerPhoto: async (id, file) => {
-  const formData = new FormData();
-  formData.append('file', file);
+  uploadTrainerPhoto: async (id, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
 
-  const res = await api.post(`/trainers/${id}/upload-photo`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+    const res = await api.post(`/trainers/${id}/upload-photo`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
 
-  return res.data;
-},
+    return res.data;
+  },
 
-getTrainerById: async (id) => {
-  const res = await api.get(`/trainers/${id}`);
-  return res.data;
-},
+  getTrainerById: async (id) => {
+    const res = await api.get(`/trainers/${id}`);
+    return res.data;
+  },
 
 
 };

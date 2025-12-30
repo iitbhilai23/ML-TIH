@@ -267,6 +267,7 @@ const Trainings = () => {
             <thead>
               <tr>
                 <th>Training Details (Subject/Trainer)</th>
+                <th>Training Subject</th>
                 <th>Location</th>
                 <th>Dates</th>
                 <th>Participants</th>
@@ -289,11 +290,14 @@ const Trainings = () => {
                   return (
                     <tr key={details.id}>
                       <td>
-                        <div className="font-bold text-indigo-700 flex items-center gap-2">
-                          <BookOpen size={14} /> {details.subject_name}
-                        </div>
+
                         <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
                           <User size={12} /> {details.trainer_name}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="font-bold text-indigo-700 flex items-center gap-2">
+                          <BookOpen size={14} /> {details.subject_name}
                         </div>
                       </td>
                       <td>
