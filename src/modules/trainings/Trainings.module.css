@@ -102,7 +102,7 @@
 }
 
 .table td {
-  padding: 16px;
+   padding: 14px;
   border-bottom: 1px solid #f1f5f9;
   color: var(--text-main);
   vertical-align: middle;

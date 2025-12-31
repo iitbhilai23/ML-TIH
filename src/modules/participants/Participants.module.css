@@ -94,7 +94,7 @@
   z-index: 10;
 }
 .table td {
-  padding: 16px;
+   padding: 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
   color: var(--text-main);
