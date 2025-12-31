@@ -12,6 +12,32 @@ const TrainerList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrainer, setEditingTrainer] = useState(null);
 
+  const THEME = {
+    primary: '#7c3aed',
+    primaryLight: '#ddd6fe',
+    secondary: '#ec4899',
+    success: '#10b981',
+    danger: '#ef4444',
+    warning: '#f59e0b',
+
+    bgGradient: 'linear-gradient(-45deg, #f8fafc, #f1f5f9, #fdfbf7, #f0fdf4)',
+
+    glass: {
+      background: 'rgba(255, 255, 255, 0.85)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      border: '1px solid rgba(255, 255, 255, 0.9)',
+      borderRadius: '20px',
+      boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+    },
+
+    softShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+    mediumShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
+    hoverShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+  };
+
+
   useEffect(() => {
     fetchTrainers();
   }, [searchTerm]);
@@ -68,7 +94,7 @@ const TrainerList = () => {
         marginBottom: '24px'
       }}>
         {/* Header Section */}
-        <div style={{
+        {/* <div style={{
           background: 'white',
           padding: '20px 24px',
           borderRadius: '12px',
@@ -152,6 +178,88 @@ const TrainerList = () => {
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
               }}
+            >
+              <Plus size={18} /> Add Trainer
+            </button>
+          </div>
+        </div> */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: 'white',
+          padding: '20px 32px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+          //  marginBottom: '20px'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <Users size={26} color={THEME.primary} /> Trainer Management
+            </h2>
+            <p style={{
+              fontSize: '0.95rem',
+              color: '#64748b',
+              margin: 0,
+              marginLeft: '42px'
+            }}>
+              Manage trainers and their profiles
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            {/* Vibrant Total Trainer Card (Fixing "Light" look) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)' // Stronger shadow
+            }}>
+              <div style={{
+                fontSize: '0.9rem',
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '2px'
+              }}>
+                Total Trainers
+              </div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>
+                {trainers.length}
+              </div>
+            </div>
+
+            <button
+              onClick={openAddModal}
+              style={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
               <Plus size={18} /> Add Trainer
             </button>
