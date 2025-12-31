@@ -4,6 +4,7 @@ export const locationService = {
   getAll: async (filters = {}) => {
     // Backend supports: village, block, district, limit, page
     const response = await api.get('/locations', { params: filters });
+    console.log(response.data)
     return response.data;
   },
   create: async (data) => {

@@ -181,7 +181,7 @@ const Participants = () => {
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <Plus size={18} /> Add Trainer
+              <Plus size={18} /> Add Participant
             </button>
           </div>
         </div>

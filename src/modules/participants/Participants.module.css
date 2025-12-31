@@ -1,9 +1,309 @@
+/* Participants.module.css */
+
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --bg-surface: #ffffff;
+  --bg-body: #f8fafc;
+  --text-main: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Layout & Header (Kept mostly same) --- */
 .container {
   padding: 20px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* gap: 15px; */
+}
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* --- Filter Section (Updated to match theme) --- */
+.filterBar {
+  display: flex;
+  gap: 15px;
+  background: var(--bg-surface);
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.filterLabel {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+.select {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  min-width: 250px;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+.select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* --- Table (Updated styling) --- */
+.tableCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.tableWrapper {
+  overflow-y: auto;
+  flex: 1;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.table th {
+  background: #f8fafc;
+  color: var(--text-secondary);
+  padding: 16px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 10;
+}
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: var(--text-main);
+}
+
+/* --- Attendance Badges (Modern Colors) --- */
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+}
+.present {
+  background: #dcfce7;
+  color: #166534;
+}
+.absent {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.late {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+/* ========================================= */
+/* --- UPDATED MODAL STYLES --- */
+/* ========================================= */
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Modal Box */
+.modalBox {
+  background: var(--bg-surface);
+  width: 100%;
+  max-width: 650px; /* Wider for 3-column grid */
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  position: relative;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.closeIconBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.closeIconBtn:hover {
+  background: #f1f5f9;
+  color: var(--danger);
+}
+
+/* Grid Layouts */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+/* Labels & Inputs */
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  background: var(--bg-surface);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Custom Select Arrow */
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnSecondary {
+  background: #f1f5f9;
+  color: var(--text-main);
+}
+.btnSecondary:hover {
+  background: #e2e8f0;
+}
+
+.btnPrimary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+.btnPrimary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* .container {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .headerRow {
   display: flex;
@@ -16,7 +316,6 @@
   color: #1e293b;
 }
 
-/* Filter Section */
 .filterBar {
   display: flex;
   gap: 15px;
@@ -39,7 +338,6 @@
   min-width: 250px;
 }
 
-/* Table */
 .tableCard {
   background: white;
   border: 1px solid #e2e8f0;
@@ -73,7 +371,6 @@
   vertical-align: middle;
 }
 
-/* Attendance Badges */
 .badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -94,7 +391,6 @@
   color: #9a3412;
 }
 
-/* Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -145,4 +441,4 @@
   justify-content: center;
   align-items: center;
   gap: 8px;
-}
+} */
