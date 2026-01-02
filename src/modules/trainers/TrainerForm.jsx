@@ -35,6 +35,8 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       )
     );
 
+
+  // new code here 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUploading(true);
@@ -42,7 +44,7 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     try {
       let trainer;
 
-      // CREATE / UPDATE TRAINER (TEXT DATA)
+      //  CREATE / UPDATE TRAINER (TEXT DATA)
       if (initialData) {
         trainer = await trainerService.updateTrainer(
           initialData.id,
@@ -62,26 +64,31 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
         });
       }
 
-      // UPLOAD IMAGE IF EXISTS
+
       if (selectedFile) {
         const uploadRes = await trainerService.uploadTrainerPhoto(
           trainer.id,
           selectedFile
         );
 
+        // update trainer with image url
         await trainerService.updateTrainer(trainer.id, {
           profile_image_url: uploadRes.file_url,
         });
+
       }
 
-      // SUCCESS
+      //  SUCCESS MESSAGE
       alert(
         initialData
           ? 'Trainer updated successfully!'
           : 'Trainer created successfully!'
       );
 
+      // refresh list
       onSubmit();
+
+      // close modal
       onClose();
     } catch (error) {
       console.error(error);
@@ -90,6 +97,9 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       setIsUploading(false);
     }
   };
+
+
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -102,44 +112,30 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        {/* Close Icon */}
-        <button
-          className={styles.closeIcon}
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-
-        <h3 className={styles.title}>
+        <h3 className={styles.title} style={{ marginBottom: '20px' }}>
           {initialData ? 'Edit Trainer' : 'Add New Trainer'}
         </h3>
 
         <form onSubmit={handleSubmit}>
-          {/* Modern Image Upload */}
-          <div className={styles.avatarContainer}>
-            <label htmlFor="file-upload" className={styles.avatarWrapper}>
-              <img
-                src={filePreview || "https://via.placeholder.com/150?text=Avatar"}
-                alt="Profile Preview"
-                className={styles.avatarPreview}
-              />
-              <div className={styles.avatarOverlay}>
-                {/* Inline SVG Camera Icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-              </div>
-            </label>
+          {/* Profile Image Upload */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Profile Image</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              {filePreview && (
+                <img
+                  src={filePreview}
+                  alt="Preview"
+                  style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+                />
+              )}
+            </div>
             <input
-              id="file-upload"
               type="file"
               accept="image/*"
               onChange={handleFileChange}
               style={{ display: 'none' }}
             />
-            <span className={styles.helperText}>Accepts JPG, PNG, GIF (Max 5MB)</span>
+            <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Accepts JPG, PNG, GIF (Max 5MB)</small>
           </div>
 
           {/* Name */}
@@ -149,38 +145,30 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               required
               className={styles.input}
               type="text"
-              placeholder="e.g. John Doe"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
-          {/* Email & Phone Row */}
-          <div className={styles.row}>
-            <div className={styles.col}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Email Address *</label>
-                <input
-                  required
-                  className={styles.input}
-                  type="email"
-                  placeholder="john@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
+          <div className="flex gap-2">
+            <div className={styles.formGroup} style={{ flex: 1 }}>
+              <label className={styles.label}>Email Address *</label>
+              <input
+                required
+                className={styles.input}
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
             </div>
-            <div className={styles.col}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Phone Number</label>
-                <input
-                  className={styles.input}
-                  type="text"
-                  placeholder="+1 (555)..."
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
+            <div className={styles.formGroup} style={{ flex: 1 }}>
+              <label className={styles.label}>Phone Number</label>
+              <input
+                className={styles.input}
+                type="text"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
             </div>
           </div>
 
@@ -190,7 +178,6 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
             <textarea
               className={styles.input}
               rows="3"
-              placeholder="Tell us about this trainer..."
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             />
@@ -198,16 +185,10 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
           {/* Action Buttons */}
           <div className={styles.actions}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={`${styles.btn} ${styles.btnSecondary}`}
-            >
-              Cancel
-            </button>
+            <button type="button" onClick={onClose} className={`${styles.btn}`} style={{ background: '#f1f5f9', color: '#333' }}>Cancel</button>
             <button
               type="submit"
-              className={`${styles.btn} ${styles.btnPrimary}`}
+              className={`${styles.btn} ${styles.primary}`}
               disabled={isUploading}
             >
               {isUploading && <div className={styles.spinner}></div>}

@@ -24,8 +24,8 @@ const Topbar = () => {
         <h3
           className={styles.headerTitle}
           style={{
-            fontSize: '1.29rem',
-            fontWeight: '700',
+            fontSize: '1.28rem',
+            fontWeight: '800',
             margin: 0,
             color: 'transparent',
             background: 'linear-gradient(135deg, #7b3f99 0%, #6a0dad 100%)',
