@@ -5,13 +5,15 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './modules/auth/Login';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
-import Dashboard from './modules/dashboard/Dashboard'; 
+import Dashboard from './modules/dashboard/Dashboard';
 import TrainerList from './modules/trainers/TrainerList';
 import Subjects from './modules/masters/Subjects';
-import Locations from './modules/masters/Locations'; 
+import Locations from './modules/masters/Locations';
 import Trainings from './modules/trainings/Trainings';
 import Participants from './modules/participants/Participants';
 import PublicReport from './modules/reports/PublicReport';
+import ChangePassword from './modules/change password/changePassword';
+
 function App() {
   return (
     <AuthProvider>
@@ -31,7 +33,7 @@ function App() {
               <Route path="locations" element={<Locations />} />
               <Route path="trainings" element={<Trainings />} />
               <Route path="participants" element={<Participants />} />
-             
+              <Route path="trainings/chngpass" element={<ChangePassword />} />
             </Route>
           </Route>
 

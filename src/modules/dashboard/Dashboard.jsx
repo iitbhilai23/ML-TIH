@@ -16,6 +16,7 @@ const THEME = {
     xl: '32px'
   },
   pad: {
+    s: '2',
     sm: '12px',
     md: '16px',
     lg: '20px',
@@ -142,10 +143,10 @@ const Dashboard = () => {
 
   return (
     <div style={{
-      padding: 20,
+      padding: 16,
       display: 'flex',
       flexDirection: 'column',
-      gap: THEME.gap.md,
+      gap: THEME.gap.sm,
       minHeight: '100vh',
       background: THEME.bgGradient,
       overflowX: "hidden",
@@ -156,7 +157,7 @@ const Dashboard = () => {
       {/* ===== HEADER & TABS ===== */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: THEME.gap.md }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
             Dashboard Overview
           </h1>
           <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.95rem', fontWeight: '500' }}>
@@ -310,7 +311,7 @@ const TraineeLocationMap = ({ locationsData }) => {
   const validLocations = locationsData.filter(loc => loc.latitude && loc.longitude);
 
   // Default center to Chhattisgarh roughly if no data, else average of locations
-  let center = [21.2787, 81.8661]; 
+  let center = [21.2787, 81.8661];
   let zoom = 7;
 
   if (validLocations.length > 0) {
@@ -372,19 +373,19 @@ const TraineeLocationMap = ({ locationsData }) => {
 
       <div style={{
         ...THEME.glass,
-        padding: THEME.pad.lg,
+        padding: THEME.pad.md,
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         overflow: 'hidden'
       }}>
-        <div style={{ marginBottom: THEME.pad.md, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontWeight: '700', color: '#0f172a', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: THEME.gap.sm }}>
-            <MapIcon size={20} color={THEME.secondary} /> Map
-          </h3>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', padding: '4px 10px', borderRadius: '6px', fontWeight: '600' }}>
+        <div style={{ marginBottom: THEME.pad.s, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* <h3 style={{ fontWeight: '700', color: '#0f172a', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: THEME.gap.sm }}>
+            <MapIcon size={18} color={THEME.secondary} /> Map
+          </h3> */}
+          {/* <span style={{ fontSize: '0.8rem', color: '#64748b', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', padding: '4px 10px', borderRadius: '6px', fontWeight: '600' }}>
             {validLocations.length} Active Centers
-          </span>
+          </span> */}
         </div>
 
         <div style={{ flex: 1, width: '100%', minHeight: '350px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #f3f4f6', padding: '6px', position: 'relative' }}>
@@ -392,8 +393,8 @@ const TraineeLocationMap = ({ locationsData }) => {
           {/* REPLACED +/- BUTTONS WITH "Training Center" LABEL */}
           <div style={{
             position: 'absolute',
-            top: '20px',
-            left: '20px',
+            top: '10px',
+            left: '10px',
             zIndex: 1000,
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px)',
@@ -404,7 +405,7 @@ const TraineeLocationMap = ({ locationsData }) => {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            pointerEvents: 'none' 
+            pointerEvents: 'none'
           }}>
             <div style={{
               width: '10px',
@@ -420,7 +421,7 @@ const TraineeLocationMap = ({ locationsData }) => {
               color: '#1e293b',
               letterSpacing: '-0.01em'
             }}>
-              Training Center
+              Training Center Locations
             </div>
           </div>
 
@@ -428,9 +429,9 @@ const TraineeLocationMap = ({ locationsData }) => {
             center={center}
             zoom={zoom}
             style={{ width: "100%", height: "100%" }}
-            zoomControl={false} 
+            zoomControl={false}
             scrollWheelZoom={true}
-            easeLinearity={0.5} 
+            easeLinearity={0.5}
           >
 
             {/* Modern CartoDB Tiles */}
@@ -494,10 +495,10 @@ const TraineeLocationMap = ({ locationsData }) => {
               ))
             }
           </MapContainer>
-          
+
           {/* Empty State Fallback */}
           {validLocations.length === 0 && (
-             <div style={{
+            <div style={{
               position: 'absolute',
               top: 0, left: 0, width: '100%', height: '100%',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -517,7 +518,7 @@ const TraineeLocationMap = ({ locationsData }) => {
 // ===== SUB COMPONENTS =====
 
 const SummaryTab = ({ summary, viewData, participant_stats, locationsData }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.xl }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.md }}>
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: THEME.gap.lg }}>
@@ -530,7 +531,7 @@ const SummaryTab = ({ summary, viewData, participant_stats, locationsData }) => 
     {/* NEW LAYOUT: 30% Status Card | 70% Map Card */}
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '30% 70%', 
+      gridTemplateColumns: '30% 70%',
       gap: THEME.gap.lg,
       alignItems: 'stretch'
     }}>
@@ -703,7 +704,7 @@ const TrainingStatusCard = ({ viewData, summary }) => (
     borderRadius: '16px',
     padding: '3px',
     boxShadow: '0 4px 12px rgba(79, 70, 229, 0.08)',
-    height: '100%' 
+    height: '100%'
   }}>
     <div style={{ background: '#ffffff', borderRadius: '13px', padding: THEME.pad.lg, height: '100%', boxSizing: 'border-box' }}>
       <h3 style={{ fontWeight: '700', color: '#3730a3', marginBottom: THEME.pad.md, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: THEME.gap.sm }}>

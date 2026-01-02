@@ -14,7 +14,7 @@
 
 /* --- Layout & Header (Kept mostly same) --- */
 .container {
-  padding: 20px;
+  padding: 12px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -94,7 +94,7 @@
   z-index: 10;
 }
 .table td {
-   padding: 12px;
+  padding: 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
   color: var(--text-main);
