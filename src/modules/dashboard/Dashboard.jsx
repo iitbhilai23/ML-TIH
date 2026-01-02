@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
-import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize } from 'lucide-react';
+import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon } from 'lucide-react';
+import { trainingService } from '../../services/trainingService';
+
 
 // ===== CLEAN & ELEGANT THEME =====
 const THEME = {
@@ -62,6 +64,8 @@ const Dashboard = () => {
   const [data, setData] = useState(null);
   const [viewData, setViewData] = useState(null);
   const [locationsData, setLocationsData] = useState([]);
+  const [trainingLocations, setTrainingLocations] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
@@ -109,6 +113,24 @@ const Dashboard = () => {
     fetchMapLocation();
   }, [])
 
+  useEffect(() => {
+  const fetchTrainingsForMap = async () => {
+    try {
+      const trainings = await trainingService.getAll();
+
+      console.log("Training data loaded:", trainings);
+
+      setTrainingLocations(
+        Array.isArray(trainings) ? trainings : trainings?.data || []
+      );
+    } catch (error) {
+      console.error("Error fetching trainings for map:", error);
+    }
+  };
+
+  fetchTrainingsForMap();
+}, []);
+
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
@@ -131,15 +153,11 @@ const Dashboard = () => {
   if (error) return <div style={{ padding: THEME.pad.xl, color: THEME.danger, textAlign: 'center' }}>Error: {error}</div>;
   if (!data) return <div style={{ padding: THEME.pad.xl, color: '#64748b', textAlign: 'center' }}>No Data Available</div>;
 
-  const { summary, participant_stats } = data;
+  const { summary } = data;
 
-  const COLORS = [THEME.primary, THEME.success, THEME.warning, THEME.secondary];
-  const trainingStatusData = [
-    { name: 'Scheduled', value: viewData?.by_status?.scheduled || 0 },
-    { name: 'Ongoing', value: viewData?.by_status?.ongoing || 0 },
-    { name: 'Completed', value: viewData?.by_status?.completed || 0 },
-    { name: 'Cancelled', value: viewData?.by_status?.cancelled || 0 }
-  ];
+
+
+
 
   return (
     <div style={{
@@ -216,7 +234,15 @@ const Dashboard = () => {
       </div>
 
       {/* ===== CONTENT ===== */}
-      {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} participant_stats={participant_stats} locationsData={locationsData} />}
+    {activeTab === 'summary' && (
+  <SummaryTab
+    summary={data}
+    viewData={viewData}
+    locationsData={locationsData}
+    trainingLocations={trainingLocations}
+  />
+)}
+
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} />}
     </div>
   );
@@ -230,278 +256,182 @@ const getTabStyle = (isActive, gradient) => ({
   letterSpacing: '0.01em'
 });
 
-// ===== HELPER COMPONENT TO FIX MAP RESIZE =====
-// This component uses useMap hook to access the map instance and trigger a resize update
-const MapResizer = ({ trigger }) => {
-  const map = useMap();
-  useEffect(() => {
-    // Wait a tiny bit for the DOM transition to finish then invalidate size
-    const resizeTimeout = setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
-    return () => clearTimeout(resizeTimeout);
-  }, [trigger, map]);
-  return null;
-};
-
-// ===== ENHANCED SMOOTH MAP COMPONENT WITH GEOJSON & FULLSCREEN =====
-const TraineeLocationMap = ({ locationsData }) => {
+// ===== ENHANCED SMOOTH MAP COMPONENT WITH GEOJSON =====
+const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Fetch GeoJSON data for CG State Boundary
-  useEffect(() => {
-    const fetchGeoJson = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:4001/files/Map/topojsons/states/cg.json');
-        const data = await response.json();
-        setGeoJsonData(data);
-      } catch (error) {
-        console.error("Error fetching CG GeoJSON:", error);
-      }
-    };
-    fetchGeoJson();
-  }, []);
+  // ✅ Trainings that have lat/lng
+  const validTrainingLocations = trainingLocations.filter(
+    t =>
+      t.location_details &&
+      t.location_details.latitude &&
+      t.location_details.longitude
+  );
 
-  // Define Smooth Custom Marker Icon
-  const createCustomIcon = () => {
-    return L.divIcon({
-      className: 'custom-div-icon',
-      html: `
-        <div style="position: relative; width: 24px; height: 24px;">
-          <div style="width: 100%; height: 100%; background: ${THEME.gradients.primary}; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3); position: absolute; z-index: 2;"></div>
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; z-index: 3;"></div>
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background: ${THEME.primary}; opacity: 0.3; border-radius: 50%; z-index: 1; animation: pulseSmooth 2.5s infinite ease-out;"></div>
-        </div>
-        <style>
-          @keyframes pulseSmooth {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-          }
-        </style>
-      `,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
-    });
-  };
+  // ✅ Plain locations (no training)
+  const validLocations = locationsData.filter(
+    loc => loc.latitude && loc.longitude
+  );
 
-  const validLocations = locationsData.filter(loc => loc.latitude && loc.longitude);
-
-  // Default center to Chhattisgarh roughly if no data, else average of locations
+  // ===== MAP CENTER LOGIC =====
   let center = [21.2787, 81.8661];
   let zoom = 7;
 
-  if (validLocations.length > 0) {
-    const avgLat = validLocations.reduce((sum, loc) => sum + parseFloat(loc.latitude), 0) / validLocations.length;
-    const avgLng = validLocations.reduce((sum, loc) => sum + parseFloat(loc.longitude), 0) / validLocations.length;
+  const allPoints = [
+    ...validLocations,
+    ...validTrainingLocations.map(t => t.location_details)
+  ];
+
+  if (allPoints.length > 0) {
+    const avgLat =
+      allPoints.reduce((s, l) => s + Number(l.latitude), 0) / allPoints.length;
+    const avgLng =
+      allPoints.reduce((s, l) => s + Number(l.longitude), 0) / allPoints.length;
+
     center = [avgLat, avgLng];
     zoom = 9;
   }
 
-  // Styles for the main container
-  const containerStyle = {
-    ...THEME.glass,
-    padding: isFullScreen ? 0 : THEME.pad.md,
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden',
-    transition: 'all 0.3s ease-in-out',
-    position: 'relative',
-    ...(isFullScreen ? {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      zIndex: 9999,
-      borderRadius: 0,
-      border: 'none',
-      margin: 0
-    } : {})
-  };
+  // ===== GEOJSON =====
+  useEffect(() => {
+    fetch('http://127.0.0.1:4001/files/Map/topojsons/states/cg.json')
+      .then(res => res.json())
+      .then(setGeoJsonData)
+      .catch(console.error);
+  }, []);
+
+  // ===== MARKER ICON =====
+  const createCustomIcon = () =>
+    L.divIcon({
+      className: 'custom-div-icon',
+      html: `
+        <div style="
+          width: 24px;
+          height: 24px;
+          background: ${THEME.primary};
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        "></div>
+      `,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
 
   return (
-    <>
-      <style>{`
-        .leaflet-popup-content-wrapper {
-          border-radius: 16px;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-          border: none;
-          padding: 0;
-          overflow: hidden;
-          animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-          transform-origin: bottom center;
-        }
-        .leaflet-popup-content { margin: 0; line-height: 1.5; }
-        .leaflet-popup-tip { background: white; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .leaflet-container a.leaflet-popup-close-button {
-          color: #94a3b8; top: 12px; right: 12px; font-size: 20px; padding: 4px; background: rgba(255,255,255,0.8);
-          border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease;
-        }
-        .leaflet-popup-content-wrapper:hover .leaflet-container a.leaflet-popup-close-button { opacity: 1; }
-        .leaflet-container a.leaflet-popup-close-button:hover { color: #4f46e5; background: white; }
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-      `}</style>
+    <div style={{ ...THEME.glass, padding: THEME.pad.lg, height: '100%' }}>
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        style={{ width: '100%', height: '100%' }}
+        zoomControl={false}
+      >
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        />
 
-      <div style={containerStyle}>
-
-        {/* TITLE - TOP LEFT */}
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          zIndex: 1000,
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(8px)',
-          padding: '12px 18px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-          border: '1px solid rgba(255,255,255,0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          pointerEvents: 'auto'
-        }}>
-          <div style={{
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            background: THEME.gradients.primary,
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
-          }}></div>
-          <div style={{
-            fontSize: '0.85rem',
-            fontWeight: '700',
-            color: '#1e293b',
-            letterSpacing: '-0.01em'
-          }}>
-            Training Center Locations
-          </div>
-        </div>
-
-        {/* FULLSCREEN TOGGLE BUTTON - TOP RIGHT */}
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 1000,
-          pointerEvents: 'auto'
-        }}>
-          <button
-            onClick={() => setIsFullScreen(!isFullScreen)}
+        {geoJsonData && (
+          <GeoJSON
+            data={geoJsonData}
             style={{
-              background: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              padding: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              color: '#475569',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              width: '36px',
-              height: '36px'
+              color: THEME.primary,
+              weight: 2,
+              fillOpacity: 0.05
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = THEME.primary;
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-            title={isFullScreen ? "Exit Fullscreen" : "View Fullscreen"}
+          />
+        )}
+
+        {/* ===== LOCATION MARKERS (NO TRAINER UI) ===== */}
+        {validLocations.map((loc, i) => (
+          <Marker
+            key={`loc-${i}`}
+            position={[loc.latitude, loc.longitude]}
+            icon={createCustomIcon()}
           >
-            {isFullScreen ? <Minimize size={18} /> : <Maximize size={18} />}
-          </button>
-        </div>
+            <Popup>
+              <strong>{loc.village}</strong>
+              <br />
+              {loc.block}, {loc.district}
+            </Popup>
+          </Marker>
+        ))}
 
-        <div style={{ flex: 1, width: '100%', height: '100%', background: '#f8fafc', borderRadius: isFullScreen ? 0 : '12px', border: isFullScreen ? 'none' : '1px solid #f3f4f6', overflow: 'hidden' }}>
-          <MapContainer
-            center={center}
-            zoom={zoom}
-            style={{ width: "100%", height: "100%" }}
-            zoomControl={false}
-            scrollWheelZoom={true}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            />
-            {geoJsonData && (
-              <GeoJSON
-                data={geoJsonData}
-                style={{
-                  color: THEME.primary,
-                  weight: 2,
-                  fillColor: THEME.primary,
-                  fillOpacity: 0.05,
-                  dashArray: '5, 5'
-                }}
-              />
-            )}
+        {/* ===== TRAINING MARKERS (WITH IMAGE) ===== */}
+        {validTrainingLocations.map((training, i) => {
+          const loc = training.location_details;
 
-            {/* COMPONENT TO FIX RESIZE ISSUE */}
-            <MapResizer trigger={isFullScreen} />
-
-            {
-              validLocations.map((item, index) => (
-                <Marker
-                  key={item.id || index}
-                  position={[item.latitude, item.longitude]}
-                  icon={createCustomIcon()}
-                >
-                  <Popup>
-                    <div style={{ minWidth: '220px', padding: '0' }}>
-                      <div style={{ padding: '16px', background: 'white', color: '#1e293b' }}>
-                        <div style={{ fontWeight: '800', fontSize: '1.05rem', color: THEME.primary, marginBottom: '4px', letterSpacing: '-0.02em' }}>
-                          {item.village}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '12px', lineHeight: '1.4' }}>
-                          {item.address_line || 'No specific address details provided.'}
-                        </div>
-                        <div style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          fontSize: '0.8rem', background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px',
-                          color: '#475569', fontWeight: '500'
-                        }}>
-                          <span>{item.block}</span>
-                          <span>{item.district}</span>
-                        </div>
+          return (
+            <Marker
+              key={`training-${training.id}`}
+              position={[loc.latitude, loc.longitude]}
+              icon={createCustomIcon()}
+            >
+              <Popup>
+                <div style={{ minWidth: '240px' }}>
+                  {/* Trainer Row */}
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                    <img
+                      src={
+                        training.trainer_profile_image ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          training.trainer_name
+                        )}`
+                      }
+                      alt={training.trainer_name}
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700 }}>
+                        {training.trainer_name}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>
+                        {training.subject_name}
                       </div>
                     </div>
-                  </Popup>
-                </Marker>
-              ))
-            }
-          </MapContainer>
+                  </div>
 
-          {/* Empty State Fallback */}
-          {validLocations.length === 0 && (
-            <div style={{
-              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(255,255,255,0.8)', zIndex: 500,
-              color: '#94a3b8', textAlign: 'center'
-            }}>
-              <MapIcon size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
-              <p style={{ fontSize: '0.9rem' }}>No location data available</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
+                  <div style={{ fontWeight: 700, color: THEME.primary }}>
+                    {loc.village}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#475569' }}>
+                    {loc.block}, {loc.district}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color:
+                        training.status === 'completed'
+                          ? THEME.success
+                          : training.status === 'ongoing'
+                          ? THEME.warning
+                          : THEME.primary
+                    }}
+                  >
+                    Status: {training.status}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </div>
   );
 };
 
 // ===== SUB COMPONENTS =====
 
-const SummaryTab = ({ summary, viewData, participant_stats, locationsData }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.md }}>
+const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.xl }}>
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: THEME.gap.lg }}>
@@ -524,7 +454,11 @@ const SummaryTab = ({ summary, viewData, participant_stats, locationsData }) => 
       </div>
 
       {/* Right 70%: Map with Lat/Long */}
-      <TraineeLocationMap locationsData={locationsData} />
+     <TraineeLocationMap
+  locationsData={locationsData}
+  trainingLocations={trainingLocations}
+/>
+
     </div>
 
   </div>
