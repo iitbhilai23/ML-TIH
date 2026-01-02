@@ -147,7 +147,11 @@ const Dashboard = () => {
       flexDirection: 'column',
       gap: THEME.gap.md,
       minHeight: '100vh',
-      background: THEME.bgGradient
+      background: THEME.bgGradient,
+      overflowX: "hidden",
+      // width: "100%",
+      // boxSizing: "border-box",
+
     }}>
       {/* ===== HEADER & TABS ===== */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: THEME.gap.md }}>
