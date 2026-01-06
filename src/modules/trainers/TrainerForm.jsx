@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { trainerService } from '../../services/trainerService';
 import styles from './Trainers.module.css';
+
+const CameraIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#94a3b8' }}>
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+    <circle cx="12" cy="13" r="4"></circle>
+  </svg>
+)
 
 const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +17,8 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (initialData) {
@@ -28,10 +37,20 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   if (!isOpen) return null;
 
   // Helper to clean payload
+  // const cleanPayload = (data) =>
+  //   Object.fromEntries(
+  //     Object.entries(data).filter(
+  //       ([_, v]) => v !== '' && v !== null && v !== undefined
+  //     )
+  //   );
+
+  // In TrainerForm.js
+
   const cleanPayload = (data) =>
     Object.fromEntries(
       Object.entries(data).filter(
-        ([_, v]) => v !== '' && v !== null && v !== undefined
+        // CHANGE THIS LINE: Allow empty strings, but filter null/undefined
+        ([_, v]) => v !== null && v !== undefined
       )
     );
 
@@ -120,7 +139,7 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
           {/* Profile Image Upload */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Profile Image</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+            {/* <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               {filePreview && (
                 <img
                   src={filePreview}
@@ -135,7 +154,71 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               onChange={handleFileChange}
               style={{ display: 'none' }}
             />
-            <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Accepts JPG, PNG, GIF (Max 5MB)</small>
+            <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Accepts JPG, PNG, GIF (Max 5MB)</small> */}
+            <div onClick={() => fileInputRef.current.click()} // Trigger hidden input
+              style={{
+                width: '100px',
+                height: '100px',
+                borderRadius: '50%',
+                border: '2px dashed #cbd5e1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                position: 'relative',
+                background: '#f8fafc',
+                margin: '0 auto',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.background = '#f1f5f9';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.background = '#f8fafc';
+              }}
+            >
+              {filePreview ? (
+                <img
+                  src={filePreview}
+                  alt="preview"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <CameraIcon />
+              )}
+
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                width: '100%',
+                background: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                fontSize: '10px',
+                textAlign: 'center',
+                padding: '4px 0',
+                opacity: 0,
+                transition: 'opacity 0.2s'
+              }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+              >
+                Change
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '8px' }}>
+              <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Click above to upload (Max 5MB)</small>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
           </div>
 
           {/* Name */}

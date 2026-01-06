@@ -48,7 +48,12 @@ const TrainerList = () => {
       const data = await trainerService.getAllTrainers(searchTerm);
 
       //  FORCE RE-RENDER (NO MANUAL REFRESH NEEDED)
-      setTrainers(Array.isArray(data) ? [...data] : []);
+      //setTrainers(Array.isArray(data) ? [...data] : []);
+      const sortedData = Array.isArray(data)
+        ? [...data].sort((a, b) => a.name.localeCompare(b.name))
+        : [];
+
+      setTrainers(sortedData);
     } catch (error) {
       console.error('Failed to fetch trainers:', error);
       alert('Failed to fetch trainers');
@@ -93,96 +98,6 @@ const TrainerList = () => {
         gap: '20px',
         marginBottom: '24px'
       }}>
-        {/* Header Section */}
-        {/* <div style={{
-          background: 'white',
-          padding: '20px 24px',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <div>
-            <h2 style={{
-              fontSize: '1.3rem',
-              fontWeight: 700,
-              color: '#1e293b',
-              margin: 0,
-              marginBottom: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              <Users size={24} style={{ color: '#6366f1' }} />
-              Trainer Management
-            </h2>
-            <p style={{
-              fontSize: '0.9rem',
-              color: '#64748b',
-              margin: 0
-            }}>
-              Manage trainers and their profiles
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
-              padding: '12px 20px',
-              borderRadius: '10px',
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
-            }}>
-              <div style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: '2px'
-              }}>
-                Total Trainers
-              </div>
-              <div style={{
-                fontSize: '1.8rem',
-                fontWeight: 800,
-                color: 'white',
-                lineHeight: 1
-              }}>
-                {trainers.length}
-              </div>
-            </div>
-            <button
-              onClick={openAddModal}
-              style={{
-                background: 'linear-gradient(135deg, #7B3F99 0%, #9B59B6 100%)',
-                color: 'white',
-                padding: '12px 20px',
-                borderRadius: '10px',
-                border: 'none',
-                fontWeight: 600,
-                fontSize: '0. 9rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-              }}
-            >
-              <Plus size={18} /> Add Trainer
-            </button>
-          </div>
-        </div> */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',

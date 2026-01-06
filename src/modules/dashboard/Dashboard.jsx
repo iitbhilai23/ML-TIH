@@ -541,7 +541,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
 // ===== SUB COMPONENTS =====
 
 const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.xl }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.sm }}>
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: THEME.gap.lg }}>
