@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet'; // Added useMap
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
-import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize } from 'lucide-react'; // Added Maximize, Minimize
+import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize } from 'lucide-react';
 
 const THEME = {
   gap: {
@@ -152,13 +152,9 @@ const Dashboard = () => {
 
   const { summary } = data;
 
-
-
-
-
   return (
     <div style={{
-      padding: 16,
+      padding: 10,
       display: 'flex',
       flexDirection: 'column',
       gap: THEME.gap.sm,
@@ -331,13 +327,37 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
 
   // ===== CONTAINER STYLES (Dynamic) =====
   const containerStyle = {
-    ...THEME.glass,
-    padding: isFullScreen ? 0 : THEME.pad.lg,
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
     transition: 'all 0.3s ease-in-out',
     position: 'relative', // Needed for absolute children
+    background: 'linear-gradient(to bottom right, #f8fafc, #ffffff)',
+    borderRadius: isFullScreen ? '0' : '16px',
+    border: isFullScreen ? 'none' : '1px solid rgba(226, 232, 240, 0.8)',
+    boxShadow: isFullScreen ? 'none' : '0 4px 20px rgba(0, 0, 0, 0.05)',
+    padding: isFullScreen ? 0 : THEME.pad.lg,
+    overflow: 'hidden',
+    // Enhanced border with light colors
+    ...(isFullScreen ? {} : {
+      borderImage: 'linear-gradient(to bottom right, #e2e8f0, #f1f5f9, #e2e8f0) 1',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: '16px',
+        padding: '1px',
+        background: 'linear-gradient(to bottom right, #e2e8f0, #f1f5f9, #e2e8f0)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        zIndex: -1
+      }
+    }),
     ...(isFullScreen ? {
       position: 'fixed',
       top: 0,
@@ -345,14 +365,107 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       width: '100vw',
       height: '100vh',
       zIndex: 9999,
-      borderRadius: 0,
-      border: 'none',
       margin: 0
     } : {})
   };
 
   return (
     <div style={containerStyle}>
+      {/* Decorative border elements */}
+      {!isFullScreen && (
+        <>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            right: '0',
+            height: '3px',
+            background: 'linear-gradient(to right, #e2e8f0, #f1f5f9, #e2e8f0)',
+            borderTopLeftRadius: '16px',
+            borderTopRightRadius: '16px',
+            zIndex: 1
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: '0',
+            left: '0',
+            right: '0',
+            height: '3px',
+            background: 'linear-gradient(to right, #e2e8f0, #f1f5f9, #e2e8f0)',
+            borderBottomLeftRadius: '16px',
+            borderBottomRightRadius: '16px',
+            zIndex: 1
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            bottom: '0',
+            width: '3px',
+            background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9, #e2e8f0)',
+            borderTopLeftRadius: '16px',
+            borderBottomLeftRadius: '16px',
+            zIndex: 1
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            bottom: '0',
+            width: '3px',
+            background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9, #e2e8f0)',
+            borderTopRightRadius: '16px',
+            borderBottomRightRadius: '16px',
+            zIndex: 1
+          }}></div>
+
+          {/* Corner decorations */}
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            width: '16px',
+            height: '16px',
+            borderTop: '2px solid #e2e8f0',
+            borderLeft: '2px solid #e2e8f0',
+            borderTopLeftRadius: '8px',
+            zIndex: 2
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            width: '16px',
+            height: '16px',
+            borderTop: '2px solid #e2e8f0',
+            borderRight: '2px solid #e2e8f0',
+            borderTopRightRadius: '8px',
+            zIndex: 2
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: '8px',
+            left: '8px',
+            width: '16px',
+            height: '16px',
+            borderBottom: '2px solid #e2e8f0',
+            borderLeft: '2px solid #e2e8f0',
+            borderBottomLeftRadius: '8px',
+            zIndex: 2
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: '8px',
+            right: '8px',
+            width: '16px',
+            height: '16px',
+            borderBottom: '2px solid #e2e8f0',
+            borderRight: '2px solid #e2e8f0',
+            borderBottomRightRadius: '8px',
+            zIndex: 2
+          }}></div>
+        </>
+      )}
 
       {/* TITLE - TOP LEFT */}
       <div style={{
@@ -555,7 +668,7 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
     <div style={{
       display: 'grid',
       gridTemplateColumns: '30% 70%',
-      gap: THEME.gap.lg,
+      gap: THEME.gap.sm,
       alignItems: 'stretch'
     }}>
       {/* Left 30%: Training Status */}
