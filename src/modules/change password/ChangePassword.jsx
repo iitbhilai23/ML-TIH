@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Lock, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, Check, AlertCircle, User2Icon } from 'lucide-react';
+import api from '../../services/api'
 
 // ===== ELEGANT THEME =====
 const THEME = {
@@ -67,7 +68,7 @@ const THEME = {
 };
 
 const ChangePassword = () => {
-    const [oldPassword, setOldPassword] = useState('');
+    const [userIdInput, setuserIdInput] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -79,34 +80,33 @@ const ChangePassword = () => {
     const [message, setMessage] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
+        setIsSuccess(false);
 
-        if (!oldPassword || !newPassword || !confirmPassword) {
+        if (!userIdInput || !newPassword) {
             setMessage('Please fill in all fields');
             return;
         }
 
-        if (newPassword !== confirmPassword) {
-            setMessage('New passwords do not match');
-            return;
-        }
+        try {
+            setLoading(true);
 
-        if (newPassword.length < 6) {
-            setMessage('Password must be at least 6 characters');
-            return;
-        }
+            const response = await api.post('/admin/reset-user-password', {
+                userId: Number(userIdInput),
+                newPassword: newPassword
+            });
 
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
             setIsSuccess(true);
-            setMessage('Password changed successfully!');
-            setOldPassword('');
+            setMessage(response.data.message || 'password reset successfully!')
+            setuserIdInput('');
             setNewPassword('');
-            setConfirmPassword('');
-        }, 2000);
+        } catch (error) {
+            setMessage(error.response?.data?.message || 'Failed to reset password');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -239,7 +239,7 @@ const ChangePassword = () => {
                                         display: 'block',
                                         paddingLeft: '12px'
                                     }}>
-                                        Current Password
+                                        User ID
                                     </label>
 
                                     {/* ROW: Lock - Input - Eye */}
@@ -248,18 +248,17 @@ const ChangePassword = () => {
                                         onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
                                     >
                                         <div style={THEME.iconBox} onClick={() => setShowOld(!showOld)}>
-                                            {showOld ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            {/* {showOld ? <EyeOff size={20} /> : <Eye size={20} />} */}
+                                            <User2Icon size={20} />
                                         </div>
                                         <input
-                                            type={showOld ? 'text' : 'password'}
-                                            value={oldPassword}
-                                            onChange={(e) => setOldPassword(e.target.value)}
-                                            placeholder="Enter current password"
+                                            // type={showOld ? 'text' : 'password'}
+                                            value={userIdInput}
+                                            onChange={(e) => setuserIdInput(e.target.value)}
+                                            placeholder="Enter User ID"
                                             style={THEME.input}
                                         />
-                                        <div style={THEME.iconBox}>
-                                            <Lock size={20} />
-                                        </div>
+
                                     </div>
                                 </div>
 
@@ -288,50 +287,12 @@ const ChangePassword = () => {
                                             type={showNew ? 'text' : 'password'}
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
-                                            placeholder="Enter new password"
+                                            placeholder="Enter New Password"
                                             style={THEME.input}
                                         />
-                                        <div style={THEME.iconBox}>
-                                            <Lock size={20} />
-                                        </div>
                                     </div>
                                 </div>
 
-                                {/* 3. Confirm Password Row */}
-                                <div>
-                                    <label style={{
-                                        fontSize: '1rem',
-                                        fontWeight: '600',
-                                        color: '#334155',
-                                        marginBottom: '8px',
-                                        display: 'block',
-                                        paddingLeft: '12px'
-                                    }}>
-                                        Confirm New Password
-                                    </label>
-
-                                    {/* ROW: Check - Input - Eye */}
-                                    <div style={THEME.inputWrapper}
-                                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = THEME.primary; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
-                                    >
-                                        <div style={THEME.iconBox} onClick={() => setShowConfirm(!showConfirm)}>
-                                            {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </div>
-                                        <input
-                                            type={showConfirm ? 'text' : 'password'}
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            placeholder="Confirm new password"
-                                            style={THEME.input}
-                                        />
-                                        <div style={THEME.iconBox}>
-                                            <Check size={20} />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={loading}
