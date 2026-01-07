@@ -281,11 +281,6 @@ const Participants = () => {
                           </div>
                         </div>
                       </td>
-
-
-
-
-
                       <td>
                         <b>{p.training_details?.subject_name}</b>
                         <div className="text-xs">
