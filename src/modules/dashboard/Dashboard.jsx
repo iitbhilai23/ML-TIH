@@ -40,6 +40,7 @@ const THEME = {
     success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     warning: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     secondary: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+    cyan: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', // New gradient added
   },
   input: {
     padding: '10px 16px',
@@ -338,26 +339,6 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     boxShadow: isFullScreen ? 'none' : '0 4px 20px rgba(0, 0, 0, 0.05)',
     padding: isFullScreen ? 0 : THEME.pad.lg,
     overflow: 'hidden',
-    // Enhanced border with light colors
-    ...(isFullScreen ? {} : {
-      borderImage: 'linear-gradient(to bottom right, #e2e8f0, #f1f5f9, #e2e8f0) 1',
-      position: 'relative',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: '16px',
-        padding: '1px',
-        background: 'linear-gradient(to bottom right, #e2e8f0, #f1f5f9, #e2e8f0)',
-        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        WebkitMaskComposite: 'xor',
-        maskComposite: 'exclude',
-        zIndex: -1
-      }
-    }),
     ...(isFullScreen ? {
       position: 'fixed',
       top: 0,
@@ -418,7 +399,6 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
             borderBottomRightRadius: '16px',
             zIndex: 1
           }}></div>
-
           {/* Corner decorations */}
           <div style={{
             position: 'absolute',
@@ -658,10 +638,11 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: THEME.gap.lg }}>
-      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={Users} gradient={THEME.gradients.primary} />
+      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.primary} />
       <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.success} />
       <StatCard title="Active Trainings" value={summary?.active_trainings || 0} icon={BookOpen} gradient={THEME.gradients.warning} />
-      <StatCard title="Locations Covered" value={summary?.total_locations || 0} icon={MapPin} gradient={THEME.gradients.secondary} />
+      {/* Changed gradient to cyan and icon to MapPin */}
+      <StatCard title="Locations Covered" value={summary?.total_locations || 0} icon={MapPin} gradient={THEME.gradients.cyan} />
     </div>
 
     {/* NEW LAYOUT: 30% Status Card | 70% Map Card */}
@@ -786,57 +767,102 @@ const DetailedTab = ({ viewData }) => (
 );
 
 // ===== DASHBOARD CARDS =====
-
-const StatCard = ({ title, value, icon: Icon, gradient }) => (
-  <div
-    style={{
-      background: gradient,
-      borderRadius: '16px',
-      padding: '3px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-      transition: 'all 0.2s ease-in-out'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-2px)';
-      e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)';
-    }}
-  >
-    <div style={{
-      background: '#ffffff',
-      borderRadius: '13px',
-      padding: THEME.pad.lg,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: THEME.gap.sm,
-      position: 'relative',
-      zIndex: 1
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
-            {title}
-          </div>
-          <div style={{
-            fontSize: '2.2rem', fontWeight: '800', lineHeight: 1, letterSpacing: '-0.02em',
-            background: gradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-          }}>
-            {value}
-          </div>
+// Redesigned StatCard with soft gradient, white text, and modern hover effects
+const StatCard = ({ title, value, icon: Icon, gradient }) => {
+  return (
+    <div
+      style={{
+        // Base Container Styles
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        minWidth: '260px',
+        padding: '20px',
+        borderRadius: '16px',
+        background: gradient,
+        // Subtle shadow for depth
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+        // Smooth transition for hover effects (250ms ease)
+        transition: 'transform 250ms ease, box-shadow 250ms ease',
+        cursor: 'default',
+        // Font family setup for consistency
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        overflow: 'hidden', // Ensures rounded corners clip content
+        userSelect: 'none', // Prevents text selection on clicks
+      }}
+      // Interaction: Hover effect handlers
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        // Increase shadow intensity on hover
+        e.currentTarget.style.boxShadow = '0 14px 30px rgba(0, 0, 0, 0.12)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        // Revert shadow to default
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.08)';
+      }}
+    >
+      {/* Left Side: Content (Title + Value) */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+          flex: 1,
+        }}
+      >
+        {/* Title Typography */}
+        <div
+          style={{
+            fontSize: '13px',
+            fontWeight: '500',
+            color: 'rgba(255, 255, 255, 0.85)', // White with 0.85 opacity
+            letterSpacing: '0.3px',
+            textTransform: 'uppercase', // Optional: often looks better for stats
+          }}
+        >
+          {title}
         </div>
-        <div style={{
-          width: '48px', height: '48px', background: gradient, borderRadius: '10px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <Icon size={24} strokeWidth={2.5} />
+
+        {/* Value Typography */}
+        <div
+          style={{
+            fontSize: '30px',
+            fontWeight: '700',
+            lineHeight: '1.2',
+            color: '#ffffff', // Solid white for high contrast
+          }}
+        >
+          {value}
         </div>
       </div>
+
+      {/* Right Side: Icon Container */}
+      <div
+        style={{
+          width: '46px',
+          height: '46px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white background
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)', // Adds subtle glassmorphism effect
+        }}
+      >
+        {/* Render Icon passed via props */}
+        <Icon
+          size={24}
+          color="#ffffff"
+          strokeWidth={2.5}
+          style={{
+            display: 'block',
+          }}
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TrainingStatusCard = ({ viewData, summary }) => (
   <div style={{
@@ -881,4 +907,3 @@ const TrainingStatusCard = ({ viewData, summary }) => (
 );
 
 export default Dashboard;
-
