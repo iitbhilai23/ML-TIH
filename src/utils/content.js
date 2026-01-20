@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, MapPin, FileText, Settings, LogOut, GraduationCap,KeyIcon } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, MapPin, FileText, Settings, LogOut, GraduationCap, KeyIcon } from 'lucide-react';
 
 const content = {
   // Global App Config
@@ -12,9 +12,9 @@ const content = {
     { label: "Locations", path: "/admin/locations", icon: MapPin },
     { label: "Trainings", path: "/admin/trainings", icon: GraduationCap },
     { label: "Participants", path: "/admin/participants", icon: Users },
-    { label: "Subjects", path: "/admin/trainings/subjects", icon: BookOpen },
-    { label: "Change Password", path: "/admin/trainings/chngpass", icon: KeyIcon },
-     { label: "Logout", path: "/logout", icon: LogOut, bottom: true },
+    { label: "Subjects", path: "/admin/training/subjects", icon: BookOpen },
+    { label: "Change Password", path: "/admin/trainee/chngpass", icon: KeyIcon },
+    { label: "Logout", path: "/logout", icon: LogOut, bottom: true },
   ],
 
   common: {

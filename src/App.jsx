@@ -15,26 +15,26 @@ import ChangePassword from './modules/change password/changePassword';
 function App() {
   return (
     <AuthProvider>
-        <Routes>
-          {/* Public Route */}
-          {/* <Route path="/" element={<PublicReport />} /> */}
-          <Route path="/login" element={<Login />} />
-          {/* Protected Routes (Login Required) */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/admin" element={<MainLayout />}>
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="trainers" element={<TrainerList />} />
-              <Route path="trainings/subjects" element={<Subjects />} />
-              <Route path="locations" element={<Locations />} />
-              <Route path="trainings" element={<Trainings />} />
-              <Route path="participants" element={<Participants />} />
-              <Route path="trainings/chngpass" element={<ChangePassword />} />
-            </Route>
+      <Routes>
+        {/* Public Route */}
+        {/* <Route path="/" element={<PublicReport />} /> */}
+        <Route path="/login" element={<Login />} />
+        {/* Protected Routes (Login Required) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<MainLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="trainers" element={<TrainerList />} />
+            <Route path="training/subjects" element={<Subjects />} />
+            <Route path="locations" element={<Locations />} />
+            <Route path="trainings" element={<Trainings />} />
+            <Route path="participants" element={<Participants />} />
+            <Route path="trainee/chngpass" element={<ChangePassword />} />
           </Route>
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
+        </Route>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
 
     </AuthProvider>
   );
