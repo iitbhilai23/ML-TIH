@@ -660,58 +660,23 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
-     <StatCard
-  title="Total Trainings"
-  value="450+"
-  icon={BookOpen}
-  gradient={THEME.gradients.warning}
-/>
-
-<StatCard
-  title="Total Trainers"
-  value="150+"
-  icon={User}
-  gradient={THEME.gradients.primary}
-/>
-
-<StatCard
-  title="Locations Covered"
-  value="384+"
-  icon={MapPin}
-  gradient={THEME.gradients.cyan}
-/>
-
-<StatCard
-  title="Total Participants"
-  value="15500+"
-  icon={Users}
-  gradient={THEME.gradients.success}
-/>
-
+      <StatCard title="Total Trainings" value="450+" icon={BookOpen} gradient={THEME.gradients.warning} />
+      <StatCard title="Total Trainers" value="150+" icon={User} gradient={THEME.gradients.primary} />
+      {/* <StatCard title="Locations Covered" value="384+" icon={MapPin} gradient={THEME.gradients.cyan} /> */}
+      <StatCard title="Total Participants" value="15500+" icon={Users} gradient={THEME.gradients.success} />
     </div>
 
-    {/* NEW LAYOUT: 30% Status Card | 70% Map Card */}
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '30% 70%',
-      gap: THEME.gap.sm,
-      alignItems: 'stretch'
-    }}>
-      {/* Left 30%: Training Status */}
-      <div>
-        <TrainingStatusCard viewData={viewData} summary={summary} />
-      </div>
-
-      {/* Right 70%: Map with Lat/Long */}
+    {/* FULL WIDTH MAP (Training Status REMOVED) */}
+    <div style={{ width: '100%', height: '600px' }}>
       <TraineeLocationMap
         locationsData={locationsData}
         trainingLocations={trainingLocations}
       />
-
     </div>
 
   </div>
 );
+
 
 const DetailedTab = ({ viewData }) => (
   <div style={{ ...THEME.glass, padding: THEME.pad.xl, minHeight: '500px' }}>
