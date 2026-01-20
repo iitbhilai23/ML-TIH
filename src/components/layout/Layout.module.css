@@ -154,7 +154,7 @@
   padding: 0 25px;
   flex-shrink: 0;
   box-shadow: 0 1px 3px rgba(106, 13, 173, 0.05);
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
 }
 
 .headerLeft {

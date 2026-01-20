@@ -37,11 +37,11 @@ const THEME = {
   warning: '#d97706',
   danger: '#dc2626',
   gradients: {
-    primary: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-    success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    warning: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-    secondary: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-    cyan: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', // New gradient added
+    primary: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+    success: 'linear-gradient(135deg, #0f766e 0%, #0f172a 120%)',
+    warning: 'linear-gradient(135deg, #b45309 0%, #1f2937 120%)',
+    secondary: 'linear-gradient(135deg, #334155 0%, #111827 100%)',
+    cyan: 'linear-gradient(135deg, #0e7490 0%, #0f172a 120%)', // New gradient added
   },
   input: {
     padding: '10px 16px',
@@ -315,16 +315,37 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       className: 'custom-div-icon',
       html: `
         <div style="
-          width: 24px;
-          height: 24px;
-          background: ${THEME.primary};
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-        "></div>
+          position: relative;
+          width: 22px;
+          height: 32px;
+        ">
+          <div style="
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #9647bb;
+            border-radius: 50% 50% 50% 0;
+            transform: translateX(-50%) rotate(-45deg);
+            box-shadow: 0 4px 12px rgba(255, 45, 255, 0.31);
+            border: 2px solid rgba(255,255,255,0.85);
+          "></div>
+          <div style="
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 0 3px rgba(226,232,240,0.35);
+          "></div>
+        </div>
       `,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
+      iconSize: [22, 32],
+      iconAnchor: [11, 32]
     });
 
   // ===== CONTAINER STYLES (Dynamic) =====
@@ -638,7 +659,7 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
   <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.sm }}>
 
     {/* Top Stats Grid */}
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: THEME.gap.lg }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
       <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.primary} />
       <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.success} />
       <StatCard title="Active Trainings" value={summary?.active_trainings || 0} icon={BookOpen} gradient={THEME.gradients.warning} />
@@ -778,16 +799,19 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         minWidth: '260px',
-        padding: '20px',
-        borderRadius: '16px',
-        background: gradient,
+        padding: '22px 24px',
+        borderRadius: '12px',
+        position: 'relative',
+        backgroundImage: `${gradient},
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='white' stop-opacity='0.12'/><stop offset='1' stop-color='white' stop-opacity='0'/></linearGradient></defs><rect width='120' height='120' fill='url(%23g)'/><path d='M0 20 H120 M0 60 H120 M0 100 H120' stroke='white' stroke-opacity='0.08'/><path d='M20 0 V120 M60 0 V120 M100 0 V120' stroke='white' stroke-opacity='0.06'/></svg>")`,
+        backgroundBlendMode: 'screen',
+        backgroundSize: 'cover',
+        border: '1px solid rgba(255, 255, 255, 0.22)',
         // Subtle shadow for depth
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+        boxShadow: '0 12px 28px rgba(0, 0, 0, 0.14)',
         // Smooth transition for hover effects (250ms ease)
-        transition: 'transform 250ms ease, box-shadow 250ms ease',
+        transition: 'transform 220ms ease, box-shadow 220ms ease, filter 220ms ease',
         cursor: 'default',
-        // Font family setup for consistency
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         overflow: 'hidden', // Ensures rounded corners clip content
         userSelect: 'none', // Prevents text selection on clicks
       }}
@@ -795,31 +819,47 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-2px)';
         // Increase shadow intensity on hover
-        e.currentTarget.style.boxShadow = '0 14px 30px rgba(0, 0, 0, 0.12)';
+        e.currentTarget.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.18)';
+        e.currentTarget.style.filter = 'saturate(1.04)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
         // Revert shadow to default
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.08)';
+        e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.14)';
+        e.currentTarget.style.filter = 'none';
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          inset: '0',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0))',
+          pointerEvents: 'none'
+        }}
+      />
       {/* Left Side: Content (Title + Value) */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '4px',
+          gap: '6px',
           flex: 1,
+          zIndex: 1
         }}
       >
         {/* Title Typography */}
         <div
           style={{
-            fontSize: '13px',
-            fontWeight: '500',
-            color: 'rgba(255, 255, 255, 0.85)', // White with 0.85 opacity
-            letterSpacing: '0.3px',
-            textTransform: 'uppercase', // Optional: often looks better for stats
+            fontSize: '10.5px',
+            fontWeight: '700',
+            color: 'rgba(255, 255, 255, 0.9)', // White with 0.9 opacity
+            letterSpacing: '0.07em',
+            textTransform: 'uppercase',
+            background: 'rgba(255,255,255,0.18)',
+            padding: '4px 8px',
+            borderRadius: '8px',
+            width: 'fit-content',
+            border: '1px solid rgba(255,255,255,0.2)'
           }}
         >
           {title}
@@ -828,10 +868,12 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
         {/* Value Typography */}
         <div
           style={{
-            fontSize: '30px',
-            fontWeight: '700',
-            lineHeight: '1.2',
+            fontSize: '34px',
+            fontWeight: '800',
+            lineHeight: '1.05',
+            letterSpacing: '-0.015em',
             color: '#ffffff', // Solid white for high contrast
+            textShadow: '0 2px 10px rgba(0,0,0,0.18)'
           }}
         >
           {value}
@@ -841,19 +883,22 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
       {/* Right Side: Icon Container */}
       <div
         style={{
-          width: '46px',
-          height: '46px',
-          borderRadius: '50%',
+          width: '54px',
+          height: '54px',
+          borderRadius: '12px',
           background: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white background
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backdropFilter: 'blur(4px)', // Adds subtle glassmorphism effect
+          backdropFilter: 'blur(6px)', // Adds subtle glassmorphism effect
+          border: '1px solid rgba(255, 255, 255, 0.24)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.12)',
+          zIndex: 1
         }}
       >
         {/* Render Icon passed via props */}
         <Icon
-          size={24}
+          size={26}
           color="#ffffff"
           strokeWidth={2.5}
           style={{

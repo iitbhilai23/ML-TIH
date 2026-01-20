@@ -4,7 +4,7 @@
   padding: 0;
   background: #f8fafc;
   min-height: 100vh;
-  font-family: 'Roboto', sans-serif;
+  font-family: inherit;
 }
 
 .dashboard-header {
