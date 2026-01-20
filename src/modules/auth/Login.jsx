@@ -157,7 +157,7 @@ const Login = () => {
             </div>
           </div>
 
-          <div className={styles.featureHighlights}>
+          {/* <div className={styles.featureHighlights}>
             <div className={styles.featureItem}>
               <div className={styles.featureIcon}>
                 <BookOpen size={24} />
@@ -176,7 +176,7 @@ const Login = () => {
                 <p>Strong network of empowered women</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className={styles.animatedBg}></div>
       </div>
