@@ -33,7 +33,7 @@ function App() {
           </Route>
         </Route>
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/ml/login" />} />
       </Routes>
 
     </AuthProvider>
