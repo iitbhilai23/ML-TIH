@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Menu } from 'lucide-react';
 import styles from './Layout.module.css';
 import content from '../../utils/content';
@@ -7,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const Header = ({ onToggleSidebar }) => {
     const { user } = useAuth();
-    
+
     // Fallback initials
     const getInitials = (name) => {
         return name ? name.charAt(0).toUpperCase() : 'A';
@@ -24,9 +23,14 @@ const Header = ({ onToggleSidebar }) => {
             </div>
 
             <div className={styles.headerRight}>
-                <div className="hidden md:block text-right mr-2">
-                     <span className={styles.userName}>{user?.name || 'Administrator'}</span>
-                     <span className={styles.userRole}>Super Admin</span>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    marginRight: '12px'
+                }}>
+                    <span className={styles.userName}>{user?.name || 'Administrator'}</span>
+                    <span className={styles.userRole}>Super Admin</span>
                 </div>
                 <div className={styles.avatar}>
                     {getInitials(user?.name)}

@@ -51,6 +51,7 @@ const MainLayout = () => {
       <Sidebar
         isOpen={sidebarOpen}
         onClose={closeSidebar}
+        onToggleSidebar={toggleSidebar}
         isCollapsed={sidebarCollapsed}
       />
 
@@ -66,7 +67,7 @@ const MainLayout = () => {
         {sidebarCollapsed && (
           <div className={styles.collapsedLogout}>
             <button onClick={handleLogout} className={styles.logoutBtn}>
-              <LogOut size={20} />
+              {/* <LogOut size={20} /> */}
             </button>
           </div>
         )}

@@ -12,7 +12,6 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
 
-
   const [formData, setFormData] = useState({
     trainer_id: '', 
     subject_id: '', 
@@ -23,7 +22,6 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     status: 'scheduled'
   });
 
-  // 3. Load Dropdown Data on Mount
   useEffect(() => {
     if (isOpen) {
       loadDropdowns();
@@ -74,7 +72,6 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
     const needsNumber = ['trainer_id', 'subject_id', 'location_id', 'max_participants'].includes(name);
     setFormData({ 
       ...formData, 
@@ -91,7 +88,7 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       return;
     }
     
-    // Create clean data object for API (remove auto-generated fields)
+    // Create clean data object for API
     const cleanData = { ...formData };
     delete cleanData.id;           
     delete cleanData.actual_participants; 
@@ -105,20 +102,23 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalBox}>
-        <div className="flex justify-between items-center mb-5 border-b pb-3">
-          <h3 className="font-bold text-lg">
+      <div className={styles.modalContent}>
+        
+        {/* Modal Header */}
+        <div className={styles.modalHeader}>
+          <h3 className={styles.title}>
             {initialData ? 'Edit Training' : 'Schedule New Training'}
           </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className={styles.closeIconBtn}>
             <X size={20} />
           </button>
         </div>
 
-        {loading && <div className="text-center p-4">Loading data...</div>}
+        {loading && <div className={styles.loadingState}>Loading data...</div>}
 
         {!loading && (
           <form onSubmit={handleSubmit}>
+            
             {/* Dropdowns Row 1 */}
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
@@ -227,18 +227,18 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            {/* Actions */}
+            <div className={styles.actions}>
               <button 
                 type="button" 
-                className={`${styles.btn} bg-gray-500`}
+                className={`${styles.btn} ${styles.btnSecondary}`}
                 onClick={onClose}
               >
                 Cancel
               </button>
               <button 
                 type="submit" 
-                className={styles.btn}
-                style={{backgroundColor: 'var(--primary)'}}
+                className={`${styles.btn} ${styles.btnPrimary}`}
               >
                 {initialData ? 'Update Schedule' : 'Create Schedule'}
               </button>
@@ -251,3 +251,4 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 };
 
 export default TrainingForm;
+

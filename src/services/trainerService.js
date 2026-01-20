@@ -1,20 +1,23 @@
 import api from './api';
 
 export const trainerService = {
-  //  Get All Trainers
+  // Get All Trainers
   getAllTrainers: async (search = '') => {
     try {
-      const response = await api.get('/trainers', {
+      // const response = await api.get('/trainers', {
+      const response = await api.get('/trainers?page=1&limit=1000', {
         params: { search }
       });
+      //   console.log("ved response", response.data)
       return response.data;
+
     } catch (error) {
       console.error("Get Trainers Error:", error);
       throw error;
     }
   },
 
-  // Create Trainer
+  // Create Trainer (JSON ONLY)
   createTrainer: async (data) => {
     try {
       const response = await api.post('/trainers', data);
@@ -25,7 +28,7 @@ export const trainerService = {
     }
   },
 
-  // Update Trainer
+  // Update Trainer (JSON ONLY)
   updateTrainer: async (id, data) => {
     try {
       const response = await api.put(`/trainers/${id}`, data);
@@ -36,7 +39,7 @@ export const trainerService = {
     }
   },
 
-  //  Delete Trainer
+  // Delete Trainer
   deleteTrainer: async (id) => {
     try {
       await api.delete(`/trainers/${id}`);
@@ -47,22 +50,22 @@ export const trainerService = {
     }
   },
 
-  // Upload Trainer Photo
-uploadTrainerPhoto: async (id, file) => {
-  const formData = new FormData();
-  formData.append('file', file);
+  // ✅ Upload Trainer Photo (FIXED)
+  uploadTrainerPhoto: async (id, file) => {
+    const formData = new FormData();
+    formData.append('image', file); // 🔥 FIXED (must match backend)
 
-  const res = await api.post(`/trainers/${id}/upload-photo`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+    const res = await api.post(
+      `/trainers/${id}/upload-photo`,
+      formData
+    ); // ❌ no headers
 
-  return res.data;
-},
+    return res.data;
+  },
 
-getTrainerById: async (id) => {
-  const res = await api.get(`/trainers/${id}`);
-  return res.data;
-},
-
-
+  // Get Trainer By ID
+  getTrainerById: async (id) => {
+    const res = await api.get(`/trainers/${id}`);
+    return res.data;
+  },
 };

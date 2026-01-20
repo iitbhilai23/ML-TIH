@@ -2,14 +2,15 @@
 import api from '../services/api';
 
 export const dashboardService = {
-  
+
   // Existing: Summary data
   getDashboardData: async (filters = {}) => {
     try {
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(([_, v]) => v != null && v !== '')
       );
-      const response = await api.get('/dashboard/complete', { params: cleanFilters });
+      // const response = await api.get('/dashboard/complete', { params: cleanFilters });
+      const response = await api.get('/dashboard/summary', { params: cleanFilters });
       return response.data;
     } catch (error) {
       console.error("Dashboard Fetch Error:", error);
@@ -23,7 +24,7 @@ export const dashboardService = {
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(([_, v]) => v != null && v !== '')
       );
-      const response = await api.get('/dashboard-view/data', { params: cleanFilters });
+      const response = await api.get('/dashboard/training-stats', { params: cleanFilters });
       return response.data;
     } catch (error) {
       console.error("Dashboard View Fetch Error:", error);

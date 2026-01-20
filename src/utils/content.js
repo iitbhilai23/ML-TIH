@@ -1,19 +1,20 @@
-import { LayoutDashboard, Users, BookOpen, MapPin, FileText, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, MapPin, FileText, Settings, LogOut, GraduationCap,KeyIcon } from 'lucide-react';
 
 const content = {
   // Global App Config
-  appTitle: "CG Training Portal",
-  appSubtitle: "Marketplace Literacy Chhattisgarh",
-  
+  appTitle: "Marketplace Literacy Chhattisgarh",
+  // appSubtitle: "Marketplace Literacy Chhattisgarh",
+
   // Navigation 
   nav: [
-    { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard }, 
+    { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Trainers", path: "/admin/trainers", icon: Users },
-     { label: "Locations", path: "/admin/locations", icon: MapPin },
-     { label: "Trainings", path: "/admin/trainings", icon: BookOpen },
-     { label: "Participants", path: "/admin/participants", icon: Users },
-    { label: "Subjects", path: "/admin/trainings/subjects", icon: BookOpen }, 
-    { label: "Reports", path: "/", icon: FileText }, 
+    { label: "Locations", path: "/admin/locations", icon: MapPin },
+    { label: "Trainings", path: "/admin/trainings", icon: GraduationCap },
+    { label: "Participants", path: "/admin/participants", icon: Users },
+    { label: "Subjects", path: "/admin/trainings/subjects", icon: BookOpen },
+    { label: "Change Password", path: "/admin/trainings/chngpass", icon: KeyIcon },
+     { label: "Logout", path: "/logout", icon: LogOut, bottom: true },
   ],
 
   common: {
