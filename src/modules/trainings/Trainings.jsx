@@ -134,8 +134,8 @@ const Trainings = () => {
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
-        marginBottom: '24px'
+        gap: '10px',
+        marginBottom: '20px'
       }}>
         {/* Header Card */}
         <div style={{

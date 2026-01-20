@@ -144,8 +144,8 @@ const Locations = () => {
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
-        marginBottom: '24px'
+        gap: '10px',
+        marginBottom: '20px'
       }}>
         <div style={{
           display: 'flex',
