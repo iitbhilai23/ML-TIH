@@ -102,6 +102,8 @@ const TrainerList = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
           background: '#FFFFFF',
           padding: '20px 32px',
           borderRadius: '16px',
@@ -128,6 +130,41 @@ const TrainerList = () => {
             }}>
               Manage trainers and their profiles
             </p>
+          </div>
+
+          {/* Search Bar */}
+          <div style={{ position: 'relative', flex: '1 1 320px', maxWidth: '520px' }}>
+            <Search size={18} style={{
+              position: 'absolute',
+              left: '14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#94a3b8'
+            }} />
+            <input
+              type="text"
+              placeholder="Search by name, email or phone..."
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 14px 12px 44px',
+                border: '2px solid #e2e8f0',
+                borderRadius: '10px',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                color: '#334155',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
           </div>
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
@@ -178,48 +215,6 @@ const TrainerList = () => {
             >
               <Plus size={18} /> Add Trainer
             </button>
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div style={{
-          background: '#FFFFFF',
-          padding: '16px 20px',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{ position: 'relative', maxWidth: '500px' }}>
-            <Search size={18} style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#94a3b8'
-            }} />
-            <input
-              type="text"
-              placeholder="Search by name, email or phone..."
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 14px 12px 44px',
-                border: '2px solid #e2e8f0',
-                borderRadius: '10px',
-                fontSize: '0.95rem',
-                fontWeight: 500,
-                color: '#334155',
-                outline: 'none',
-                transition: 'all 0.2s ease'
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#e2e8f0';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
           </div>
         </div>
       </div>
