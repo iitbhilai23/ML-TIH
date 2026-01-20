@@ -198,7 +198,7 @@ const Dashboard = () => {
       </div>
 
       {/* ===== FILTERS ===== */}
-      <div style={{ ...THEME.glass, padding: `${THEME.pad.md} ${THEME.pad.lg}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.md }}>
+      {/* <div style={{ ...THEME.glass, padding: `${THEME.pad.md} ${THEME.pad.lg}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.md }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.md, borderRight: '1px solid #f3f4f6', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
           <Filter size={16} /> Filters
         </div>
@@ -226,7 +226,7 @@ const Dashboard = () => {
           <option value="scheduled">Scheduled</option>
           <option value="cancelled">Cancelled</option>
         </select>
-      </div>
+      </div> */}
 
       {/* ===== CONTENT ===== */}
       {activeTab === 'summary' && (
@@ -660,11 +660,34 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
-      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.primary} />
-      <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.success} />
-      <StatCard title="Active Trainings" value={summary?.active_trainings || 0} icon={BookOpen} gradient={THEME.gradients.warning} />
-      {/* Changed gradient to cyan and icon to MapPin */}
-      <StatCard title="Locations Covered" value={summary?.total_locations || 0} icon={MapPin} gradient={THEME.gradients.cyan} />
+     <StatCard
+  title="Total Trainings"
+  value="450+"
+  icon={BookOpen}
+  gradient={THEME.gradients.warning}
+/>
+
+<StatCard
+  title="Total Trainers"
+  value="150+"
+  icon={User}
+  gradient={THEME.gradients.primary}
+/>
+
+<StatCard
+  title="Locations Covered"
+  value="384+"
+  icon={MapPin}
+  gradient={THEME.gradients.cyan}
+/>
+
+<StatCard
+  title="Total Participants"
+  value="15500+"
+  icon={Users}
+  gradient={THEME.gradients.success}
+/>
+
     </div>
 
     {/* NEW LAYOUT: 30% Status Card | 70% Map Card */}
