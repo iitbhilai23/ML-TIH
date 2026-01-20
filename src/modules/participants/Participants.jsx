@@ -107,7 +107,7 @@ const Participants = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: '#FFF5E4',
+          background: '#FFFFFF',
           padding: '20px 32px',
           borderRadius: '16px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
@@ -188,7 +188,7 @@ const Participants = () => {
 
         {/* Filter Bar */}
         <div className={styles.filterBar} style={{
-          background: '#FFF5E4',
+          background: '#FFFFFF',
           padding: '16px 20px',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
