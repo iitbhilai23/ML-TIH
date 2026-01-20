@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -76,11 +77,10 @@ const Dashboard = () => {
     subject: '',
     status: ''
   });
-  // Fetch data on mount and when filters change
+
   useEffect(() => {
-    axios.get('http://localhost:5058/api/reports/districts', { headers })
-      .then(res => setDistricts(res.data));
-  }, []);
+    fetchData();
+  }, [filters]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -98,23 +98,6 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-    fetchReport();
-  }, [selectedDistrict, selectedBlock, fromDate, toDate]);
-
-  const fetchReport = () => {
-    setLoading(true);
-    const params = {};
-    if (selectedDistrict) params.district_cd = selectedDistrict;
-    if (selectedBlock) params.block_cd = selectedBlock;
-    if (fromDate) params.from_date = fromDate;
-    if (toDate) params.to_date = toDate;
-
-    axios.get('http://localhost:5058/api/reports/dashboard', { headers, params })
-      .then(res => {
-        setReportData(res.data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
   };
 
   useEffect(() => {

@@ -17,7 +17,10 @@ const Login = () => {
   const navigate = useNavigate();
 
 
-    
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    setError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
