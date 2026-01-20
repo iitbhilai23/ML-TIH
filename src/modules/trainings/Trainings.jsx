@@ -361,24 +361,29 @@ const Trainings = () => {
                           <button
                             onClick={() => openEdit(t)}
                             style={{
-                              padding: '8px 12px',
-                              background: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              borderRadius: '8px',
-                              color: '#1e40af',
+                              padding: '8px 14px',
+                              background: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '10px',
+                              color: '#1e293b',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '4px',
                               fontSize: '0.85rem',
                               fontWeight: 600,
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                               transition: 'all 0.2s ease'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.background = '#dbeafe';
+                              e.currentTarget.style.borderColor = '#6366f1';
+                              e.currentTarget.style.color = '#4338ca';
+                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.background = '#eff6ff';
+                              e.currentTarget.style.borderColor = '#e2e8f0';
+                              e.currentTarget.style.color = '#1e293b';
+                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
                             }}
                           >
                             <Pencil size={14} /> Edit
@@ -386,10 +391,10 @@ const Trainings = () => {
                           <button
                             onClick={() => handleDelete(details.id)}
                             style={{
-                              padding: '8px 12px',
-                              background: '#fef2f2',
-                              border: '1px solid #fecaca',
-                              borderRadius: '8px',
+                              padding: '8px 14px',
+                              background: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '10px',
                               color: '#991b1b',
                               cursor: 'pointer',
                               display: 'flex',
@@ -397,13 +402,16 @@ const Trainings = () => {
                               gap: '4px',
                               fontSize: '0.85rem',
                               fontWeight: 600,
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                               transition: 'all 0.2s ease'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.background = '#fee2e2';
+                              e.currentTarget.style.borderColor = '#fecaca';
+                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.background = '#fef2f2';
+                              e.currentTarget.style.borderColor = '#e2e8f0';
+                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
                             }}
                           >
                             <Trash2 size={14} /> Delete

@@ -364,47 +364,63 @@ const Locations = () => {
                     </td>
                     <td>
                       <span style={{
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                        fontFamily: 'monospace'
+                        background: '#ffffff',
+                        color: '#0f172a',
+                        padding: '6px 12px',
+                        borderRadius: '10px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        fontFamily: 'monospace',
+                        letterSpacing: '0.08em',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '86px'
                       }}>
                         {loc.pincode || 'N/A'}
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                         <button
                           onClick={() => openEdit(loc)}
                           style={{
-                            padding: '8px 12px',
-                            background: '#eff6ff',
-                            border: '1px solid #bfdbfe',
-                            borderRadius: '8px',
-                            color: '#1e40af',
+                            padding: '8px 14px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
+                            color: '#1e293b',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
                             fontSize: '0.85rem',
                             fontWeight: 600,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                             transition: 'all 0.2s ease'
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = '#dbeafe'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = '#eff6ff'; }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = '#6366f1';
+                            e.currentTarget.style.color = '#4338ca';
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = '#e2e8f0';
+                            e.currentTarget.style.color = '#1e293b';
+                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                          }}
                         >
                           <Pencil size={14} /> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(loc.id)}
                           style={{
-                            padding: '8px 12px',
-                            background: '#fef2f2',
-                            border: '1px solid #fecaca',
-                            borderRadius: '8px',
+                            padding: '8px 14px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
                             color: '#991b1b',
                             cursor: 'pointer',
                             display: 'flex',
@@ -412,10 +428,17 @@ const Locations = () => {
                             gap: '4px',
                             fontSize: '0.85rem',
                             fontWeight: 600,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                             transition: 'all 0.2s ease'
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = '#fecaca';
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = '#e2e8f0';
+                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                          }}
                         >
                           <Trash2 size={14} /> Delete
                         </button>

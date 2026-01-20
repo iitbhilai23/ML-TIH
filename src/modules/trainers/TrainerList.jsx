@@ -338,12 +338,19 @@ const TrainerList = () => {
                     <td style={{ textAlign: 'center' }}>
                       {trainer.profile_image_url && (
                         <span style={{
-                          background: '#dcfce7',
-                          color: '#166534',
-                          padding: '4px 10px',
-                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%)',
+                          color: '#065f46',
+                          padding: '6px 12px',
+                          borderRadius: '999px',
                           fontSize: '0.75rem',
-                          fontWeight: 600
+                          fontWeight: 700,
+                          letterSpacing: '0.02em',
+                          border: '1px solid #a7f3d0',
+                          boxShadow: '0 2px 6px rgba(5, 150, 105, 0.15)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          whiteSpace: 'nowrap'
                         }}>
                           ✓ Set
                         </span>
@@ -353,29 +360,34 @@ const TrainerList = () => {
                       <div style={{
                         display: 'flex',
                         justifyContent: 'center',
-                        gap: '8px'
+                        gap: '10px'
                       }}>
                         <button
                           onClick={() => openEditModal(trainer)}
                           style={{
-                            padding: '8px 12px',
-                            background: '#eff6ff',
-                            border: '1px solid #bfdbfe',
-                            borderRadius: '8px',
-                            color: '#1e40af',
+                            padding: '8px 14px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
+                            color: '#1e293b',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
                             fontSize: '0.85rem',
                             fontWeight: 600,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                             transition: 'all 0.2s ease'
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#dbeafe';
+                            e.currentTarget.style.borderColor = '#6366f1';
+                            e.currentTarget.style.color = '#4338ca';
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#eff6ff';
+                            e.currentTarget.style.borderColor = '#e2e8f0';
+                            e.currentTarget.style.color = '#1e293b';
+                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
                           }}
                         >
                           <Pencil size={14} /> Edit
@@ -383,10 +395,10 @@ const TrainerList = () => {
                         <button
                           onClick={() => handleDelete(trainer.id)}
                           style={{
-                            padding: '8px 12px',
-                            background: '#fef2f2',
-                            border: '1px solid #fecaca',
-                            borderRadius: '8px',
+                            padding: '8px 14px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
                             color: '#991b1b',
                             cursor: 'pointer',
                             display: 'flex',
@@ -394,13 +406,16 @@ const TrainerList = () => {
                             gap: '4px',
                             fontSize: '0.85rem',
                             fontWeight: 600,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                             transition: 'all 0.2s ease'
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#fee2e2';
+                            e.currentTarget.style.borderColor = '#fecaca';
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#fef2f2';
+                            e.currentTarget.style.borderColor = '#e2e8f0';
+                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
                           }}
                         >
                           <Trash2 size={14} /> Delete
