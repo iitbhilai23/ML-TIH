@@ -217,7 +217,7 @@ const Trainings = () => {
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <Plus size={18} /> Add Training
+              <Plus size={18} /> Add Trainings
             </button>
           </div>
         </div>
