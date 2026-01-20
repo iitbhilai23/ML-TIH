@@ -17,10 +17,10 @@ import ChangePassword from './modules/change password/changePassword';
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      
         <Routes>
           {/* Public Route */}
-          <Route path="/" element={<PublicReport />} />
+          {/* <Route path="/" element={<PublicReport />} /> */}
           <Route path="/login" element={<Login />} />
 
           {/* Protected Routes (Login Required) */}
@@ -40,7 +40,7 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
-      </Router>
+
     </AuthProvider>
   );
 }
