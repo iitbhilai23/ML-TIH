@@ -3,6 +3,7 @@ import { trainerService } from '../../services/trainerService';
 import TrainerForm from './TrainerForm';
 import styles from './Trainers.module.css';
 import { Plus, Search, Pencil, Trash2, Phone, Mail, User, Users } from 'lucide-react';
+import Spinner from '../../components/common/Spinner';
 
 const TrainerList = () => {
   const [trainers, setTrainers] = useState([]);
@@ -251,7 +252,7 @@ const TrainerList = () => {
             <tbody>
               {loading ? (
                 <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                  <div>Loading trainers...</div>
+                  <Spinner overlay={false}/>
                 </td></tr>
               ) : trainers.length === 0 ? (
                 <tr><td colSpan="6" style={{ textAlign: 'center', padding: '60px' }}>
