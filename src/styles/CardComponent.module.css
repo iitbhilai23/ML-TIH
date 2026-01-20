@@ -1,0 +1,100 @@
+/* src/styles/CardComponent.module.css */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  border-left: 4px solid;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.cardIcon {
+  font-size: 30px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: white;
+}
+
+.cardContent {
+  flex: 1;
+}
+
+.cardValue {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cardTitle {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Color variants */
+.blue {
+  border-left-color: #3498db;
+}
+.blue .cardIcon {
+  background: #3498db;
+}
+
+.green {
+  border-left-color: #2ecc71;
+}
+.green .cardIcon {
+  background: #2ecc71;
+}
+
+.orange {
+  border-left-color: #e67e22;
+}
+.orange .cardIcon {
+  background: #e67e22;
+}
+
+.purple {
+  border-left-color: #9b59b6;
+}
+.purple .cardIcon {
+  background: #9b59b6;
+}
+
+.red {
+  border-left-color: #e74c3c;
+}
+.red .cardIcon {
+  background: #e74c3c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    padding: 15px;
+  }
+  
+  .cardIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+  
+  .cardValue {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,172 @@
+/* src/styles/MapComponent.module.css */
+.mapContainer {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.mapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(90deg, #2980b9, #3498db);
+  color: white;
+}
+
+.mapHeader h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.mapControls {
+  display: flex;
+  gap: 10px;
+}
+
+.mapControlButton {
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.mapControlButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.map {
+  width: 100%;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Custom marker styles */
+.mapMarker {
+  position: relative;
+}
+
+.markerPin {
+  width: 30px;
+  height: 30px;
+  background: #e74c3c;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.markerPin::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  margin: 3px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.markerLabel {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 60px;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  font-size: 12px;
+  z-index: 1;
+}
+
+.popupContent {
+  padding: 10px;
+  min-width: 200px;
+}
+
+.popupContent h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.popupContent p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.filterButton {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+}
+
+.filterButton:hover {
+  background: #2980b9;
+}
+
+.mapLegend {
+  display: flex;
+  justify-content: space-around;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legendMarker {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+.activeMarker {
+  background: #e74c3c;
+}
+
+.completedMarker {
+  background: #2ecc71;
+}
+
+.legendCount {
+  width: 30px;
+  height: 30px;
+  background: #3498db;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .mapHeader {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .mapLegend {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}
