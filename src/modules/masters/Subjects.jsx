@@ -126,6 +126,8 @@ const Subjects = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
           background: '#FFFFFF',
           padding: '20px 32px',
           borderRadius: '16px',
@@ -151,6 +153,40 @@ const Subjects = () => {
             }}>
               Manage training subjects and course topics
             </p>
+          </div>
+
+          {/* Search Bar */}
+          <div style={{ position: 'relative', flex: '1 1 320px', maxWidth: '420px' }}>
+            <Search size={18} style={{
+              position: 'absolute',
+              left: '14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#94a3b8'
+            }} />
+            <input
+              placeholder="Search subjects..."
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 14px 12px 44px',
+                border: '2px solid #e2e8f0',
+                borderRadius: '10px',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                color: '#334155',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
           </div>
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
@@ -203,47 +239,6 @@ const Subjects = () => {
             </button>
           </div>
         </div>
-
-        {/* Search Bar */}
-        <div style={{
-          background: '#FFFFFF',
-          padding: '16px 20px',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{ position: 'relative', maxWidth: '500px' }}>
-            <Search size={18} style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#94a3b8'
-            }} />
-            <input
-              placeholder="Search subjects..."
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 14px 12px 44px',
-                border: '2px solid #e2e8f0',
-                borderRadius: '10px',
-                fontSize: '0.95rem',
-                fontWeight: 500,
-                color: '#334155',
-                outline: 'none',
-                transition: 'all 0.2s ease'
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#e2e8f0';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Table */}
@@ -265,35 +260,44 @@ const Subjects = () => {
                   <td style={{ fontWeight: 500 }}>{sub.name}</td>
                   <td style={{ color: '#64748b' }}>{sub.description || '-'}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                       <button
                         onClick={() => openEdit(sub)}
                         style={{
-                          padding: '8px 12px',
-                          background: '#eff6ff',
-                          border: '1px solid #bfdbfe',
-                          borderRadius: '8px',
-                          color: '#1e40af',
+                          padding: '8px 14px',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '10px',
+                          color: '#1e293b',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '4px',
                           fontSize: '0.85rem',
                           fontWeight: 600,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                           transition: 'all 0.2s ease'
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#dbeafe'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = '#eff6ff'; }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#6366f1';
+                          e.currentTarget.style.color = '#4338ca';
+                          e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#e2e8f0';
+                          e.currentTarget.style.color = '#1e293b';
+                          e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                        }}
                       >
                         <Pencil size={14} /> Edit
                       </button>
                       <button
                         onClick={() => handleDelete(sub.id)}
                         style={{
-                          padding: '8px 12px',
-                          background: '#fef2f2',
-                          border: '1px solid #fecaca',
-                          borderRadius: '8px',
+                          padding: '8px 14px',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '10px',
                           color: '#991b1b',
                           cursor: 'pointer',
                           display: 'flex',
@@ -301,10 +305,17 @@ const Subjects = () => {
                           gap: '4px',
                           fontSize: '0.85rem',
                           fontWeight: 600,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                           transition: 'all 0.2s ease'
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#fecaca';
+                          e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#e2e8f0';
+                          e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                        }}
                       >
                         <Trash2 size={14} /> Delete
                       </button>
