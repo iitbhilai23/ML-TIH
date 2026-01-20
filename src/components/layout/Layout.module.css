@@ -204,9 +204,9 @@
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  width: 40px;
-  height: 40px;
+  border-radius: 34px;
+  width: 35px;
+  height: 35px;
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--bg-surface);
@@ -225,7 +225,7 @@
 
 /* CG Title animation */
 .portalTitle {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 800;
   background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
   -webkit-background-clip: text;

@@ -97,7 +97,7 @@ const TrainerList = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: '20px',
-        marginBottom: '24px'
+      
       }}>
         <div style={{
           display: 'flex',
@@ -106,10 +106,10 @@ const TrainerList = () => {
           flexWrap: 'wrap',
           gap: '16px',
           background: '#FFFFFF',
-          padding: '20px 32px',
+          padding: '20px 20px',
           borderRadius: '16px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
-          //  marginBottom: '20px'
+          
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
             <h2 style={{
