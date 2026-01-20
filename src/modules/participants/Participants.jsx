@@ -5,6 +5,7 @@ import ParticipantForm from './ParticipantForm';
 import styles from './Participants.module.css';
 import { Plus, Pencil, Trash2, User, Phone, Filter } from 'lucide-react';
 import '../../styles/shared.css';
+import Spinner from '../../components/common/Spinner';
 
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
@@ -264,7 +265,9 @@ const Participants = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr> :
+              {loading ? <tr><td colSpan="5" className="p-4 text-center">
+                <Spinner overlay={false} />
+                </td></tr> :
                 participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
                   participants.map(p => (
                     <tr key={p.id}>

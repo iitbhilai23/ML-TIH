@@ -4,6 +4,7 @@ import TrainingForm from './TrainingForm';
 import styles from './Trainings.module.css';
 import { Plus, Pencil, Trash2, Calendar, MapPin, User, BookOpen, Filter } from 'lucide-react';
 import '../../styles/shared.css';
+import Spinner from '../../components/common/Spinner';
 
 const Trainings = () => {
   const [trainings, setTrainings] = useState([]);
@@ -296,7 +297,9 @@ const Trainings = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="p-4 text-center">Loading trainings...</td>
+                  <td colSpan="6" className="p-4 text-center">
+                    <Spinner overlay={false} />
+                  </td>
                 </tr>
               ) : trainings.length === 0 ? (
                 <tr>

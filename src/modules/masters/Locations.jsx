@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { locationService } from '../../services/locationService';
 import styles from './Masters.module.css';
 import { Plus, Pencil, Trash2, MapPin, X, Filter, AlertCircle } from 'lucide-react';
+import Spinner from '../../components/common/Spinner';
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -339,7 +340,7 @@ const Locations = () => {
             <tbody>
               {loading ? (
                 <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                  <div>Loading locations...</div>
+                  <Spinner overlay={false}/>
                 </td></tr>
               ) : locations.length === 0 ? (
                 <tr><td colSpan="5" style={{ textAlign: 'center', padding: '60px' }}>
