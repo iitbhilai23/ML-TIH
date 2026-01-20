@@ -1,71 +1,35 @@
+// src/services/reportService.js
+
 import api from './api';
 
 /**
- * Utility: remove empty / null filters
+ * Fetches training reports with filters.
  */
-const cleanFilters = (filters = {}) =>
-  Object.fromEntries(
-    Object.entries(filters).filter(
-      ([_, v]) => v !== undefined && v !== null && v !== ""
-    )
-  );
-
-/**
- * ===============================
- * GENERIC REPORT (type based)
- * GET /api/reports/generate
- * ===============================
- */
-export const generateReport = async (filters = {}) => {
-  const params = cleanFilters(filters);
-  const response = await api.get("/reports/generate", { params });
-  return response.data;
+export const fetchTrainingReport = async (filters = {}) => {
+  const res = await api.get('/reports/training', { params: filters });
+  return res.data;
 };
 
 /**
- * ===============================
- * TRAINING REPORT
- * GET /api/reports/training
- * ===============================
+ * Fetches participant reports with filters.
  */
-export const getTrainingReport = async (filters = {}) => {
-  const params = cleanFilters(filters);
-  const response = await api.get("/reports/training", { params });
-  return response.data;
+export const fetchParticipantReport = async (filters = {}) => {
+  const res = await api.get('/reports/participant', { params: filters });
+  return res.data;
 };
 
 /**
- * ===============================
- * PARTICIPANT REPORT
- * GET /api/reports/participant
- * ===============================
+ * Fetches summary statistics.
  */
-export const getParticipantReport = async (filters = {}) => {
-  const params = cleanFilters(filters);
-  const response = await api.get("/reports/participant", { params });
-  return response.data;
+export const fetchSummaryReport = async (filters = {}) => {
+  const res = await api.get('/reports/summary', { params: filters });
+  return res.data;
 };
 
 /**
- * ===============================
- * SUMMARY REPORT (KPI cards)
- * GET /api/reports/summary
- * ===============================
+ * Fetches location data for map markers.
  */
-export const getSummaryReport = async (filters = {}) => {
-  const params = cleanFilters(filters);
-  const response = await api.get("/reports/summary", { params });
-  return response.data;
-};
-
-/**
- * ===============================
- * LOCATION REPORT (Map data)
- * GET /api/reports/location
- * ===============================
- */
-export const getLocationReport = async (filters = {}) => {
-  const params = cleanFilters(filters);
-  const response = await api.get("/reports/location", { params });
-  return response.data;
+export const fetchLocationReport = async (filters = {}) => {
+  const res = await api.get('/reports/location', { params: filters });
+  return res.data;
 };

@@ -1,0 +1,64 @@
+/* src/styles/ChartComponent.module.css */
+.chartContainer {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.chartTitle {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.chartWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chartCanvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.chartLegend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendColor {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+.legendLabel {
+  font-size: 14px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .chartLegend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .chartContainer {
+    padding: 15px;
+  }
+}

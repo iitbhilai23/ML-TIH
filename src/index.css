@@ -10,11 +10,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 html {
   overflow-x: hidden;
 }
-
 body {
   margin: 0;
   padding: 0;
@@ -26,12 +24,10 @@ body {
   overflow-x: hidden;
   max-width: 100vw;
 }
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
-
 /* Ensure all inputs, buttons, and form elements use Inter */
 input,
 button,
