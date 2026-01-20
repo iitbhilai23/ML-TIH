@@ -76,7 +76,7 @@ const Dashboard = () => {
     subject: '',
     status: ''
   });
-
+  // Fetch data on mount and when filters change
   useEffect(() => {
     fetchData();
   }, [filters]);
