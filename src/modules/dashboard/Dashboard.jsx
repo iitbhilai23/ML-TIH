@@ -76,7 +76,7 @@ const Dashboard = () => {
     subject: '',
     status: ''
   });
-
+  // Fetch data on mount and when filters change
   useEffect(() => {
     axios.get('http://localhost:5058/api/reports/districts', { headers })
       .then(res => setDistricts(res.data));
