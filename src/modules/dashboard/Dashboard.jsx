@@ -325,10 +325,10 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
             left: 50%;
             width: 20px;
             height: 20px;
-            background: #ef4444;
+            background: #9647bb;
             border-radius: 50% 50% 50% 0;
             transform: translateX(-50%) rotate(-45deg);
-            box-shadow: 0 4px 12px rgba(239,68,68,0.35);
+            box-shadow: 0 4px 12px rgba(255, 45, 255, 0.31);
             border: 2px solid rgba(255,255,255,0.85);
           "></div>
           <div style="
