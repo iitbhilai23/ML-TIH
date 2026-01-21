@@ -590,9 +590,9 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
-      <StatCard title="Total Trainings" value="450+" icon={BookOpen} gradient={THEME.gradients.warning} />
-      <StatCard title="Total Trainers" value="150+" icon={User} gradient={THEME.gradients.primary} />
-      <StatCard title="Total Participants" value="15500+" icon={Users} gradient={THEME.gradients.success} />
+      <StatCard title="Total Trainings" value="450+" icon={BookOpen} gradient={THEME.gradients.kpiA} />
+      <StatCard title="Total Trainers" value="150+" icon={User} gradient={THEME.gradients.kpiB} />
+      <StatCard title="Total Participants" value="15500+" icon={Users} gradient={THEME.gradients.kpiC} />
     </div>
 
     {/* FULL WIDTH MAP */}
