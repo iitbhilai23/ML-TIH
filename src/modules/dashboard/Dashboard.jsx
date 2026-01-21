@@ -709,6 +709,7 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
   return (
     <div
       style={{
+        // Base Container Styles
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -716,21 +717,29 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
         padding: '22px 24px',
         borderRadius: '12px',
         position: 'relative',
-        backgroundImage: `${gradient}`,
+        backgroundImage: `${gradient},
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='white' stop-opacity='0.12'/><stop offset='1' stop-color='white' stop-opacity='0'/></linearGradient></defs><rect width='120' height='120' fill='url(%23g)'/><path d='M0 20 H120 M0 60 H120 M0 100 H120' stroke='white' stroke-opacity='0.08'/><path d='M20 0 V120 M60 0 V120 M100 0 V120' stroke='white' stroke-opacity='0.06'/></svg>")`,
+        backgroundBlendMode: 'screen',
+        backgroundSize: 'cover',
         border: '1px solid rgba(255, 255, 255, 0.22)',
+        // Subtle shadow for depth
         boxShadow: '0 12px 28px rgba(0, 0, 0, 0.14)',
+        // Smooth transition for hover effects (250ms ease)
         transition: 'transform 220ms ease, box-shadow 220ms ease, filter 220ms ease',
         cursor: 'default',
-        overflow: 'hidden',
-        userSelect: 'none',
+        overflow: 'hidden', // Ensures rounded corners clip content
+        userSelect: 'none', // Prevents text selection on clicks
       }}
+      // Interaction: Hover effect handlers
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-2px)';
+        // Increase shadow intensity on hover
         e.currentTarget.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.18)';
         e.currentTarget.style.filter = 'saturate(1.04)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
+        // Revert shadow to default
         e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.14)';
         e.currentTarget.style.filter = 'none';
       }}
@@ -743,6 +752,7 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
           pointerEvents: 'none'
         }}
       />
+      {/* Left Side: Content (Title + Value) */}
       <div
         style={{
           display: 'flex',
@@ -752,11 +762,12 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
           zIndex: 1
         }}
       >
+        {/* Title Typography */}
         <div
           style={{
             fontSize: '10.5px',
             fontWeight: '700',
-            color: 'rgba(255, 255, 255, 0.9)',
+            color: 'rgba(255, 255, 255, 0.9)', // White with 0.9 opacity
             letterSpacing: '0.07em',
             textTransform: 'uppercase',
             background: 'rgba(255,255,255,0.18)',
@@ -769,13 +780,14 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
           {title}
         </div>
 
+        {/* Value Typography */}
         <div
           style={{
             fontSize: '34px',
             fontWeight: '800',
             lineHeight: '1.05',
             letterSpacing: '-0.015em',
-            color: '#ffffff',
+            color: '#ffffff', // Solid white for high contrast
             textShadow: '0 2px 10px rgba(0,0,0,0.18)'
           }}
         >
@@ -783,26 +795,30 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
         </div>
       </div>
 
+      {/* Right Side: Icon Container */}
       <div
         style={{
           width: '54px',
           height: '54px',
           borderRadius: '12px',
-          background: 'rgba(255, 255, 255, 0.2)',
+          background: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white background
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backdropFilter: 'blur(6px)',
+          backdropFilter: 'blur(6px)', // Adds subtle glassmorphism effect
           border: '1px solid rgba(255, 255, 255, 0.24)',
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.12)',
           zIndex: 1
         }}
       >
+        {/* Render Icon passed via props */}
         <Icon
           size={26}
           color="#ffffff"
           strokeWidth={2.5}
-          style={{ display: 'block' }}
+          style={{
+            display: 'block',
+          }}
         />
       </div>
     </div>
