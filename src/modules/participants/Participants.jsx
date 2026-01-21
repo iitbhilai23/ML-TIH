@@ -71,8 +71,6 @@ const Participants = () => {
     setLoading(false);
   };
 
-
-
   const handleSave = async (data) => {
     if (editingData) {
       const { training_id, ...updateData } = data; // 🔥 REMOVE
@@ -85,7 +83,6 @@ const Participants = () => {
     setEditingData(null);
     await loadParticipants();
   };
-
 
   const handleDelete = async (id) => {
     if (window.confirm('Are You Sure Delete?')) {
@@ -267,18 +264,47 @@ const Participants = () => {
             <tbody>
               {loading ? <tr><td colSpan="5" className="p-4 text-center">
                 <Spinner overlay={false} />
-                </td></tr> :
+              </td></tr> :
                 participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
                   participants.map(p => (
                     <tr key={p.id}>
                       <td>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                            {p.name.charAt(0)}
-                          </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {p.profile_image_url ? (
+                            // Image with FORCED small size using inline styles
+                            <img
+                              src={p.profile_image_url}
+                              alt={p.name}
+                              style={{
+                                width: '36px',      // Fixed Width
+                                height: '36px',     // Fixed Height
+                                objectFit: 'cover', // Prevents stretching
+                                borderRadius: '50%', // Makes it a circle
+                                border: '1px solid #e2e8f0'
+                              }}
+                            />
+                          ) : (
+                            // Fallback Initials with matching size
+                            <div style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              background: '#e0e7ff',
+                              color: '#4338ca',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 'bold',
+                              fontSize: '14px',
+                              border: '1px solid #e2e8f0'
+                            }}>
+                              {p.name.charAt(0)}
+                            </div>
+                          )}
+
                           <div>
-                            <div className="font-bold">{p.name}</div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                            <div style={{ fontWeight: '700', color: '#1e293b' }}>{p.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Phone size={10} /> {p.phone || 'N/A'}
                             </div>
                           </div>

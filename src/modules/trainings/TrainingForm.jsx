@@ -4,7 +4,7 @@ import { subjectService } from '../../services/subjectService';
 import { locationService } from '../../services/locationService';
 import { X } from 'lucide-react';
 
-// Inline Styles for Advanced Form Design
+
 const styles = {
   modalOverlay: {
     position: 'fixed',
@@ -12,7 +12,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)', // Darker slate overlay
+    backgroundColor: 'rgba(15, 23, 42, 0.6)', 
     backdropFilter: 'blur(4px)',
     display: 'flex',
     justifyContent: 'center',
