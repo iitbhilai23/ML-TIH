@@ -42,6 +42,10 @@ const THEME = {
     warning: 'linear-gradient(135deg, #b45309 0%, #1f2937 120%)',
     secondary: 'linear-gradient(135deg, #334155 0%, #111827 100%)',
     cyan: 'linear-gradient(135deg, #0e7490 0%, #0f172a 120%)', // New gradient added
+    kpiA: 'linear-gradient(135deg, #7b3f99 0%, #5a2b7a 100%)',
+    kpiB: 'linear-gradient(135deg, #9b59b6 0%, #7b3f99 100%)',
+    kpiC: 'linear-gradient(135deg, #6a0dad 0%, #4c1d95 100%)',
+    kpiD: 'linear-gradient(135deg, #b06ad9 0%, #7b3f99 100%)'
   },
   input: {
     padding: '10px 16px',
@@ -660,11 +664,10 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
-      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.primary} />
-      <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.success} />
-      <StatCard title="Active Trainings" value={summary?.active_trainings || 0} icon={BookOpen} gradient={THEME.gradients.warning} />
-      {/* Changed gradient to cyan and icon to MapPin */}
-      <StatCard title="Locations Covered" value={summary?.total_locations || 0} icon={MapPin} gradient={THEME.gradients.cyan} />
+      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.kpiA} />
+      <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.kpiB} />
+      <StatCard title="Active Trainings" value={summary?.active_trainings || 0} icon={BookOpen} gradient={THEME.gradients.kpiC} />
+      <StatCard title="Locations Covered" value={summary?.total_locations || 0} icon={MapPin} gradient={THEME.gradients.kpiD} />
     </div>
 
     {/* NEW LAYOUT: 30% Status Card | 70% Map Card */}
