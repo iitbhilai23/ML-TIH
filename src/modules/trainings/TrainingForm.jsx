@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { trainerService } from '../../services/trainerService';
 import { subjectService } from '../../services/subjectService';
