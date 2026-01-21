@@ -41,7 +41,11 @@ const THEME = {
     success: 'linear-gradient(135deg, #0f766e 0%, #0f172a 120%)',
     warning: 'linear-gradient(135deg, #b45309 0%, #1f2937 120%)',
     secondary: 'linear-gradient(135deg, #334155 0%, #111827 100%)',
-    cyan: 'linear-gradient(135deg, #0e7490 0%, #0f172a 120%)',
+    cyan: 'linear-gradient(135deg, #0e7490 0%, #0f172a 120%)', // New gradient added
+    kpiA: 'linear-gradient(135deg, #7b3f99 0%, #5a2b7a 100%)',
+    kpiB: 'linear-gradient(135deg, #9b59b6 0%, #7b3f99 100%)',
+    kpiC: 'linear-gradient(135deg, #6a0dad 0%, #4c1d95 100%)',
+    kpiD: 'linear-gradient(135deg, #b06ad9 0%, #7b3f99 100%)'
   },
   input: {
     padding: '10px 16px',
