@@ -397,7 +397,8 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
   }
 
   useEffect(() => {
-    fetch('http://127.0.0.1:4001/files/Map/topojsons/states/cg.json')
+    // fetch('http://127.0.0.1:4001/files/Map/topojsons/states/cg.json')
+    fetch('https://www.ibitf.co.in/files/Map/topojsons/states/cg.json')
       .then(res => res.json())
       .then(setGeoJsonData)
       .catch(console.error);
