@@ -8,7 +8,7 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-l
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
-import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize } from 'lucide-react';
+import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize,House  } from 'lucide-react';
 
 const THEME = {
   gap: {
@@ -595,6 +595,7 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
       <StatCard title="Total Trainings" value="450+" icon={BookOpen} gradient={THEME.gradients.kpiA} />
       <StatCard title="Total Trainers" value="150+" icon={User} gradient={THEME.gradients.kpiB} />
       <StatCard title="Total Participants" value="15500+" icon={Users} gradient={THEME.gradients.kpiC} />
+      <StatCard title="Total Villages" value="400+" icon={House} gradient={THEME.gradients.kpiD} />
     </div>
 
     {/* FULL WIDTH MAP */}
