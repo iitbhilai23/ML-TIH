@@ -555,7 +555,10 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
                     />
                     <div>
                       <div style={{ fontWeight: 700 }}>{training.trainer_name}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>{training.subject_name}</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>
+                        {/* {training.subject_name} */}
+                        Marketplace Literacy
+                      </div>
                       {training.isFake && (
                         <span style={{ fontSize: 10, background: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>DEMO</span>
                       )}
