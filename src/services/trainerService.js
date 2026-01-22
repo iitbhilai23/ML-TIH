@@ -2,20 +2,21 @@ import api from './api';
 
 export const trainerService = {
   // Get All Trainers
-  getAllTrainers: async (search = '') => {
-    try {
-      // const response = await api.get('/trainers', {
-      const response = await api.get('/trainers?page=1&limit=1000', {
-        params: { search }
-      });
-      //   console.log("ved response", response.data)
-      return response.data;
+getAllTrainers: async (search = '') => {
+  try {
+    const params = {
+      page: 1,
+      limit: 1000,  
+      search,        
+    };
 
-    } catch (error) {
-      console.error("Get Trainers Error:", error);
-      throw error;
-    }
-  },
+    const response = await api.get('/trainers', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get Trainers Error:', error);
+    throw error;
+  }
+},
 
   // Create Trainer (JSON ONLY)
   createTrainer: async (data) => {

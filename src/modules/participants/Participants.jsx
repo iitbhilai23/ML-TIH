@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { participantService } from '../../services/participantService';
 import { trainingService } from '../../services/trainingService';
 import ParticipantForm from './ParticipantForm';
 import styles from './Participants.module.css';
-import { Plus, Pencil, Trash2, User, Phone, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 
@@ -11,6 +12,10 @@ const Participants = () => {
   const [participants, setParticipants] = useState([]);
   const [trainings, setTrainings] = useState([]); // Filter dropdown ke liye
   const [loading, setLoading] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   const THEME = {
     primary: '#7c3aed',
@@ -52,6 +57,8 @@ const Participants = () => {
   // 2. Load Participants when filter changes
   useEffect(() => {
     loadParticipants();
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
   }, [selectedTrainingId]);
 
   const loadTrainings = async () => {
@@ -88,6 +95,20 @@ const Participants = () => {
     if (window.confirm('Are You Sure Delete?')) {
       await participantService.delete(id);
       await loadParticipants(); //  MUST
+    }
+  };
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentParticipants = participants.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(participants.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      // Optional: scroll to top of table on page change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -266,7 +287,7 @@ const Participants = () => {
                 <Spinner overlay={false} />
               </td></tr> :
                 participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
-                  participants.map(p => (
+                  currentParticipants.map(p => (
                     <tr key={p.id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -404,6 +425,112 @@ const Participants = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && participants.length > 0 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '16px 20px',
+            borderTop: '1px solid #e2e8f0',
+            background: '#ffffff',
+            borderBottomLeftRadius: '16px',
+            borderBottomRightRadius: '16px',
+            marginTop: '0px' 
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, participants.length)} of {participants.length} entries
+            </div>
+            
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
+                  color: currentPage === 1 ? '#cbd5e1' : '#475569',
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1';
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                <ChevronLeft size={16} /> Previous
+              </button>
+
+              <div style={{
+                display: 'flex',
+                gap: '4px',
+                margin: '0 8px'
+              }}>
+                 {/* Simple page indicator */}
+                 <span style={{
+                   padding: '8px 12px',
+                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                   color: 'white',
+                   borderRadius: '8px',
+                   fontWeight: 600,
+                   fontSize: '0.9rem',
+                   boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+                 }}>
+                   {currentPage}
+                 </span>
+                 <span style={{
+                   padding: '8px 4px',
+                   color: '#64748b',
+                   fontWeight: 500,
+                   fontSize: '0.9rem',
+                   display: 'flex',
+                   alignItems: 'center'
+                 }}>
+                   of {totalPages}
+                 </span>
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff',
+                  color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569',
+                  cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1';
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                Next <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ParticipantForm

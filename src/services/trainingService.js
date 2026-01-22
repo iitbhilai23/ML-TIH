@@ -2,18 +2,22 @@ import api from './api';
 
 export const trainingService = {
  
+getAll: async (filters = {}) => {
+  try {
+    const params = {
+      limit: 1000,  
+      page: 1,
+      ...filters,    
+    };
 
-  getAll: async (filters = {}) => {
-    try {
-     
-      const response = await api.get('/trainings', { params: filters });
-      return response.data;
-    } catch (error) {
-      console.error('Get trainings error:', error);
-      throw error;
-    }
-  },
-  
+    const response = await api.get('/trainings', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Get trainings error:', error);
+    throw error;
+  }
+},
+
   
   getById: async (id) => {
     try {
