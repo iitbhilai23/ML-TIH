@@ -12,6 +12,7 @@ export const dashboardService = {
       // const response = await api.get('/dashboard/complete', { params: cleanFilters });
       const response = await api.get('/dashboard/summary', { params: cleanFilters });
       return response.data;
+
     } catch (error) {
       console.error("Dashboard Fetch Error:", error);
       throw error;

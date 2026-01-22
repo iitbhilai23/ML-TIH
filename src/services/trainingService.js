@@ -18,6 +18,18 @@ getAll: async (filters = {}) => {
   }
 },
 
+  getAll: async (filters = {}) => {
+    try {
+     
+      const response = await api.get('/trainings', { params: filters });
+      console.log('Get trainings response:', response);
+      return response.data;
+    } catch (error) {
+      console.error('Get trainings error:', error);
+      throw error;
+    }
+  },
+  
   
   getById: async (id) => {
     try {

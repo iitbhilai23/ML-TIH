@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -8,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-l
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
-import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize,House  } from 'lucide-react';
+import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize, House } from 'lucide-react';
 
 const THEME = {
   gap: {
@@ -305,41 +302,41 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     { name: 'Narayanpur', lat: 19.7200, lng: 81.2400, district: 'Narayanpur' },
     { name: 'Gariaband', lat: 20.6300, lng: 82.0600, district: 'Gariaband' },
     { name: 'Chhura', lat: 20.8800, lng: 82.2500, district: 'Gariaband' },
-    
+
     // NEW Locations
     { name: 'Dhamtari', lat: 20.7075, lng: 81.5482, district: 'Dhamtari' },
     { name: 'Kurud', lat: 20.8300, lng: 81.7200, district: 'Dhamtari' },
     { name: 'Magarlod', lat: 20.6800, lng: 81.8300, district: 'Dhamtari' },
-    
+
     { name: 'Mahasamund', lat: 21.1074, lng: 82.0979, district: 'Mahasamund' },
     { name: 'Saraipali', lat: 21.3150, lng: 83.0000, district: 'Mahasamund' },
     { name: 'Basna', lat: 21.2800, lng: 82.8300, district: 'Mahasamund' },
     { name: 'Pithora', lat: 21.2500, lng: 82.9300, district: 'Mahasamund' },
-    
+
     { name: 'Kanker', lat: 20.2719, lng: 81.4917, district: 'Kanker' },
     { name: 'Bhanupratappur', lat: 20.3500, lng: 81.1000, district: 'Kanker' },
     { name: 'Charama', lat: 20.4500, lng: 81.2500, district: 'Kanker' },
     { name: 'Durgkondal', lat: 20.1500, lng: 81.0000, district: 'Kanker' },
     { name: 'Antagarh', lat: 20.0900, lng: 81.1500, district: 'Kanker' },
     { name: 'Pakhanjur', lat: 20.0300, lng: 80.6200, district: 'Kanker' },
-    
+
     { name: 'Sukma', lat: 18.3900, lng: 81.6500, district: 'Sukma' },
     { name: 'Konta', lat: 17.8100, lng: 81.3900, district: 'Sukma' },
     { name: 'Chhindgarh', lat: 18.5000, lng: 81.8300, district: 'Sukma' },
-    
+
     { name: 'Baloda Bazar', lat: 21.6570, lng: 82.1600, district: 'Baloda Bazar' },
     { name: 'Bhatapara', lat: 21.7350, lng: 81.9500, district: 'Baloda Bazar' },
     { name: 'Simga', lat: 21.6300, lng: 81.7000, district: 'Baloda Bazar' },
     { name: 'Palari', lat: 21.5500, lng: 82.0500, district: 'Baloda Bazar' },
-    
+
     { name: 'Surajpur', lat: 23.2200, lng: 82.8700, district: 'Surajpur' },
     { name: 'Pratappur', lat: 23.3500, lng: 82.7800, district: 'Surajpur' },
     { name: 'Ramanujnagar', lat: 23.1900, lng: 82.9800, district: 'Surajpur' },
-    
+
     { name: 'Baikunthpur', lat: 23.2600, lng: 82.5600, district: 'Korea' },
     { name: 'Manendragarh', lat: 23.1200, lng: 82.2000, district: 'Korea' },
     { name: 'Khadgawan', lat: 23.0500, lng: 82.5000, district: 'Korea' },
-    
+
     { name: 'Gaurela', lat: 22.7600, lng: 81.9000, district: 'Gaurela-Pendra-Marwahi' },
     { name: 'Pendra', lat: 22.7700, lng: 81.9600, district: 'Gaurela-Pendra-Marwahi' },
     { name: 'Marwahi', lat: 22.8000, lng: 82.0000, district: 'Gaurela-Pendra-Marwahi' }
@@ -389,7 +386,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       ...validLocations,
       ...validTrainingLocations.map(t => t.location_details)
     ];
-    
+
     const avgLat = allPoints.reduce((s, l) => s + Number(l.latitude), 0) / allPoints.length;
     const avgLng = allPoints.reduce((s, l) => s + Number(l.longitude), 0) / allPoints.length;
     center = [avgLat, avgLng];
@@ -523,7 +520,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
 
       <MapContainer center={center} zoom={zoom} style={{ width: '100%', height: '100%', borderRadius: isFullScreen ? 0 : '12px' }} zoomControl={false}>
         <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-        
+
         {geoJsonData && (
           <GeoJSON data={geoJsonData} style={{ color: THEME.primary, weight: 2, fillOpacity: 0.05 }} />
         )}
@@ -593,10 +590,10 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
 
     {/* Top Stats Grid */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
-      <StatCard title="Total Trainings" value="450+" icon={BookOpen} gradient={THEME.gradients.kpiA} />
-      <StatCard title="Total Trainers" value="150+" icon={User} gradient={THEME.gradients.kpiB} />
-      <StatCard title="Total Participants" value="15500+" icon={Users} gradient={THEME.gradients.kpiC} />
-      <StatCard title="Total Villages" value="400+" icon={House} gradient={THEME.gradients.kpiD} />
+      <StatCard title="Total Trainings" value={summary?.total_trainings || 0} icon={BookOpen} gradient={THEME.gradients.kpiA} />
+      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.kpiB} />
+      <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.kpiC} />
+      <StatCard title="Total Locations" value={summary?.total_locations || 0} icon={House} gradient={THEME.gradients.kpiD} />
     </div>
 
     {/* FULL WIDTH MAP */}

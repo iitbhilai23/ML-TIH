@@ -154,6 +154,62 @@ const Participants = () => {
             </p>
           </div>
 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            paddingRight: '16px',
+            borderRight: '2px solid #e2e8f0',
+            minWidth: '100px'
+          }}>
+            {/* <Filter size={18} style={{ color: '#6366f1' }} /> */}
+            {/* <span style={{
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              color: '#1e293b',
+              letterSpacing: '0.5px'
+            }}>FILTER</span> */}
+          </div>
+          <select
+            className={styles.select}
+            value={selectedTrainingId}
+            onChange={(e) => setSelectedTrainingId(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              color: '#334155',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              minWidth: '300px',
+              cursor: 'pointer',
+              background: 'white'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#6366f1';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <option value="">-- Show All Participants --</option>
+            {trainings.map(t => (
+              <option key={t.id} value={t.id}>
+                {t.subject_name} ({t.location_details?.district})
+              </option>
+            ))}
+          </select>
+          {selectedTrainingId && (
+            <span style={{ fontSize: '0.875rem', color: '#64748b', marginLeft: '8px' }}>
+              Showing {participants.length} students
+            </span>
+          )}
+
+
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             {/* Vibrant Total Trainer Card (Fixing "Light" look) */}
             <div style={{
@@ -205,68 +261,6 @@ const Participants = () => {
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className={styles.filterBar} style={{
-          background: '#FFFFFF',
-          padding: '16px 20px',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            paddingRight: '16px',
-            borderRight: '2px solid #e2e8f0',
-            minWidth: '100px'
-          }}>
-            <Filter size={18} style={{ color: '#6366f1' }} />
-            <span style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              color: '#1e293b',
-              letterSpacing: '0.5px'
-            }}>FILTER</span>
-          </div>
-          <select
-            className={styles.select}
-            value={selectedTrainingId}
-            onChange={(e) => setSelectedTrainingId(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#334155',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-              minWidth: '300px',
-              cursor: 'pointer',
-              background: 'white'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <option value="">-- Show All Participants --</option>
-            {trainings.map(t => (
-              <option key={t.id} value={t.id}>
-                {t.subject_name} ({t.location_details?.district})
-              </option>
-            ))}
-          </select>
-          {selectedTrainingId && (
-            <span style={{ fontSize: '0.875rem', color: '#64748b', marginLeft: '8px' }}>
-              Showing {participants.length} students
-            </span>
-          )}
-        </div>
       </div>
 
       {/* Table */}
