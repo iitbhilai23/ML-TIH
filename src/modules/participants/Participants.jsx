@@ -134,60 +134,66 @@ const Participants = () => {
         gap: '10px',
         marginBottom: '20px'
       }}>
-        {/* Header Card */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'nowrap',
+          gap: '24px',
           background: '#FFFFFF',
-          padding: '20px 32px', // Restored original padding
+          padding: '24px 32px',
           borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
-          flexWrap: 'nowrap', // Keep in one row
-          gap: '16px'
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          overflow: 'hidden', // Prevents content spill if too long
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '250px', flexShrink: 0 }}>
+
+          {/* Left Section: Title & Stat */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            minWidth: '280px',
+            flexShrink: 0
+          }}>
             <h2 style={{
-              fontSize: '1.5rem', // Restored original font size
+              fontSize: '1.5rem',
               fontWeight: 700,
               color: '#1e293b',
+              margin: 0,
+              letterSpacing: '-0.025em',
               display: 'flex',
               alignItems: 'center',
               gap: '12px'
             }}>
               Participants / Beneficiaries
             </h2>
-            <p style={{
-              fontSize: '0.95rem', // Restored original font size
-              color: '#64748b',
-              margin: 0,
-              marginLeft: '2px'
-            }}>
-              Manage participant registrations and attendance
-            </p>
+
+            {/* Modern Pill Badge */}
             <div
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '10px',
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                padding: '6px 14px',
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
-                whiteSpace: 'nowrap'
+                backgroundColor: '#f1f5f9',
+                padding: '6px 16px',
+                borderRadius: '9999px',
+                border: '1px solid transparent',
+                alignSelf: 'flex-start',
+                transition: 'all 0.2s ease'
               }}
             >
               {/* Icon */}
-              <User size={22} color="white" />
+              <User size={18} color="#6366f1" strokeWidth={2} />
 
               {/* Label */}
               <span
                 style={{
-                  fontSize: '0.85rem',
-                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.75rem',
+                  color: '#64748b',
                   fontWeight: 600,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.05em'
                 }}
               >
                 Total Participants
@@ -196,55 +202,63 @@ const Participants = () => {
               {/* Count */}
               <span
                 style={{
-                  fontSize: '1.4rem',
+                  fontSize: '1.1rem',
                   fontWeight: 800,
-                  color: 'white'
+                  color: '#1e293b',
+                  lineHeight: 1
                 }}
               >
                 {participants.length}
               </span>
             </div>
-
           </div>
 
+          {/* Middle Section: Filters & Search */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px', // Reduced gap slightly to save space
+            gap: '12px',
             flexWrap: 'nowrap',
             flexGrow: 1,
-            justifyContent: 'flex-end'
+            justifyContent: 'flex-end',
+            overflow: 'hidden' // Prevents inputs from breaking layout
           }}>
 
-            {/* Training Filter Dropdown - Reduced Width */}
-            <div style={{ minWidth: '180px' }}> {/* Changed from 300px to 180px */}
+            {/* Training Filter Dropdown */}
+            <div style={{ minWidth: '200px', maxWidth: '280px' }}>
               <select
-                className={styles.select}
                 value={selectedTrainingId}
                 onChange={(e) => setSelectedTrainingId(e.target.value)}
                 style={{
-                  padding: '10px 14px', // Restored padding
-                  border: '2px solid #e2e8f0',
-                  borderRadius: '8px',
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
                   fontSize: '0.9rem',
                   fontWeight: 500,
                   color: '#334155',
+                  backgroundColor: '#f8fafc',
                   outline: 'none',
-                  transition: 'all 0.2s ease',
-                  width: '100%',
                   cursor: 'pointer',
-                  background: 'white'
+                  transition: 'all 0.2s ease',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 14px center',
+                  backgroundSize: '16px'
                 }}
                 onFocus={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
                   e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                 }}
                 onBlur={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                   e.currentTarget.style.borderColor = '#e2e8f0';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <option value="">-- Show All Participants --</option> {/* Shortened Text */}
+                <option value="">Show All Participants</option>
                 {trainings.map(t => (
                   <option key={t.id} value={t.id}>
                     {t.subject_name} ({t.location_details?.district})
@@ -254,82 +268,55 @@ const Participants = () => {
             </div>
 
             {/* Search By Name Input */}
-            <div style={{ position: 'relative', minWidth: '220px' }}> {/* Moderate Width */}
-              <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'relative', minWidth: '220px', flex: '1' }}>
+              <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               <input
                 type="text"
                 placeholder="Search by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                  padding: '10px 14px', // Restored padding
-                  paddingLeft: '40px',
-                  border: '2px solid #e2e8f0',
-                  borderRadius: '8px',
+                  width: '100%',
+                  padding: '12px 16px 12px 46px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
                   fontSize: '0.9rem',
                   fontWeight: 500,
                   color: '#334155',
+                  backgroundColor: '#f8fafc',
                   outline: 'none',
-                  transition: 'all 0.2s ease',
-                  background: 'white',
-                  width: '100%'
+                  transition: 'all 0.2s ease'
                 }}
                 onFocus={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
                   e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
                 }}
                 onBlur={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
                   e.currentTarget.style.borderColor = '#e2e8f0';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               />
             </div>
 
+            {/* Results Counter */}
             {selectedTrainingId && (
-              <span style={{ fontSize: '0.875rem', color: '#64748b', whiteSpace: 'nowrap' }}>
-                {filteredParticipants.length} found
-              </span>
+              <div style={{
+                fontSize: '0.85rem',
+                color: '#64748b',
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                minWidth: '70px'
+              }}>
+                <span style={{ color: '#1e293b', fontWeight: 700 }}>{filteredParticipants.length}</span> found
+              </div>
             )}
 
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-
-            {/* Total Participants Card */}
-            {/* <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                padding: '6px 14px',
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '0.9rem',
-                  color: 'rgba(255,255,255,0.9)',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Total Participants
-              </span>
-
-              <span
-                style={{
-                  fontSize: '1.4rem',
-                  fontWeight: 800,
-                  color: 'white'
-                }}
-              >
-                {participants.length}
-              </span>
-            </div> */}
+          {/* Right Section: Action Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
 
             {/* Add Button */}
             <button
@@ -340,8 +327,8 @@ const Participants = () => {
               style={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 color: 'white',
-                padding: '12px 20px',
-                borderRadius: '10px',
+                padding: '14px 24px',
+                borderRadius: '12px',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: '0.9rem',
@@ -349,17 +336,24 @@ const Participants = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                whiteSpace: 'nowrap'
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease',
+                fontFamily: 'inherit'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
               }}
             >
               <Plus size={18} /> Add Participant
             </button>
-
           </div>
-
         </div>
-
       </div>
 
       {/* Table */}

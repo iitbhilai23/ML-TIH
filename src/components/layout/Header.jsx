@@ -1,4 +1,3 @@
-
 import { Menu } from 'lucide-react';
 import styles from './Layout.module.css';
 import content from '../../utils/content';
