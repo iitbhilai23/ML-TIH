@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { subjectService } from '../../services/subjectService';
 import styles from './Masters.module.css';
-import { Plus, Pencil, Trash2, Search, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, X, Book } from 'lucide-react';
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -135,24 +135,62 @@ const Subjects = () => {
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: '1.5rem', // Restored original font size
               fontWeight: 700,
               color: '#1e293b',
-              margin: 0,
               display: 'flex',
               alignItems: 'center',
               gap: '12px'
             }}>
-              <Plus size={26} color={THEME.primary} /> Subjects / Topics
+              Subjects / Topics
             </h2>
             <p style={{
-              fontSize: '0.95rem',
+              fontSize: '0.95rem', // Restored original font size
               color: '#64748b',
               margin: 0,
-              marginLeft: '42px'
+              marginLeft: '2px'
             }}>
               Manage training subjects and course topics
             </p>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {/* Icon */}
+              <Book size={26} color="white" />
+
+              {/* Label */}
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Total Subjects
+              </span>
+
+              {/* Count */}
+              <span
+                style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 800,
+                  color: 'white'
+                }}
+              >
+                {subjects.length}
+              </span>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -191,29 +229,7 @@ const Subjects = () => {
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             {/* Vibrant Total Participants Card */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)'
-            }}>
-              <div style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: '2px'
-              }}>
-                Total Subjects
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>
-                {subjects.length}
-              </div>
-            </div>
+
 
             <button
               onClick={openAdd}

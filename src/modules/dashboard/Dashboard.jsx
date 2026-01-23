@@ -72,8 +72,8 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
   const [filters, setFilters] = useState({
-    district: '',
-    block: '',
+    district_cd: '',
+    block_cd: '',
     village: '',
     start_date: '',
     end_date: '',
@@ -166,13 +166,16 @@ const Dashboard = () => {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: THEME.gap.md }}>
         <div>
-          <h1 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
             Dashboard Overview
           </h1>
           <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.95rem', fontWeight: '500' }}>
             Welcome back, here is your training summary.
           </p>
         </div>
+
+
+
         <div style={{
           display: 'flex',
           gap: THEME.gap.xs,
@@ -196,6 +199,39 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* ===== FILTERS ===== */}
+
+      <div style={{ ...THEME.glass, padding: `${THEME.pad.md} ${THEME.pad.lg}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.xl }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.md, borderRight: '1px solid #f3f4f6', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
+          <Filter size={16} /> Filters
+        </div>
+        <select name="district_cd" style={THEME.input} onChange={handleFilterChange} value={filters.district_cd}>
+          <option value="">All Districts</option>
+          <option value="2230">Khairagarh</option>
+          <option value="2210">Durg</option>
+          <option value="2209">Rajnandgaon</option>
+        </select>
+        <select name="block_cd" style={THEME.input} onChange={handleFilterChange} value={filters.block_cd}>
+          <option value="">All Blocks</option>
+          <option value="220908">Khairagarh</option>
+          <option value="221011">Patan</option>
+          <option value="220904">Churia</option>
+        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
+          <Calendar size={16} style={{ color: '#94a3b8' }} />
+          <input type="date" name="start_date" style={THEME.input} onChange={handleFilterChange} value={filters.start_date} />
+          <span style={{ color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem', margin: `0 ${THEME.gap.xs}` }}>to</span>
+          <input type="date" name="end_date" style={THEME.input} onChange={handleFilterChange} value={filters.end_date} />
+        </div>
+        <select name="status" style={THEME.input} onChange={handleFilterChange} value={filters.status}>
+          <option value="">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
       {activeTab === 'summary' && (
         <SummaryTab
           summary={data}
@@ -209,6 +245,8 @@ const Dashboard = () => {
     </div>
   );
 };
+
+
 
 const getTabStyle = (isActive, gradient) => ({
   display: 'flex', alignItems: 'center', gap: THEME.gap.xs, padding: `8px ${THEME.pad.md}`, border: 'none', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease-in-out',
@@ -462,6 +500,8 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       margin: 0
     } : {})
   };
+
+
 
   return (
     <div style={containerStyle}>

@@ -172,51 +172,98 @@ const Trainings = () => {
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: '1.5rem', // Restored original font size
               fontWeight: 700,
               color: '#1e293b',
-              margin: 0,
               display: 'flex',
               alignItems: 'center',
               gap: '12px'
             }}>
-              <Calendar size={26} color={THEME.primary} />  Training Schedule
+              Trainings Management
             </h2>
             <p style={{
-              fontSize: '0.95rem',
+              fontSize: '0.95rem', // Restored original font size
               color: '#64748b',
               margin: 0,
-              marginLeft: '42px'
+              marginLeft: '2px'
             }}>
-              Manage all training sessions and programs
+              Manage and oversee all training sessions
             </p>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {/* Icon */}
+              <Calendar size={26} color="white" />
+
+              {/* Label */}
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Total Trainings
+              </span>
+
+              {/* Count */}
+              <span
+                style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 800,
+                  color: 'white'
+                }}
+              >
+                {trainings.length}
+              </span>
+            </div>
           </div>
 
+          <select
+            className={styles.select}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            value={filterStatus}
+            style={{
+              padding: '10px 14px',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              color: '#334155',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+              minWidth: '200px',
+              cursor: 'pointer',
+              background: 'white'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#6366f1';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <option value="">All Statuses</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            {/* Vibrant Total Trainer Card (Fixing "Light" look) */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)' // Stronger shadow
-            }}>
-              <div style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: '2px'
-              }}>
-                Total Trainings
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>
-                {trainings.length}
-              </div>
-            </div>
 
             <button
               onClick={openAdd}
@@ -244,7 +291,7 @@ const Trainings = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className={styles.filterBar} style={{
+        {/* <div className={styles.filterBar} style={{
           background: '#FFFFFF',
           padding: '16px 20px',
           borderRadius: '12px',
@@ -298,7 +345,7 @@ const Trainings = () => {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.tableCard}>
@@ -461,12 +508,12 @@ const Trainings = () => {
             background: '#ffffff',
             borderBottomLeftRadius: '16px',
             borderBottomRightRadius: '16px',
-            marginTop: '0px' 
+            marginTop: '0px'
           }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
               Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, trainings.length)} of {trainings.length} entries
             </div>
-            
+
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -501,28 +548,28 @@ const Trainings = () => {
                 gap: '4px',
                 margin: '0 8px'
               }}>
-                 {/* Simple page indicator for mobile/compact view, or simplified list */}
-                 <span style={{
-                   padding: '8px 12px',
-                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                   color: 'white',
-                   borderRadius: '8px',
-                   fontWeight: 600,
-                   fontSize: '0.9rem',
-                   boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
-                 }}>
-                   {currentPage}
-                 </span>
-                 <span style={{
-                   padding: '8px 4px',
-                   color: '#64748b',
-                   fontWeight: 500,
-                   fontSize: '0.9rem',
-                   display: 'flex',
-                   alignItems: 'center'
-                 }}>
-                   of {totalPages}
-                 </span>
+                {/* Simple page indicator for mobile/compact view, or simplified list */}
+                <span style={{
+                  padding: '8px 12px',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+                }}>
+                  {currentPage}
+                </span>
+                <span style={{
+                  padding: '8px 4px',
+                  color: '#64748b',
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  of {totalPages}
+                </span>
               </div>
 
               <button

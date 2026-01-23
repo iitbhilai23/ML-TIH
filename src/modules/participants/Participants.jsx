@@ -1,21 +1,23 @@
-
 import React, { useState, useEffect } from 'react';
 import { participantService } from '../../services/participantService';
 import { trainingService } from '../../services/trainingService';
 import ParticipantForm from './ParticipantForm';
 import styles from './Participants.module.css';
-import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
-  const [trainings, setTrainings] = useState([]); // Filter dropdown ke liye
+  const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
 
   const THEME = {
     primary: '#7c3aed',
@@ -61,6 +63,11 @@ const Participants = () => {
     setCurrentPage(1);
   }, [selectedTrainingId]);
 
+  // 3. Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   const loadTrainings = async () => {
     try {
       const data = await trainingService.getAll();
@@ -98,11 +105,17 @@ const Participants = () => {
     }
   };
 
-  // Pagination Logic
+  // --- Filtering Logic ---
+  // Filter participants by name based on searchQuery
+  const filteredParticipants = participants.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination Logic (Updated to use filteredParticipants)
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentParticipants = participants.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(participants.length / itemsPerPage);
+  const currentParticipants = filteredParticipants.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredParticipants.length / itemsPerPage);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -127,117 +140,203 @@ const Participants = () => {
           justifyContent: 'space-between',
           alignItems: 'center',
           background: '#FFFFFF',
-          padding: '20px 32px',
+          padding: '20px 32px', // Restored original padding
           borderRadius: '16px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
-          //  marginBottom: '20px'
+          flexWrap: 'nowrap', // Keep in one row
+          gap: '16px'
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '250px', flexShrink: 0 }}>
             <h2 style={{
-              fontSize: '1.5rem',
+              fontSize: '1.5rem', // Restored original font size
               fontWeight: 700,
               color: '#1e293b',
-              margin: 0,
               display: 'flex',
               alignItems: 'center',
               gap: '12px'
             }}>
-              <User size={26} color={THEME.primary} /> Participants / Beneficiaries
+              Participants / Beneficiaries
             </h2>
             <p style={{
-              fontSize: '0.95rem',
+              fontSize: '0.95rem', // Restored original font size
               color: '#64748b',
               margin: 0,
-              marginLeft: '42px'
+              marginLeft: '2px'
             }}>
               Manage participant registrations and attendance
             </p>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                padding: '6px 14px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {/* Icon */}
+              <User size={22} color="white" />
+
+              {/* Label */}
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Total Participants
+              </span>
+
+              {/* Count */}
+              <span
+                style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 800,
+                  color: 'white'
+                }}
+              >
+                {participants.length}
+              </span>
+            </div>
+
           </div>
 
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            paddingRight: '16px',
-            borderRight: '2px solid #e2e8f0',
-            minWidth: '100px'
+            gap: '12px', // Reduced gap slightly to save space
+            flexWrap: 'nowrap',
+            flexGrow: 1,
+            justifyContent: 'flex-end'
           }}>
-            {/* <Filter size={18} style={{ color: '#6366f1' }} /> */}
-            {/* <span style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              color: '#1e293b',
-              letterSpacing: '0.5px'
-            }}>FILTER</span> */}
-          </div>
-          <select
-            className={styles.select}
-            value={selectedTrainingId}
-            onChange={(e) => setSelectedTrainingId(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#334155',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-              minWidth: '300px',
-              cursor: 'pointer',
-              background: 'white'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <option value="">-- Show All Participants --</option>
-            {trainings.map(t => (
-              <option key={t.id} value={t.id}>
-                {t.subject_name} ({t.location_details?.district})
-              </option>
-            ))}
-          </select>
-          {selectedTrainingId && (
-            <span style={{ fontSize: '0.875rem', color: '#64748b', marginLeft: '8px' }}>
-              Showing {participants.length} students
-            </span>
-          )}
 
-
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            {/* Vibrant Total Trainer Card (Fixing "Light" look) */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)' // Stronger shadow
-            }}>
-              <div style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: '2px'
-              }}>
-                Total Participants
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>
-                {participants.length}
-              </div>
+            {/* Training Filter Dropdown - Reduced Width */}
+            <div style={{ minWidth: '180px' }}> {/* Changed from 300px to 180px */}
+              <select
+                className={styles.select}
+                value={selectedTrainingId}
+                onChange={(e) => setSelectedTrainingId(e.target.value)}
+                style={{
+                  padding: '10px 14px', // Restored padding
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  color: '#334155',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  width: '100%',
+                  cursor: 'pointer',
+                  background: 'white'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#6366f1';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <option value="">-- Show All Participants --</option> {/* Shortened Text */}
+                {trainings.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.subject_name} ({t.location_details?.district})
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* Search By Name Input */}
+            <div style={{ position: 'relative', minWidth: '220px' }}> {/* Moderate Width */}
+              <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  padding: '10px 14px', // Restored padding
+                  paddingLeft: '40px',
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  color: '#334155',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  background: 'white',
+                  width: '100%'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#6366f1';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            {selectedTrainingId && (
+              <span style={{ fontSize: '0.875rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                {filteredParticipants.length} found
+              </span>
+            )}
+
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+
+            {/* Total Participants Card */}
+            {/* <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                padding: '6px 14px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.9rem',
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Total Participants
+              </span>
+
+              <span
+                style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 800,
+                  color: 'white'
+                }}
+              >
+                {participants.length}
+              </span>
+            </div> */}
+
+            {/* Add Button */}
             <button
-              onClick={() => { setEditingData(null); setIsModalOpen(true); }}
+              onClick={() => {
+                setEditingData(null);
+                setIsModalOpen(true);
+              }}
               style={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 color: 'white',
@@ -251,14 +350,14 @@ const Participants = () => {
                 alignItems: 'center',
                 gap: '8px',
                 boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                transition: 'all 0.2s ease'
+                whiteSpace: 'nowrap'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
               <Plus size={18} /> Add Participant
             </button>
+
           </div>
+
         </div>
 
       </div>
@@ -280,26 +379,24 @@ const Participants = () => {
               {loading ? <tr><td colSpan="5" className="p-4 text-center">
                 <Spinner overlay={false} />
               </td></tr> :
-                participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
+                filteredParticipants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
                   currentParticipants.map(p => (
                     <tr key={p.id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           {p.profile_image_url ? (
-                            // Image with FORCED small size using inline styles
                             <img
                               src={p.profile_image_url}
                               alt={p.name}
                               style={{
-                                width: '36px',      // Fixed Width
-                                height: '36px',     // Fixed Height
-                                objectFit: 'cover', // Prevents stretching
-                                borderRadius: '50%', // Makes it a circle
+                                width: '36px',
+                                height: '36px',
+                                objectFit: 'cover',
+                                borderRadius: '50%',
                                 border: '1px solid #e2e8f0'
                               }}
                             />
                           ) : (
-                            // Fallback Initials with matching size
                             <div style={{
                               width: '36px',
                               height: '36px',
@@ -421,7 +518,7 @@ const Participants = () => {
         </div>
 
         {/* Pagination Controls */}
-        {!loading && participants.length > 0 && (
+        {!loading && filteredParticipants.length > 0 && (
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -431,12 +528,12 @@ const Participants = () => {
             background: '#ffffff',
             borderBottomLeftRadius: '16px',
             borderBottomRightRadius: '16px',
-            marginTop: '0px' 
+            marginTop: '0px'
           }}>
             <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, participants.length)} of {participants.length} entries
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredParticipants.length)} of {filteredParticipants.length} entries
             </div>
-            
+
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -471,28 +568,27 @@ const Participants = () => {
                 gap: '4px',
                 margin: '0 8px'
               }}>
-                 {/* Simple page indicator */}
-                 <span style={{
-                   padding: '8px 12px',
-                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                   color: 'white',
-                   borderRadius: '8px',
-                   fontWeight: 600,
-                   fontSize: '0.9rem',
-                   boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
-                 }}>
-                   {currentPage}
-                 </span>
-                 <span style={{
-                   padding: '8px 4px',
-                   color: '#64748b',
-                   fontWeight: 500,
-                   fontSize: '0.9rem',
-                   display: 'flex',
-                   alignItems: 'center'
-                 }}>
-                   of {totalPages}
-                 </span>
+                <span style={{
+                  padding: '8px 12px',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+                }}>
+                  {currentPage}
+                </span>
+                <span style={{
+                  padding: '8px 4px',
+                  color: '#64748b',
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  of {totalPages}
+                </span>
               </div>
 
               <button
