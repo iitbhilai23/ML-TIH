@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { trainerService } from '../../services/trainerService';
 import TrainerForm from './TrainerForm';
 import styles from './Trainers.module.css';
-import { Plus, Search, Pencil, Trash2, Phone, Mail, User, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Phone, Mail, User, Users, ChevronLeft, ChevronRight, AlertTriangle, Check, AlertCircle } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
 
@@ -15,29 +15,26 @@ const TrainerList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
+  // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrainer, setEditingTrainer] = useState(null);
+  
+  // State for the Custom Confirmation Modal
+  const [confirmState, setConfirmState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+    type: 'danger' // 'danger' for delete, 'primary' for save
+  });
+
+  // Saving State (moved here to handle API logic outside form)
+  const [isSaving, setIsSaving] = useState(false);
 
   const THEME = {
-    primary: '#7c3aed',
-    primaryLight: '#ddd6fe',
-    secondary: '#ec4899',
-    success: '#10b981',
+    primary: '#6366f1',
     danger: '#ef4444',
-    warning: '#f59e0b',
-    bgGradient: 'linear-gradient(-45deg, #f8fafc, #f1f5f9, #fdfbf7, #f0fdf4)',
-    glass: {
-      background: 'rgba(255, 255, 255, 0.85)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      border: '1px solid rgba(255, 255, 255, 0.9)',
-      borderRadius: '20px',
-      boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-    },
-    softShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-    mediumShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
-    hoverShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+    // ... other theme constants
   };
 
   useEffect(() => {
@@ -55,30 +52,103 @@ const TrainerList = () => {
       setTrainers(sortedData);
     } catch (error) {
       console.error('Failed to fetch trainers:', error);
-      // SONNER TOAST
       toast.error('Failed to fetch trainers');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    await fetchTrainers();
+  // --- API LOGIC (Executed after confirmation) ---
+
+  const executeSave = async (data, file) => {
+    setIsSaving(true);
+    try {
+      let trainer;
+
+      if (editingTrainer) {
+        // Update Trainer
+        trainer = await trainerService.updateTrainer(
+          editingTrainer.id,
+          {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            bio: data.bio,
+          }
+        );
+      } else {
+        // Create Trainer
+        trainer = await trainerService.createTrainer({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          bio: data.bio,
+        });
+      }
+
+      // Handle File Upload if exists
+      if (file) {
+        const uploadRes = await trainerService.uploadTrainerPhoto(
+          trainer.id,
+          file
+        );
+        await trainerService.updateTrainer(trainer.id, {
+          profile_image_url: uploadRes.file_url,
+        });
+      }
+
+      toast.success(
+        editingTrainer
+          ? 'Trainer updated successfully!'
+          : 'Trainer created successfully!'
+      );
+
+      setIsModalOpen(false);
+      setEditingTrainer(null);
+      fetchTrainers();
+    } catch (error) {
+      console.error('Could not save trainer:', error);
+      toast.error('Could not save trainer: ' + (error.message || 'Something went wrong'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDelete = async (id) => {
-    // if (window.confirm('Are you sure you want to delete this trainer?')) {
+  const executeDelete = async (id) => {
     try {
       await trainerService.deleteTrainer(id);
-      fetchTrainers();
-      // SONNER TOAST
       toast.success('Trainer deleted successfully!');
+      fetchTrainers();
     } catch (error) {
       console.error('Could not delete trainer:', error);
-      // SONNER TOAST
       toast.error('Could not delete trainer: ' + error.message);
     }
-    // }
+  };
+
+  // --- HANDLERS (Triggers Confirmation) ---
+
+  const handleSaveRequest = (data, file) => {
+    if (editingTrainer) {
+      // If editing, show confirmation before saving
+      openConfirm(
+        'Save Changes?',
+        'Are you sure you want to update the details for this trainer?',
+        () => executeSave(data, file),
+        'primary'
+      );
+    } else {
+      // If new, save directly
+      executeSave(data, file);
+    }
+  };
+
+  const handleDeleteClick = (id) => {
+    openConfirm(
+      'Delete Trainer?',
+      'This action cannot be undone. This will permanently remove the trainer from the database.',
+      () => executeDelete(id),
+      'danger'
+    );
   };
 
   const openAddModal = () => {
@@ -89,6 +159,22 @@ const TrainerList = () => {
   const openEditModal = (trainer) => {
     setEditingTrainer(trainer);
     setIsModalOpen(true);
+  };
+
+  // --- CONFIRMATION MODAL LOGIC ---
+
+  const openConfirm = (title, message, onConfirm, type) => {
+    setConfirmState({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      type
+    });
+  };
+
+  const closeConfirm = () => {
+    setConfirmState({ ...confirmState, isOpen: false });
   };
 
   // Pagination Logic
@@ -106,10 +192,9 @@ const TrainerList = () => {
 
   return (
     <div className={styles.container}>
-      {/* ADD SONNER <Toaster /> HERE - Place it high up in your app tree */}
       <Toaster position="top-right" richColors />
 
-      {/* Modern Header with Search and Add Button */}
+      {/* --- Header & Controls --- */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{
           display: 'flex',
@@ -123,7 +208,6 @@ const TrainerList = () => {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           border: '1px solid rgba(255, 255, 255, 0.8)',
         }}>
-          {/* Left Section */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: '1 1 250px' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b', margin: 0, letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '12px' }}>
               Trainers Management
@@ -135,7 +219,6 @@ const TrainerList = () => {
             </div>
           </div>
 
-          {/* Middle Section */}
           <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '520px' }}>
             <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none', transition: 'color 0.2s' }} />
             <input
@@ -148,7 +231,6 @@ const TrainerList = () => {
             />
           </div>
 
-          {/* Right Section */}
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: '0 0 auto' }}>
             <button onClick={openAddModal} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', padding: '14px 24px', borderRadius: '12px', border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)', transition: 'all 0.2s ease', fontFamily: 'inherit' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)'; }}>
               <Plus size={18} /> Add Trainer
@@ -157,7 +239,7 @@ const TrainerList = () => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* --- Table --- */}
       <div className={styles.tableCard}>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -218,7 +300,7 @@ const TrainerList = () => {
                         <button onClick={() => openEditModal(trainer)} style={{ padding: '8px 14px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#1e293b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#4338ca'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}>
                           <Pencil size={14} /> Edit
                         </button>
-                        <button onClick={() => handleDelete(trainer.id)} style={{ padding: '8px 14px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#991b1b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fecaca'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}>
+                        <button onClick={() => handleDeleteClick(trainer.id)} style={{ padding: '8px 14px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#991b1b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fecaca'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}>
                           <Trash2 size={14} /> Delete
                         </button>
                       </div>
@@ -250,13 +332,178 @@ const TrainerList = () => {
         )}
       </div>
 
-      {/* We no longer need to pass showToast prop */}
+      {/* --- TRAINER FORM (Refactored) --- */}
       <TrainerForm
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSave}
+        onSave={handleSaveRequest}
         initialData={editingTrainer}
+        isSaving={isSaving}
       />
+
+      {/* --- ENHANCED CUSTOM CONFIRMATION MODAL --- */}
+      {confirmState.isOpen && (
+        <div 
+            className={styles.modalOverlay} 
+            style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(15, 23, 42, 0.4)', zIndex: 9999 }} 
+        >
+          <div 
+            className={styles.modalBox} 
+            style={{
+                maxWidth: '440px',
+                width: '90%',
+                padding: '36px 32px',
+                textAlign: 'center',
+                borderRadius: '24px',
+                background: '#ffffff',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                border: 'none',
+                animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                zIndex: 9999
+            }}
+          >
+            {/* Icon Container with Glow */}
+            <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+                backgroundColor: confirmState.type === 'danger' ? '#fef2f2' : '#eef2ff',
+                color: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
+                position: 'relative'
+            }}>
+                {/* Decorative outer ring */}
+                <div style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    left: '-4px',
+                    right: '-4px',
+                    bottom: '-4px',
+                    borderRadius: '50%',
+                    border: '2px solid',
+                    borderColor: confirmState.type === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                    borderStyle: 'dashed'
+                }}></div>
+                
+                {confirmState.type === 'danger' ? (
+                    <Trash2 size={32} strokeWidth={1.5} />
+                ) : (
+                    <AlertTriangle size={32} strokeWidth={1.5} />
+                )}
+            </div>
+
+            {/* Text Content */}
+            <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#1e293b',
+                margin: '0 0 12px',
+                letterSpacing: '-0.025em'
+            }}>
+                {confirmState.title}
+            </h3>
+            <p style={{
+                fontSize: '0.95rem',
+                color: '#64748b',
+                lineHeight: '1.6',
+                margin: '0 0 32px',
+                maxWidth: '340px',
+                marginLeft: 'auto',
+                marginRight: 'auto'
+            }}>
+                {confirmState.message}
+            </p>
+
+            {/* Button Group */}
+            <div style={{ 
+                display: 'flex', 
+                gap: '12px', 
+                justifyContent: 'center' 
+            }}>
+              <button
+                onClick={closeConfirm}
+                style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f8fafc';
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                    if(confirmState.onConfirm) confirmState.onConfirm();
+                    closeConfirm();
+                }}
+                style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: confirmState.type === 'danger' 
+                        ? '0 4px 12px rgba(239, 68, 68, 0.25)' 
+                        : '0 4px 12px rgba(99, 102, 241, 0.25)',
+                    transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.opacity = '0.9';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.opacity = '1';
+                }}
+              >
+                {confirmState.type === 'danger' ? (
+                    <>
+                        <Trash2 size={18} /> Delete
+                    </>
+                ) : (
+                    <>
+                        <Check size={18} /> Save Changes
+                    </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <style>{`
+        @keyframes modalPopIn {
+          0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };

@@ -143,7 +143,7 @@ const styles = {
   },
 };
 
-const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
+const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
 
   const [trainers, setTrainers] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -203,7 +203,6 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       setLocations(lData);
     } catch (error) {
       console.error("Failed to load dropdowns:", error);
-      // SONNER TOAST
       toast.error('Failed to load dropdown data');
     }
     setLoading(false);
@@ -223,7 +222,6 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
     // Validate required fields
     if (!formData.trainer_id || !formData.subject_id || !formData.location_id || !formData.start_date) {
-      // SONNER TOAST
       toast.error('Please fill all required fields');
       return;
     }
@@ -235,7 +233,8 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     delete cleanData.created_at;
     delete cleanData.updated_at;
 
-    onSubmit(cleanData);
+    // Pass data up to parent (Parent handles confirm & API)
+    onSave(cleanData);
   };
 
   if (!isOpen) return null;
@@ -394,6 +393,7 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 onClick={onClose}
                 onMouseEnter={(e) => Object.assign(e.target.style, styles.btnSecondaryHover)}
                 onMouseLeave={(e) => Object.assign(e.target.style, { backgroundColor: '#fff', borderColor: '#cbd5e1', color: '#475569' })}
+                disabled={isSaving}
               >
                 Cancel
               </button>
@@ -402,8 +402,9 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 style={{ ...styles.btn, ...styles.btnPrimary }}
                 onMouseEnter={(e) => Object.assign(e.target.style, styles.btnPrimaryHover)}
                 onMouseLeave={(e) => Object.assign(e.target.style, { backgroundColor: '#3b82f6', color: '#fff' })}
+                disabled={isSaving}
               >
-                {initialData ? 'Update Schedule' : 'Create Schedule'}
+                {isSaving ? 'Saving...' : (initialData ? 'Update Schedule' : 'Create Schedule')}
               </button>
             </div>
           </form>
@@ -414,4 +415,3 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 };
 
 export default TrainingForm;
-
