@@ -27,8 +27,7 @@ const MainLayout = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
-  }
-
+  };
 
   // Auto-close sidebar on resize > mobile
   useEffect(() => {

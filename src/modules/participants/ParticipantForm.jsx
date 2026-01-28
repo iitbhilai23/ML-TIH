@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { trainingService } from '../../services/trainingService';
 import styles from './Participants.module.css';
 import { X, User, Camera } from 'lucide-react';
-
-// IMPORT SONNER
 import { toast } from 'sonner';
 
-const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
+const ParticipantForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
   const [trainings, setTrainings] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -77,7 +75,6 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
         setFormData({ ...formData, profile_image_url: compressedBase64 });
       } catch (error) {
         console.error("Error compressing image:", error);
-        // SONNER TOAST FOR IMAGE ERROR
         toast.error('Failed to process image. Please try another file.');
       }
     }
@@ -115,7 +112,6 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       setTrainings(data);
     } catch (err) {
       console.error(err);
-      // SONNER TOAST FOR LOADING ERROR
       toast.error('Failed to load trainings list');
     }
   };
@@ -143,6 +139,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
             onClick={onClose}
             className={styles.closeIconBtn}
             aria-label="Close modal"
+            disabled={isSaving}
           >
             <X size={20} />
           </button>
@@ -150,17 +147,18 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
         {/* --- Image Upload Section --- */}
         <div className={styles.imageUploadSection}>
-
           <input
             type="file"
             id="profileImageInput"
             hidden
             accept="image/*"
             onChange={handleImageChange}
+            disabled={isSaving}
           />
           <div
             className={styles.imageUploaderBox}
-            onClick={() => document.getElementById('profileImageInput').click()}
+            onClick={() => !isSaving && document.getElementById('profileImageInput').click()}
+            style={{ opacity: isSaving ? '0.6' : '1', cursor: isSaving ? 'not-allowed' : 'pointer' }}
           >
             {formData.profile_image_url ? (
               <img src={formData.profile_image_url} alt="Profile" className={styles.previewImg} />
@@ -173,7 +171,11 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
           <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Click above to upload (Max 5MB)</small>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSubmit(cleanPayload(formData)); }}>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          // Pass clean data up to parent (Parent handles confirm & API)
+          onSave(cleanPayload(formData));
+        }}>
 
           {/* Training Selection */}
           <div className={styles.formGroup}>
@@ -184,6 +186,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               value={formData.training_id}
               onChange={handleChange}
               required
+              disabled={isSaving}
             >
               <option value="">Select Training</option>
               {trainings.map(t => (
@@ -205,6 +208,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter full name"
+                disabled={isSaving}
               />
             </div>
             <div className={styles.formGroup}>
@@ -216,6 +220,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 onChange={handleChange}
                 maxLength={10}
                 placeholder="10 digit number"
+                disabled={isSaving}
               />
             </div>
           </div>
@@ -231,6 +236,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 value={formData.age}
                 onChange={handleChange}
                 placeholder="Years"
+                disabled={isSaving}
               />
             </div>
             <div className={styles.formGroup}>
@@ -240,6 +246,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 className={styles.input}
                 value={formData.category}
                 onChange={handleChange}
+                disabled={isSaving}
               >
                 <option value="">Select</option>
                 <option value="Male">Male</option>
@@ -254,6 +261,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 className={styles.input}
                 value={formData.caste}
                 onChange={handleChange}
+                disabled={isSaving}
               >
                 <option value="">Select</option>
                 <option value="General">General</option>
@@ -274,6 +282,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 value={formData.education}
                 onChange={handleChange}
                 placeholder="e.g. 10th Pass"
+                disabled={isSaving}
               />
             </div>
             <div className={styles.formGroup}>
@@ -283,6 +292,7 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                 className={styles.input}
                 value={formData.attendance_status}
                 onChange={handleChange}
+                disabled={isSaving}
               >
                 <option value="present">Present</option>
                 <option value="absent">Absent</option>
@@ -297,14 +307,16 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               type="button"
               className={`${styles.btn} ${styles.btnSecondary}`}
               onClick={onClose}
+              disabled={isSaving}
             >
               Cancel
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={isSaving}
             >
-              {initialData ? 'Update Details' : 'Register Participant'}
+              {isSaving ? 'Saving...' : (initialData ? 'Update Details' : 'Register Participant')}
             </button>
           </div>
         </form>
@@ -314,4 +326,3 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 };
 
 export default ParticipantForm;
-

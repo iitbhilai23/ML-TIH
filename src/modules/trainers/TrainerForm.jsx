@@ -1,25 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { trainerService } from '../../services/trainerService';
 import styles from './Trainers.module.css';
-import { toast, Toaster } from 'sonner';
 
 const CameraIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#94a3b8' }}>
     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
     <circle cx="12" cy="13" r="4"></circle>
   </svg>
-)
+);
 
-// REMOVED showToast from props
-const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
+// Props: initialData, onSave (callback), isSaving (boolean), onClose
+const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', bio: '', profile_image_url: ''
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -44,59 +40,19 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       )
     );
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsUploading(true);
+    
+    // Prepare clean data
+    const dataToSave = cleanPayload({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      bio: formData.bio,
+    });
 
-    try {
-      let trainer;
-
-      if (initialData) {
-        trainer = await trainerService.updateTrainer(
-          initialData.id,
-          cleanPayload({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            bio: formData.bio,
-          })
-        );
-      } else {
-        trainer = await trainerService.createTrainer({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          bio: formData.bio,
-        });
-      }
-
-      if (selectedFile) {
-        const uploadRes = await trainerService.uploadTrainerPhoto(
-          trainer.id,
-          selectedFile
-        );
-
-        await trainerService.updateTrainer(trainer.id, {
-          profile_image_url: uploadRes.file_url,
-        });
-      }
-
-      // SONNER TOAST
-      toast.success(
-        initialData
-          ? 'Trainer updated successfully!'
-          : 'Trainer created successfully!'
-      );
-
-      onSubmit();
-      onClose();
-    } catch (error) {
-      console.error(error);
-      // SONNER TOAST
-      toast.error(error.message || 'Something went wrong');
-    } finally {
-      setIsUploading(false);
-    }
+    // Pass data and file up to parent
+    onSave(dataToSave, selectedFile);
   };
 
   const handleFileChange = (e) => {
@@ -231,14 +187,22 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
           {/* Action Buttons */}
           <div className={styles.actions}>
-            <button type="button" onClick={onClose} className={`${styles.btn}`} style={{ background: '#f1f5f9', color: '#333' }}>Cancel</button>
+            <button 
+                type="button" 
+                onClick={onClose} 
+                className={`${styles.btn}`} 
+                style={{ background: '#f1f5f9', color: '#333' }}
+                disabled={isSaving}
+            >
+                Cancel
+            </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.primary}`}
-              disabled={isUploading}
+              disabled={isSaving}
             >
-              {isUploading && <div className={styles.spinner}></div>}
-              <span>{isUploading ? 'Saving...' : (initialData ? 'Update Trainer' : 'Save Trainer')}</span>
+              {isSaving && <div className={styles.spinner}></div>}
+              <span>{isSaving ? 'Saving...' : (initialData ? 'Update Trainer' : 'Save Trainer')}</span>
             </button>
           </div>
         </form>
@@ -248,4 +212,3 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 };
 
 export default TrainerForm;
-

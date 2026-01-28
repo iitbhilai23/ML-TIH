@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { locationService } from '../../services/locationService';
 import styles from './Masters.module.css';
-import { Plus, Pencil, Trash2, MapPin, X, Filter, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, MapPin, X, AlertCircle, ChevronLeft, ChevronRight, Check, AlertTriangle } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
-
-// IMPORT SONNER
 import { toast, Toaster } from 'sonner';
 
 const Locations = () => {
@@ -16,31 +14,7 @@ const Locations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
-  // ... (Keep your existing THEME constant exactly as is) ...
-  const THEME = {
-    primary: '#7c3aed',
-    primaryLight: '#ddd6fe',
-    secondary: '#ec4899',
-    success: '#10b981',
-    danger: '#ef4444',
-    warning: '#f59e0b',
-    bgGradient: 'linear-gradient(-45deg, #f8fafc, #f1f5f9, #fdfbf7, #f0fdf4)',
-    glass: {
-      background: 'rgba(255, 255, 255, 0.85)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      border: '1px solid rgba(255, 255, 255, 0.9)',
-      borderRadius: '20px',
-      boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-    },
-    softShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-    mediumShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
-    hoverShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-  };
-
-  const [filters, setFilters] = useState({ district: '', block: '' });
-
+  // State for the Edit/Add Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
@@ -52,9 +26,26 @@ const Locations = () => {
     address_line: ''
   });
 
+  // State for the Custom Confirmation Modal
+  const [confirmState, setConfirmState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+    type: 'danger' // 'danger' for delete, 'primary' for save
+  });
+
+  const THEME = {
+    primary: '#6366f1',
+    danger: '#ef4444',
+    // ... other theme colors if needed locally, though mostly using inline styles
+  };
+
+  const [filters, setFilters] = useState({ district: '', block: '' });
+
   useEffect(() => {
     loadLocations();
-    setCurrentPage(1); // Reset to page 1 on filter change
+    setCurrentPage(1);
   }, [filters]);
 
   const loadLocations = async () => {
@@ -87,41 +78,61 @@ const Locations = () => {
     return cleaned;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // --- ACTUAL API LOGIC (Executed after confirmation) ---
+
+  const executeSave = async () => {
     try {
       const payload = cleanPayload(formData);
       if (formData.id) {
         await locationService.update(formData.id, payload);
-        // SONNER TOAST
         toast.success('Location updated successfully');
       } else {
         await locationService.create(payload);
-        // SONNER TOAST
         toast.success('Location created successfully');
       }
       setIsModalOpen(false);
       loadLocations();
     } catch (err) {
-      // console.error(err);
-      // SONNER TOAST
       toast.error(err.response?.data?.message || 'Failed to save location');
     }
   };
 
-  const handleDelete = async (id) => {
-    // if (window.confirm('Delete this location? This might affect trainings linked to it.')) {
+  const executeDelete = async (id) => {
     try {
       await locationService.delete(id);
-      loadLocations();
-      // SONNER TOAST
       toast.success('Location deleted successfully');
+      loadLocations();
     } catch (err) {
-      //  console.error("Delete Location Error:", err);
-      // SONNER TOAST
       toast.error('Failed to delete location. It might be linked to existing trainings.');
     }
-    // }
+  };
+
+  // --- HANDLERS (Triggers Confirmation) ---
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // If it's an edit, show confirmation before saving
+    if (formData.id) {
+      openConfirm(
+        'Save Changes?',
+        'Are you sure you want to update the details for this location?',
+        executeSave,
+        'primary'
+      );
+    } else {
+      // If it's new, just save directly
+      executeSave();
+    }
+  };
+
+  const handleDeleteClick = (id) => {
+    openConfirm(
+      'Delete Location?',
+      'This action cannot be undone. This will permanently remove the location from the database.',
+      () => executeDelete(id),
+      'danger'
+    );
   };
 
   const openAdd = () => {
@@ -152,6 +163,22 @@ const Locations = () => {
     setIsModalOpen(true);
   };
 
+  // --- CONFIRMATION MODAL LOGIC ---
+
+  const openConfirm = (title, message, onConfirm, type) => {
+    setConfirmState({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      type
+    });
+  };
+
+  const closeConfirm = () => {
+    setConfirmState({ ...confirmState, isOpen: false });
+  };
+
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -161,17 +188,15 @@ const Locations = () => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      // Optional: scroll to top of table on page change
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
     <div className={styles.container}>
-      {/* ADD TOASTER COMPONENT */}
       <Toaster position="top-right" richColors />
 
-      {/* --- Header & Filter (Keep exactly as is) --- */}
+      {/* --- Header & Filter --- */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -190,8 +215,6 @@ const Locations = () => {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           border: '1px solid rgba(255, 255, 255, 0.8)',
         }}>
-
-          {/* Left Section: Title & Stat */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -210,8 +233,6 @@ const Locations = () => {
             }}>
               Location Management
             </h2>
-
-            {/* Modern Pill Badge */}
             <div
               style={{
                 display: 'inline-flex',
@@ -219,16 +240,13 @@ const Locations = () => {
                 gap: '10px',
                 backgroundColor: '#f1f5f9',
                 padding: '6px 16px',
-                borderRadius: '9999px', // Fully rounded (Pill)
+                borderRadius: '9999px',
                 border: '1px solid transparent',
                 alignSelf: 'flex-start',
                 transition: 'all 0.2s ease'
               }}
             >
-              {/* Icon */}
               <MapPin size={18} color="#6366f1" strokeWidth={2} />
-
-              {/* Label */}
               <span
                 style={{
                   fontSize: '0.75rem',
@@ -240,8 +258,6 @@ const Locations = () => {
               >
                 Total Locations
               </span>
-
-              {/* Count */}
               <span
                 style={{
                   fontSize: '1.1rem',
@@ -260,10 +276,8 @@ const Locations = () => {
             display: 'flex',
             gap: '12px',
             flex: '1 1 300px',
-            minWidth: '300px', // Ensure inputs don't squish too much
+            minWidth: '300px',
           }}>
-
-            {/* District Input */}
             <input
               placeholder="Filter by District..."
               value={filters.district}
@@ -292,7 +306,6 @@ const Locations = () => {
               }}
             />
 
-            {/* Block Input */}
             <input
               placeholder="Filter by Block..."
               value={filters.block}
@@ -320,7 +333,6 @@ const Locations = () => {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
-
           </div>
 
           {/* Right Section: Action Button */}
@@ -358,7 +370,7 @@ const Locations = () => {
         </div>
       </div>
 
-      {/* --- Error & Table (Keep exactly as is, but map currentLocations) --- */}
+      {/* --- Error & Table --- */}
       {error && (
         <div style={{
           background: '#fef2f2',
@@ -486,7 +498,7 @@ const Locations = () => {
                           <Pencil size={14} /> Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(loc.id)}
+                          onClick={() => handleDeleteClick(loc.id)}
                           style={{
                             padding: '8px 14px',
                             background: '#ffffff',
@@ -573,7 +585,6 @@ const Locations = () => {
                 gap: '4px',
                 margin: '0 8px'
               }}>
-                {/* Simple page indicator */}
                 <span style={{
                   padding: '8px 12px',
                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
@@ -630,11 +641,10 @@ const Locations = () => {
       </div>
 
 
-      {/* --- UPDATED MODAL SECTION START --- */}
+      {/* --- ADD/EDIT MODAL --- */}
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
-            {/* Modern Modal Header */}
             <div className={styles.modalHeader}>
               <h3 className={styles.modalTitle}>
                 {formData.id ? 'Update Location' : 'Add New Location'}
@@ -649,7 +659,6 @@ const Locations = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-
               {/* Row 1: District / Block */}
               <div className={styles.row}>
                 <div className={styles.formGroup}>
@@ -734,7 +743,6 @@ const Locations = () => {
                 </div>
               </div>
 
-              {/* Hidden State Field (Preserved logic) */}
               <input
                 type="hidden"
                 value={formData.state}
@@ -760,7 +768,170 @@ const Locations = () => {
           </div>
         </div>
       )}
-      {/* --- UPDATED MODAL SECTION END --- */}
+
+      {/* --- ENHANCED CUSTOM CONFIRMATION MODAL --- */}
+      {confirmState.isOpen && (
+        <div
+          className={styles.modalOverlay}
+          style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(15, 23, 42, 0.4)' }}
+        >
+          <div
+            className={styles.modalBox}
+            style={{
+              maxWidth: '440px',
+              width: '90%',
+              padding: '36px 32px',
+              textAlign: 'center',
+              borderRadius: '24px',
+              background: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: 'none',
+              animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}
+          >
+            {/* Icon Container with Glow */}
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              backgroundColor: confirmState.type === 'danger' ? '#fef2f2' : '#eef2ff',
+              color: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
+              position: 'relative'
+            }}>
+              {/* Decorative outer ring */}
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                left: '-4px',
+                right: '-4px',
+                bottom: '-4px',
+                borderRadius: '50%',
+                border: '2px solid',
+                borderColor: confirmState.type === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                borderStyle: 'dashed'
+              }}></div>
+
+              {confirmState.type === 'danger' ? (
+                <Trash2 size={32} strokeWidth={1.5} />
+              ) : (
+                <AlertTriangle size={32} strokeWidth={1.5} />
+              )}
+            </div>
+
+            {/* Text Content */}
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: '0 0 12px',
+              letterSpacing: '-0.025em'
+            }}>
+              {confirmState.title}
+            </h3>
+            <p style={{
+              fontSize: '0.95rem',
+              color: '#64748b',
+              lineHeight: '1.6',
+              margin: '0 0 32px',
+              maxWidth: '340px',
+              marginLeft: 'auto',
+              marginRight: 'auto'
+            }}>
+              {confirmState.message}
+            </p>
+
+            {/* Button Group */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={closeConfirm}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  background: '#ffffff',
+                  color: '#64748b',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  if (confirmState.onConfirm) confirmState.onConfirm();
+                  closeConfirm();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: confirmState.type === 'danger'
+                    ? '0 4px 12px rgba(239, 68, 68, 0.25)'
+                    : '0 4px 12px rgba(99, 102, 241, 0.25)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.opacity = '0.9';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.opacity = '1';
+                }}
+              >
+                {confirmState.type === 'danger' ? (
+                  <>
+                    <Trash2 size={18} /> Delete
+                  </>
+                ) : (
+                  <>
+                    <Check size={18} /> Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- CSS ANIMATION FOR MODAL POP-IN --- */}
+      <style>{`
+        @keyframes modalPopIn {
+          0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };
