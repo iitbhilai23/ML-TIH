@@ -411,7 +411,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     { name: 'Konta', lat: 17.8100, lng: 81.3900, district: 'Sukma' },
     { name: 'Chhindgarh', lat: 18.5000, lng: 81.8300, district: 'Sukma' },
 
-    
+
     { name: 'Baloda Bazar', lat: 21.6570, lng: 82.1600, district: 'Baloda Bazar' },
     { name: 'Bhatapara', lat: 21.7350, lng: 81.9500, district: 'Baloda Bazar' },
     { name: 'Simga', lat: 21.6300, lng: 81.7000, district: 'Baloda Bazar' },
@@ -446,6 +446,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       district: pt.district
     }
   }));
+  
 
   // Merge Real and Specific Fake Data
   const allTrainingData = [...(trainingLocations || []), ...SPECIFIC_FAKE_LOCATIONS];
