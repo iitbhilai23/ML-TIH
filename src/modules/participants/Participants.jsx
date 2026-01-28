@@ -6,8 +6,6 @@ import styles from './Participants.module.css';
 import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
-
-// IMPORT SONNER
 import { toast, Toaster } from 'sonner';
 
 const Participants = () => {
@@ -83,7 +81,7 @@ const Participants = () => {
       const filters = selectedTrainingId ? { training_id: selectedTrainingId } : {};
       const data = await participantService.getAll(filters);
       setParticipants(data);
-    } catch (err) { 
+    } catch (err) {
       console.error(err);
       toast.error('Failed to load participants');
     }
@@ -93,7 +91,7 @@ const Participants = () => {
   const handleSave = async (data) => {
     try {
       if (editingData) {
-        const { training_id, ...updateData } = data; 
+        const { training_id, ...updateData } = data;
         await participantService.update(editingData.id, updateData);
         toast.success('Participant updated successfully');
       } else {
@@ -111,16 +109,16 @@ const Participants = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are You Sure Delete?')) {
-      try {
-        await participantService.delete(id);
-        toast.success('Participant deleted successfully');
-        await loadParticipants(); 
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to delete participant');
-      }
+    // if (window.confirm('Are You Sure Delete?')) {
+    try {
+      await participantService.delete(id);
+      toast.success('Participant deleted successfully');
+      await loadParticipants();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to delete participant');
     }
+    // }
   };
 
   // --- Filtering Logic ---

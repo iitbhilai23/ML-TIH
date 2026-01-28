@@ -25,11 +25,10 @@ const MainLayout = () => {
   const closeSidebar = () => setSidebarOpen(false);
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/login');
-    }
-  };
+    logout();
+    navigate('/login');
+  }
+
 
   // Auto-close sidebar on resize > mobile
   useEffect(() => {

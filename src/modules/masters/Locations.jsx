@@ -110,18 +110,18 @@ const Locations = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this location? This might affect trainings linked to it.')) {
-      try {
-        await locationService.delete(id);
-        loadLocations();
-        // SONNER TOAST
-        toast.success('Location deleted successfully');
-      } catch (err) {
-        console.error("Delete Location Error:", err);
-        // SONNER TOAST
-        toast.error('Failed to delete location. It might be linked to existing trainings.');
-      }
+    // if (window.confirm('Delete this location? This might affect trainings linked to it.')) {
+    try {
+      await locationService.delete(id);
+      loadLocations();
+      // SONNER TOAST
+      toast.success('Location deleted successfully');
+    } catch (err) {
+      //  console.error("Delete Location Error:", err);
+      // SONNER TOAST
+      toast.error('Failed to delete location. It might be linked to existing trainings.');
     }
+    // }
   };
 
   const openAdd = () => {

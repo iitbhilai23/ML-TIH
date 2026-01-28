@@ -80,16 +80,16 @@ const Trainings = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this training?')) {
-      try {
-        await trainingService.delete(id);
-        toast.success('Training deleted successfully');
-        loadTrainings();
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to delete training: ' + (err.response?.data?.message || err.message));
-      }
+    //if (window.confirm('Are you sure you want to delete this training?')) {
+    try {
+      await trainingService.delete(id);
+      toast.success('Training deleted successfully');
+      loadTrainings();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to delete training: ' + (err.response?.data?.message || err.message));
     }
+    // }
   };
 
   const openAdd = () => {

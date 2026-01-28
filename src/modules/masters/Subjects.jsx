@@ -108,14 +108,13 @@ const Subjects = () => {
 
   const handleDelete = async (id) => {
     //if (!window.confirm('Delete this subject?')) return;
-
     try {
       await subjectService.delete(id);
       // SONNER TOAST
       toast.success('Subject deleted successfully');
       loadSubjects();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       // SONNER TOAST
       toast.error(err.response?.data?.message || 'Delete failed');
     }
