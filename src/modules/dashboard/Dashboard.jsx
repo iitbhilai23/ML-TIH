@@ -398,10 +398,17 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
 
   useEffect(() => {
     // fetch('http://127.0.0.1:4001/files/Map/topojsons/states/cg.json')
-    fetch('https://www.ibitf.co.in/files/Map/topojsons/states/cg.json')
-      .then(res => res.json())
-      .then(setGeoJsonData)
-      .catch(console.error);
+    //   .then(res => res.json())
+    //   .then(setGeoJsonData)
+    //   .catch(console.error);
+
+    fetch('/files/Map/topojsons/states/cg.json')
+    .then(res => {
+      if (!res.ok) throw new Error('GeoJSON not found');
+      return res.json();
+    })
+    .then(setGeoJsonData)
+    .catch(err => console.error('GeoJSON load error:', err));
   }, []);
 
   // Icon definition - Using the detailed pin shape
