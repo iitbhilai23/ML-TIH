@@ -7,6 +7,9 @@ import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, S
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 
+// IMPORT SONNER
+import { toast, Toaster } from 'sonner';
+
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
   const [trainings, setTrainings] = useState([]);
@@ -26,9 +29,7 @@ const Participants = () => {
     success: '#10b981',
     danger: '#ef4444',
     warning: '#f59e0b',
-
     bgGradient: 'linear-gradient(-45deg, #f8fafc, #f1f5f9, #fdfbf7, #f0fdf4)',
-
     glass: {
       background: 'rgba(255, 255, 255, 0.85)',
       backdropFilter: 'blur(16px)',
@@ -38,7 +39,6 @@ const Participants = () => {
       boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     },
-
     softShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
     mediumShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
     hoverShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
@@ -72,7 +72,9 @@ const Participants = () => {
     try {
       const data = await trainingService.getAll();
       setTrainings(data);
-    } catch (e) { }
+    } catch (e) {
+      toast.error('Failed to load trainings list');
+    }
   };
 
   const loadParticipants = async () => {
@@ -81,27 +83,43 @@ const Participants = () => {
       const filters = selectedTrainingId ? { training_id: selectedTrainingId } : {};
       const data = await participantService.getAll(filters);
       setParticipants(data);
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+      console.error(err);
+      toast.error('Failed to load participants');
+    }
     setLoading(false);
   };
 
   const handleSave = async (data) => {
-    if (editingData) {
-      const { training_id, ...updateData } = data; // 🔥 REMOVE
-      await participantService.update(editingData.id, updateData);
-    } else {
-      await participantService.create(data);
-    }
+    try {
+      if (editingData) {
+        const { training_id, ...updateData } = data; 
+        await participantService.update(editingData.id, updateData);
+        toast.success('Participant updated successfully');
+      } else {
+        await participantService.create(data);
+        toast.success('Participant registered successfully');
+      }
 
-    setIsModalOpen(false);
-    setEditingData(null);
-    await loadParticipants();
+      setIsModalOpen(false);
+      setEditingData(null);
+      await loadParticipants();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to save participant');
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are You Sure Delete?')) {
-      await participantService.delete(id);
-      await loadParticipants(); //  MUST
+      try {
+        await participantService.delete(id);
+        toast.success('Participant deleted successfully');
+        await loadParticipants(); 
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to delete participant');
+      }
     }
   };
 
@@ -127,6 +145,9 @@ const Participants = () => {
 
   return (
     <div className={styles.container}>
+      {/* ADD TOASTER COMPONENT */}
+      <Toaster position="top-right" richColors />
+
       {/* Modern Header Section */}
       <div style={{
         display: 'flex',
@@ -628,3 +649,4 @@ const Participants = () => {
 };
 
 export default Participants;
+

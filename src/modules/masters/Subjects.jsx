@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { subjectService } from '../../services/subjectService';
 import styles from './Masters.module.css';
 import { Plus, Pencil, Trash2, Search, X, Book } from 'lucide-react';
+import { toast, Toaster } from 'sonner';
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -44,7 +45,11 @@ const Subjects = () => {
     try {
       const data = await subjectService.getAll(searchTerm);
       setSubjects(data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      // SONNER TOAST FOR LOAD ERROR
+      toast.error('Failed to load subjects');
+    }
     setLoading(false);
   };
 
@@ -70,17 +75,20 @@ const Subjects = () => {
 
       if (formData.id) {
         await subjectService.update(formData.id, payload);
-        alert('Subject updated successfully');
+        // SONNER TOAST
+        toast.success('Subject updated successfully');
       } else {
         await subjectService.create(payload);
-        alert('Subject created successfully');
+        // SONNER TOAST
+        toast.success('Subject created successfully');
       }
 
       setIsModalOpen(false);
       loadSubjects();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Operation Failed');
+      // SONNER TOAST
+      toast.error(err.response?.data?.message || 'Operation Failed');
     }
   };
 
@@ -99,21 +107,26 @@ const Subjects = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this subject?')) return;
+    //if (!window.confirm('Delete this subject?')) return;
 
     try {
       await subjectService.delete(id);
-      alert('Subject deleted successfully');
+      // SONNER TOAST
+      toast.success('Subject deleted successfully');
       loadSubjects();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Delete failed');
+      // SONNER TOAST
+      toast.error(err.response?.data?.message || 'Delete failed');
     }
   };
 
 
   return (
     <div className={styles.container}>
+      {/* ADD TOASTER COMPONENT */}
+      <Toaster position="top-right" richColors />
+
       {/* Modern Header Section */}
       <div style={{
         display: 'flex',

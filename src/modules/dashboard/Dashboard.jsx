@@ -71,6 +71,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
+  const [districts, setDistricts] = useState([]);
+  const [blocks, setBlocks] = useState([]);
   const [filters, setFilters] = useState({
     district_cd: '',
     block_cd: '',
@@ -102,6 +104,43 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const data = await dashboardService.getDistricts();
+        setDistricts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error loading districts', error);
+      }
+    };
+
+    fetchDistricts();
+  }, []);
+
+  useEffect(() => {
+    const fetchBlocks = async () => {
+      try {
+        if (!filters.district_cd) {
+          // Reset blocks if "All Districts"
+          setBlocks([]);
+          setFilters((prev) => ({ ...prev, block_cd: '' }));
+          return;
+        }
+
+        const data = await dashboardService.getBlocksByDistrict(filters.district_cd);
+        setBlocks(Array.isArray(data) ? data : []);
+
+        // Reset selected block when district changes
+        setFilters((prev) => ({ ...prev, block_cd: '' }));
+      } catch (error) {
+        console.error('Error loading blocks', error);
+      }
+    };
+
+    fetchBlocks();
+  }, [filters.district_cd]);
+
 
   useEffect(() => {
     const fetchMapLocation = async () => {
@@ -201,15 +240,31 @@ const Dashboard = () => {
         </div>
         <select name="district_cd" style={THEME.input} onChange={handleFilterChange} value={filters.district_cd}>
           <option value="">All Districts</option>
-          <option value="2230">Khairagarh</option>
+          {/* <option value="2230">Khairagarh</option>
           <option value="2210">Durg</option>
-          <option value="2209">Rajnandgaon</option>
+          <option value="2209">Rajnandgaon</option> */}
+          {districts.map((d) => (
+            <option key={d.district_cd} value={d.district_cd}>
+              {d.district_name}
+            </option>
+          ))}
         </select>
-        <select name="block_cd" style={THEME.input} onChange={handleFilterChange} value={filters.block_cd}>
-          <option value="">All Blocks</option>
+        <select name="block_cd" style={THEME.input} onChange={handleFilterChange} value={filters.block_cd} >
+          {/* <option value="">All Blocks</option>
           <option value="220908">Khairagarh</option>
           <option value="221011">Patan</option>
-          <option value="220904">Churia</option>
+          <option value="220904">Churia</option> */}
+          {/* <option value="">
+            {filters.district_cd ? 'All Blocks' : 'Select District First'}
+          </option>
+          disabled={!filters.district_cd}
+           */}
+          <option value="">All Blocks</option>
+          {blocks.map((b) => (
+            <option key={b.block_cd} value={b.block_cd}>
+              {b.block_name}
+            </option>
+          ))}
         </select>
         <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
           <Calendar size={16} style={{ color: '#94a3b8' }} />

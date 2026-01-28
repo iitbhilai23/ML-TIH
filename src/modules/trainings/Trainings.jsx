@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { trainingService } from '../../services/trainingService';
 import TrainingForm from './TrainingForm';
@@ -6,6 +5,7 @@ import styles from './Trainings.module.css';
 import { Plus, Pencil, Trash2, Calendar, MapPin, User, BookOpen, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
+import { toast, Toaster } from 'sonner';
 
 const Trainings = () => {
   const [trainings, setTrainings] = useState([]);
@@ -23,9 +23,7 @@ const Trainings = () => {
     success: '#10b981',
     danger: '#ef4444',
     warning: '#f59e0b',
-
     bgGradient: 'linear-gradient(-45deg, #f8fafc, #f1f5f9, #fdfbf7, #f0fdf4)',
-
     glass: {
       background: 'rgba(255, 255, 255, 0.85)',
       backdropFilter: 'blur(16px)',
@@ -35,7 +33,6 @@ const Trainings = () => {
       boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     },
-
     softShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
     mediumShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
     hoverShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
@@ -60,6 +57,7 @@ const Trainings = () => {
       setTrainings(data);
     } catch (err) {
       console.error('Failed to load trainings:', err);
+      toast.error('Failed to load trainings');
     }
     setLoading(false);
   };
@@ -68,13 +66,16 @@ const Trainings = () => {
     try {
       if (editingTraining) {
         await trainingService.update(editingTraining.id, data);
+        toast.success('Training updated successfully');
       } else {
         await trainingService.create(data);
+        toast.success('Training created successfully');
       }
       setIsModalOpen(false);
       loadTrainings();
     } catch (err) {
-      alert('Failed to save training: ' + (err.response?.data?.message || err.message));
+      console.error(err);
+      toast.error('Failed to save training: ' + (err.response?.data?.message || err.message));
     }
   };
 
@@ -82,9 +83,11 @@ const Trainings = () => {
     if (window.confirm('Are you sure you want to delete this training?')) {
       try {
         await trainingService.delete(id);
+        toast.success('Training deleted successfully');
         loadTrainings();
       } catch (err) {
-        alert('Failed to delete training: ' + (err.response?.data?.message || err.message));
+        console.error(err);
+        toast.error('Failed to delete training: ' + (err.response?.data?.message || err.message));
       }
     }
   };
@@ -152,6 +155,9 @@ const Trainings = () => {
 
   return (
     <div className={styles.container}>
+      {/* ADD TOASTER COMPONENT */}
+      <Toaster position="top-right" richColors />
+
       {/* Modern Header Section */}
       <div style={{
         display: 'flex',
@@ -580,3 +586,4 @@ const Trainings = () => {
 };
 
 export default Trainings;
+

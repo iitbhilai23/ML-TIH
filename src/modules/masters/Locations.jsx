@@ -1,9 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { locationService } from '../../services/locationService';
 import styles from './Masters.module.css';
 import { Plus, Pencil, Trash2, MapPin, X, Filter, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
+
+// IMPORT SONNER
+import { toast, Toaster } from 'sonner';
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -64,6 +66,7 @@ const Locations = () => {
     } catch (err) {
       console.error("Load Locations Error:", err);
       setError('Failed to load locations. Please try again.');
+      toast.error('Failed to load locations');
     } finally {
       setLoading(false);
     }
@@ -90,16 +93,19 @@ const Locations = () => {
       const payload = cleanPayload(formData);
       if (formData.id) {
         await locationService.update(formData.id, payload);
-        alert('Location updated successfully');
+        // SONNER TOAST
+        toast.success('Location updated successfully');
       } else {
         await locationService.create(payload);
-        alert('Location created successfully');
+        // SONNER TOAST
+        toast.success('Location created successfully');
       }
       setIsModalOpen(false);
       loadLocations();
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || 'Failed to save location');
+      // console.error(err);
+      // SONNER TOAST
+      toast.error(err.response?.data?.message || 'Failed to save location');
     }
   };
 
@@ -108,9 +114,12 @@ const Locations = () => {
       try {
         await locationService.delete(id);
         loadLocations();
+        // SONNER TOAST
+        toast.success('Location deleted successfully');
       } catch (err) {
         console.error("Delete Location Error:", err);
-        alert('Failed to delete location. It might be linked to existing trainings.');
+        // SONNER TOAST
+        toast.error('Failed to delete location. It might be linked to existing trainings.');
       }
     }
   };
@@ -159,6 +168,9 @@ const Locations = () => {
 
   return (
     <div className={styles.container}>
+      {/* ADD TOASTER COMPONENT */}
+      <Toaster position="top-right" richColors />
+
       {/* --- Header & Filter (Keep exactly as is) --- */}
       <div style={{
         display: 'flex',
