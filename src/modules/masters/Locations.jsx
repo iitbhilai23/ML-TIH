@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { locationService } from '../../services/locationService';
 import styles from './Masters.module.css';
-import { Plus, Pencil, Trash2, MapPin, X, Filter, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, MapPin, X, Filter, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
+
+// IMPORT SONNER
+import { toast, Toaster } from 'sonner';
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   // ... (Keep your existing THEME constant exactly as is) ...
   const THEME = {
@@ -45,10 +52,9 @@ const Locations = () => {
     address_line: ''
   });
 
-  // ... (Keep your existing useEffect, loadLocations, cleanPayload, handleSubmit, handleDelete, openAdd, openEdit exactly as is) ...
-
   useEffect(() => {
     loadLocations();
+    setCurrentPage(1); // Reset to page 1 on filter change
   }, [filters]);
 
   const loadLocations = async () => {
@@ -60,6 +66,7 @@ const Locations = () => {
     } catch (err) {
       console.error("Load Locations Error:", err);
       setError('Failed to load locations. Please try again.');
+      toast.error('Failed to load locations');
     } finally {
       setLoading(false);
     }
@@ -86,29 +93,35 @@ const Locations = () => {
       const payload = cleanPayload(formData);
       if (formData.id) {
         await locationService.update(formData.id, payload);
-        alert('Location updated successfully');
+        // SONNER TOAST
+        toast.success('Location updated successfully');
       } else {
         await locationService.create(payload);
-        alert('Location created successfully');
+        // SONNER TOAST
+        toast.success('Location created successfully');
       }
       setIsModalOpen(false);
       loadLocations();
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || 'Failed to save location');
+      // console.error(err);
+      // SONNER TOAST
+      toast.error(err.response?.data?.message || 'Failed to save location');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this location? This might affect trainings linked to it.')) {
-      try {
-        await locationService.delete(id);
-        loadLocations();
-      } catch (err) {
-        console.error("Delete Location Error:", err);
-        alert('Failed to delete location. It might be linked to existing trainings.');
-      }
+    // if (window.confirm('Delete this location? This might affect trainings linked to it.')) {
+    try {
+      await locationService.delete(id);
+      loadLocations();
+      // SONNER TOAST
+      toast.success('Location deleted successfully');
+    } catch (err) {
+      //  console.error("Delete Location Error:", err);
+      // SONNER TOAST
+      toast.error('Failed to delete location. It might be linked to existing trainings.');
     }
+    // }
   };
 
   const openAdd = () => {
@@ -139,8 +152,25 @@ const Locations = () => {
     setIsModalOpen(true);
   };
 
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentLocations = locations.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(locations.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      // Optional: scroll to top of table on page change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className={styles.container}>
+      {/* ADD TOASTER COMPONENT */}
+      <Toaster position="top-right" richColors />
+
       {/* --- Header & Filter (Keep exactly as is) --- */}
       <div style={{
         display: 'flex',
@@ -152,56 +182,156 @@ const Locations = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '24px',
           background: '#FFFFFF',
-          padding: '20px 32px',
+          padding: '24px 32px',
           borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
+
+          {/* Left Section: Title & Stat */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            flex: '1 1 250px'
+          }}>
             <h2 style={{
               fontSize: '1.5rem',
               fontWeight: 700,
               color: '#1e293b',
               margin: 0,
+              letterSpacing: '-0.025em',
               display: 'flex',
               alignItems: 'center',
               gap: '12px'
             }}>
-              <MapPin size={26} color={THEME.primary} /> Locations / Centers
+              Location Management
             </h2>
-            <p style={{
-              fontSize: '0.95rem',
-              color: '#64748b',
-              margin: 0,
-              marginLeft: '42px'
-            }}>
-              Manage training centers and their details
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)'
-            }}>
-              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>
-                Total Trainers
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>
+
+            {/* Modern Pill Badge */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                backgroundColor: '#f1f5f9',
+                padding: '6px 16px',
+                borderRadius: '9999px', // Fully rounded (Pill)
+                border: '1px solid transparent',
+                alignSelf: 'flex-start',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {/* Icon */}
+              <MapPin size={18} color="#6366f1" strokeWidth={2} />
+
+              {/* Label */}
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#64748b',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                Total Locations
+              </span>
+
+              {/* Count */}
+              <span
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 800,
+                  color: '#1e293b',
+                  lineHeight: 1
+                }}
+              >
                 {locations.length}
-              </div>
+              </span>
             </div>
+          </div>
+
+          {/* Middle Section: Filters Group */}
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            flex: '1 1 300px',
+            minWidth: '300px', // Ensure inputs don't squish too much
+          }}>
+
+            {/* District Input */}
+            <input
+              placeholder="Filter by District..."
+              value={filters.district}
+              onChange={(e) => setFilters({ ...filters, district: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                color: '#334155',
+                backgroundColor: '#f8fafc',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+
+            {/* Block Input */}
+            <input
+              placeholder="Filter by Block..."
+              value={filters.block}
+              onChange={(e) => setFilters({ ...filters, block: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                color: '#334155',
+                backgroundColor: '#f8fafc',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+
+          </div>
+
+          {/* Right Section: Action Button */}
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: '0 0 auto' }}>
             <button
               onClick={openAdd}
               style={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 color: 'white',
-                padding: '12px 20px',
-                borderRadius: '10px',
+                padding: '14px 24px',
+                borderRadius: '12px',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: '0.9rem',
@@ -209,86 +339,26 @@ const Locations = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                transition: 'all 0.2s ease',
+                fontFamily: 'inherit'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+              }}
             >
               <Plus size={18} /> Add Location
             </button>
           </div>
         </div>
-
-        <div className={styles.filterBar} style={{
-          background: '#FFFFFF',
-          padding: '16px 20px',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            paddingRight: '16px',
-            borderRight: '2px solid #e2e8f0',
-            minWidth: '100px'
-          }}>
-            <Filter size={18} style={{ color: '#6366f1' }} />
-            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1e293b', letterSpacing: '0.5px' }}>FILTERS</span>
-          </div>
-          <input
-            placeholder="Filter by District..."
-            value={filters.district}
-            onChange={(e) => setFilters({ ...filters, district: e.target.value })}
-            style={{
-              padding: '10px 14px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#334155',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-              minWidth: '200px'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          />
-          <input
-            placeholder="Filter by Block..."
-            value={filters.block}
-            onChange={(e) => setFilters({ ...filters, block: e.target.value })}
-            style={{
-              padding: '10px 14px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#334155',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-              minWidth: '200px'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          />
-        </div>
       </div>
 
-      {/* --- Error & Table (Keep exactly as is) --- */}
+      {/* --- Error & Table (Keep exactly as is, but map currentLocations) --- */}
       {error && (
         <div style={{
           background: '#fef2f2',
@@ -340,7 +410,7 @@ const Locations = () => {
             <tbody>
               {loading ? (
                 <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                  <Spinner overlay={false}/>
+                  <Spinner overlay={false} />
                 </td></tr>
               ) : locations.length === 0 ? (
                 <tr><td colSpan="5" style={{ textAlign: 'center', padding: '60px' }}>
@@ -353,7 +423,7 @@ const Locations = () => {
                   </div>
                 </td></tr>
               ) : (
-                locations.map(loc => (
+                currentLocations.map(loc => (
                   <tr key={loc.id}>
                     <td style={{ fontWeight: 600, color: '#1e293b' }}>{loc.district}</td>
                     <td style={{ color: '#475569' }}>{loc.block}</td>
@@ -451,6 +521,112 @@ const Locations = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && locations.length > 0 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '16px 20px',
+            borderTop: '1px solid #e2e8f0',
+            background: '#ffffff',
+            borderBottomLeftRadius: '16px',
+            borderBottomRightRadius: '16px',
+            marginTop: '0px'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, locations.length)} of {locations.length} entries
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
+                  color: currentPage === 1 ? '#cbd5e1' : '#475569',
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1';
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                <ChevronLeft size={16} /> Previous
+              </button>
+
+              <div style={{
+                display: 'flex',
+                gap: '4px',
+                margin: '0 8px'
+              }}>
+                {/* Simple page indicator */}
+                <span style={{
+                  padding: '8px 12px',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+                }}>
+                  {currentPage}
+                </span>
+                <span style={{
+                  padding: '8px 4px',
+                  color: '#64748b',
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  of {totalPages}
+                </span>
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff',
+                  color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569',
+                  cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1';
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                Next <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
 
@@ -590,4 +766,3 @@ const Locations = () => {
 };
 
 export default Locations;
-

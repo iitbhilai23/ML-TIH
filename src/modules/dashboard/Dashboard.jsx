@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -8,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-l
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
-import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize,House  } from 'lucide-react';
+import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize, House } from 'lucide-react';
 
 const THEME = {
   gap: {
@@ -74,9 +71,11 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
+  const [districts, setDistricts] = useState([]);
+  const [blocks, setBlocks] = useState([]);
   const [filters, setFilters] = useState({
-    district: '',
-    block: '',
+    district_cd: '',
+    block_cd: '',
     village: '',
     start_date: '',
     end_date: '',
@@ -105,6 +104,43 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const data = await dashboardService.getDistricts();
+        setDistricts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error loading districts', error);
+      }
+    };
+
+    fetchDistricts();
+  }, []);
+
+  useEffect(() => {
+    const fetchBlocks = async () => {
+      try {
+        if (!filters.district_cd) {
+          // Reset blocks if "All Districts"
+          setBlocks([]);
+          setFilters((prev) => ({ ...prev, block_cd: '' }));
+          return;
+        }
+
+        const data = await dashboardService.getBlocksByDistrict(filters.district_cd);
+        setBlocks(Array.isArray(data) ? data : []);
+
+        // Reset selected block when district changes
+        setFilters((prev) => ({ ...prev, block_cd: '' }));
+      } catch (error) {
+        console.error('Error loading blocks', error);
+      }
+    };
+
+    fetchBlocks();
+  }, [filters.district_cd]);
+
 
   useEffect(() => {
     const fetchMapLocation = async () => {
@@ -169,12 +205,9 @@ const Dashboard = () => {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: THEME.gap.md }}>
         <div>
-          <h1 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', margin: 0, letterSpacing: '-0.02em' }}>
             Dashboard Overview
           </h1>
-          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.95rem', fontWeight: '500' }}>
-            Welcome back, here is your training summary.
-          </p>
         </div>
         <div style={{
           display: 'flex',
@@ -199,6 +232,55 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* ===== FILTERS ===== */}
+
+      <div style={{ ...THEME.glass, padding: `${THEME.pad.md} ${THEME.pad.lg}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.xl }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.md, borderRight: '1px solid #f3f4f6', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
+          <Filter size={16} /> Filters
+        </div>
+        <select name="district_cd" style={THEME.input} onChange={handleFilterChange} value={filters.district_cd}>
+          <option value="">All Districts</option>
+          {/* <option value="2230">Khairagarh</option>
+          <option value="2210">Durg</option>
+          <option value="2209">Rajnandgaon</option> */}
+          {districts.map((d) => (
+            <option key={d.district_cd} value={d.district_cd}>
+              {d.district_name}
+            </option>
+          ))}
+        </select>
+        <select name="block_cd" style={THEME.input} onChange={handleFilterChange} value={filters.block_cd} >
+          {/* <option value="">All Blocks</option>
+          <option value="220908">Khairagarh</option>
+          <option value="221011">Patan</option>
+          <option value="220904">Churia</option> */}
+          {/* <option value="">
+            {filters.district_cd ? 'All Blocks' : 'Select District First'}
+          </option>
+          disabled={!filters.district_cd}
+           */}
+          <option value="">All Blocks</option>
+          {blocks.map((b) => (
+            <option key={b.block_cd} value={b.block_cd}>
+              {b.block_name}
+            </option>
+          ))}
+        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
+          <Calendar size={16} style={{ color: '#94a3b8' }} />
+          <input type="date" name="start_date" style={THEME.input} onChange={handleFilterChange} value={filters.start_date} />
+          <span style={{ color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem', margin: `0 ${THEME.gap.xs}` }}>to</span>
+          <input type="date" name="end_date" style={THEME.input} onChange={handleFilterChange} value={filters.end_date} />
+        </div>
+        <select name="status" style={THEME.input} onChange={handleFilterChange} value={filters.status}>
+          <option value="">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
       {activeTab === 'summary' && (
         <SummaryTab
           summary={data}
@@ -212,6 +294,8 @@ const Dashboard = () => {
     </div>
   );
 };
+
+
 
 const getTabStyle = (isActive, gradient) => ({
   display: 'flex', alignItems: 'center', gap: THEME.gap.xs, padding: `8px ${THEME.pad.md}`, border: 'none', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease-in-out',
@@ -305,41 +389,41 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     { name: 'Narayanpur', lat: 19.7200, lng: 81.2400, district: 'Narayanpur' },
     { name: 'Gariaband', lat: 20.6300, lng: 82.0600, district: 'Gariaband' },
     { name: 'Chhura', lat: 20.8800, lng: 82.2500, district: 'Gariaband' },
-    
+
     // NEW Locations
     { name: 'Dhamtari', lat: 20.7075, lng: 81.5482, district: 'Dhamtari' },
     { name: 'Kurud', lat: 20.8300, lng: 81.7200, district: 'Dhamtari' },
     { name: 'Magarlod', lat: 20.6800, lng: 81.8300, district: 'Dhamtari' },
-    
+
     { name: 'Mahasamund', lat: 21.1074, lng: 82.0979, district: 'Mahasamund' },
     { name: 'Saraipali', lat: 21.3150, lng: 83.0000, district: 'Mahasamund' },
     { name: 'Basna', lat: 21.2800, lng: 82.8300, district: 'Mahasamund' },
     { name: 'Pithora', lat: 21.2500, lng: 82.9300, district: 'Mahasamund' },
-    
+
     { name: 'Kanker', lat: 20.2719, lng: 81.4917, district: 'Kanker' },
     { name: 'Bhanupratappur', lat: 20.3500, lng: 81.1000, district: 'Kanker' },
     { name: 'Charama', lat: 20.4500, lng: 81.2500, district: 'Kanker' },
     { name: 'Durgkondal', lat: 20.1500, lng: 81.0000, district: 'Kanker' },
     { name: 'Antagarh', lat: 20.0900, lng: 81.1500, district: 'Kanker' },
     { name: 'Pakhanjur', lat: 20.0300, lng: 80.6200, district: 'Kanker' },
-    
+
     { name: 'Sukma', lat: 18.3900, lng: 81.6500, district: 'Sukma' },
     { name: 'Konta', lat: 17.8100, lng: 81.3900, district: 'Sukma' },
     { name: 'Chhindgarh', lat: 18.5000, lng: 81.8300, district: 'Sukma' },
-    
+
     { name: 'Baloda Bazar', lat: 21.6570, lng: 82.1600, district: 'Baloda Bazar' },
     { name: 'Bhatapara', lat: 21.7350, lng: 81.9500, district: 'Baloda Bazar' },
     { name: 'Simga', lat: 21.6300, lng: 81.7000, district: 'Baloda Bazar' },
     { name: 'Palari', lat: 21.5500, lng: 82.0500, district: 'Baloda Bazar' },
-    
+
     { name: 'Surajpur', lat: 23.2200, lng: 82.8700, district: 'Surajpur' },
     { name: 'Pratappur', lat: 23.3500, lng: 82.7800, district: 'Surajpur' },
     { name: 'Ramanujnagar', lat: 23.1900, lng: 82.9800, district: 'Surajpur' },
-    
+
     { name: 'Baikunthpur', lat: 23.2600, lng: 82.5600, district: 'Korea' },
     { name: 'Manendragarh', lat: 23.1200, lng: 82.2000, district: 'Korea' },
     { name: 'Khadgawan', lat: 23.0500, lng: 82.5000, district: 'Korea' },
-    
+
     { name: 'Gaurela', lat: 22.7600, lng: 81.9000, district: 'Gaurela-Pendra-Marwahi' },
     { name: 'Pendra', lat: 22.7700, lng: 81.9600, district: 'Gaurela-Pendra-Marwahi' },
     { name: 'Marwahi', lat: 22.8000, lng: 82.0000, district: 'Gaurela-Pendra-Marwahi' }
@@ -389,7 +473,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       ...validLocations,
       ...validTrainingLocations.map(t => t.location_details)
     ];
-    
+
     const avgLat = allPoints.reduce((s, l) => s + Number(l.latitude), 0) / allPoints.length;
     const avgLng = allPoints.reduce((s, l) => s + Number(l.longitude), 0) / allPoints.length;
     center = [avgLat, avgLng];
@@ -473,6 +557,8 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     } : {})
   };
 
+
+
   return (
     <div style={containerStyle}>
       {!isFullScreen && (
@@ -530,7 +616,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
 
       <MapContainer center={center} zoom={zoom} style={{ width: '100%', height: '100%', borderRadius: isFullScreen ? 0 : '12px' }} zoomControl={false}>
         <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-        
+
         {geoJsonData && (
           <GeoJSON data={geoJsonData} style={{ color: THEME.primary, weight: 2, fillOpacity: 0.05 }} />
         )}
@@ -545,7 +631,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
         ))}
 
         {/* Training Markers */}
-        {validTrainingLocations.map((training, i) => {
+        {/* {validTrainingLocations.map((training, i) => {
           const loc = training.location_details;
           const markerColor = training.isFake ? '#2563EB' : '#9647bb';
 
@@ -566,7 +652,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
                     <div>
                       <div style={{ fontWeight: 700 }}>{training.trainer_name}</div>
                       <div style={{ fontSize: 12, color: '#64748b' }}>
-                        {/* {training.subject_name} */}
+                        {training.subject_name}
                         Marketplace Literacy
                       </div>
                       {training.isFake && (
@@ -586,7 +672,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
               </Popup>
             </Marker>
           );
-        })}
+        })} */}
       </MapContainer>
     </div>
   );
@@ -598,12 +684,12 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
 const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.sm }}>
 
-    {/* Top Stats Grid */}
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.md }}>
-      <StatCard title="Total Trainings" value="450+" icon={BookOpen} gradient={THEME.gradients.kpiA} />
-      <StatCard title="Total Trainers" value="150+" icon={User} gradient={THEME.gradients.kpiB} />
-      <StatCard title="Total Participants" value="15500+" icon={Users} gradient={THEME.gradients.kpiC} />
-      <StatCard title="Total Villages" value="400+" icon={House} gradient={THEME.gradients.kpiD} />
+    {/* Top Stats Grid - Updated minmax for smaller cards */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: THEME.gap.md }}>
+      <StatCard title="Total Trainings" value={summary?.total_trainings || 0} icon={BookOpen} gradient={THEME.gradients.kpiA} />
+      <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.kpiB} />
+      <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.kpiC} />
+      <StatCard title="Total Locations" value={summary?.total_locations || 0} icon={House} gradient={THEME.gradients.kpiD} />
     </div>
 
     {/* FULL WIDTH MAP */}
@@ -724,107 +810,106 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        minWidth: '260px',
-        padding: '22px 24px',
-        borderRadius: '12px',
+        minWidth: '200px', // Smaller minimum width
+        padding: '16px 18px', // Reduced padding for compactness
+        borderRadius: '14px',
         position: 'relative',
-        backgroundImage: `${gradient},
-          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='white' stop-opacity='0.12'/><stop offset='1' stop-color='white' stop-opacity='0'/></linearGradient></defs><rect width='120' height='120' fill='url(%23g)'/><path d='M0 20 H120 M0 60 H120 M0 100 H120' stroke='white' stroke-opacity='0.08'/><path d='M20 0 V120 M60 0 V120 M100 0 V120' stroke='white' stroke-opacity='0.06'/></svg>")`,
-        backgroundBlendMode: 'screen',
+        backgroundImage: `${gradient}`,
+        // Removed the noisy SVG pattern for a cleaner look, kept subtle overlay
         backgroundSize: 'cover',
-        border: '1px solid rgba(255, 255, 255, 0.22)',
-        // Subtle shadow for depth
-        boxShadow: '0 12px 28px rgba(0, 0, 0, 0.14)',
-        // Smooth transition for hover effects (250ms ease)
-        transition: 'transform 220ms ease, box-shadow 220ms ease, filter 220ms ease',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        // Elegant shadows with inner glow
+        boxShadow: `
+            0 4px 12px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2)
+          `,
+        transition: 'transform 220ms cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 220ms ease',
         cursor: 'default',
-        overflow: 'hidden', // Ensures rounded corners clip content
-        userSelect: 'none', // Prevents text selection on clicks
+        overflow: 'hidden',
+        userSelect: 'none',
       }}
-      // Interaction: Hover effect handlers
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        // Increase shadow intensity on hover
-        e.currentTarget.style.boxShadow = '0 18px 36px rgba(0, 0, 0, 0.18)';
-        e.currentTarget.style.filter = 'saturate(1.04)';
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.boxShadow = `
+            0 10px 20px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3)
+          `;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        // Revert shadow to default
-        e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.14)';
-        e.currentTarget.style.filter = 'none';
+        e.currentTarget.style.boxShadow = `
+            0 4px 12px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2)
+          `;
       }}
     >
+      {/* Subtle Overlay for Glass Effect */}
       <div
         style={{
           position: 'absolute',
           inset: '0',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0))',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0))',
           pointerEvents: 'none'
         }}
       />
+
       {/* Left Side: Content (Title + Value) */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '6px',
+          gap: '4px',
           flex: 1,
           zIndex: 1
         }}
       >
-        {/* Title Typography */}
+        {/* Title Typography - Clean, No Pill Background */}
         <div
           style={{
-            fontSize: '10.5px',
-            fontWeight: '700',
-            color: 'rgba(255, 255, 255, 0.9)', // White with 0.9 opacity
-            letterSpacing: '0.07em',
+            fontSize: '0.7rem', // Smaller text
+            fontWeight: '600',
+            color: 'rgba(255, 255, 255, 0.85)',
+            letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            background: 'rgba(255,255,255,0.18)',
-            padding: '4px 8px',
-            borderRadius: '8px',
-            width: 'fit-content',
-            border: '1px solid rgba(255,255,255,0.2)'
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
           }}
         >
           {title}
         </div>
 
-        {/* Value Typography */}
+        {/* Value Typography - Reduced Size */}
         <div
           style={{
-            fontSize: '34px',
+            fontSize: '1.75rem', // Reduced from 34px
             fontWeight: '800',
-            lineHeight: '1.05',
-            letterSpacing: '-0.015em',
-            color: '#ffffff', // Solid white for high contrast
-            textShadow: '0 2px 10px rgba(0,0,0,0.18)'
+            lineHeight: '1',
+            letterSpacing: '-0.02em',
+            color: '#ffffff',
+            textShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}
         >
           {value}
         </div>
       </div>
 
-      {/* Right Side: Icon Container */}
+      {/* Right Side: Icon Container - Smaller & Cleaner */}
       <div
         style={{
-          width: '54px',
-          height: '54px',
-          borderRadius: '12px',
-          background: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white background
+          width: '42px', // Reduced from 54px
+          height: '42px',
+          borderRadius: '10px',
+          background: 'rgba(255, 255, 255, 0.18)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backdropFilter: 'blur(6px)', // Adds subtle glassmorphism effect
-          border: '1px solid rgba(255, 255, 255, 0.24)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.12)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.1)',
           zIndex: 1
         }}
       >
-        {/* Render Icon passed via props */}
         <Icon
-          size={26}
+          size={20} // Reduced from 26px
           color="#ffffff"
           strokeWidth={2.5}
           style={{
@@ -835,6 +920,7 @@ const StatCard = ({ title, value, icon: Icon, gradient }) => {
     </div>
   );
 };
+
 
 const TrainingStatusCard = ({ viewData, summary }) => (
   <div style={{

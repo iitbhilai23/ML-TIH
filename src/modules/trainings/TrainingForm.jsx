@@ -3,7 +3,7 @@ import { trainerService } from '../../services/trainerService';
 import { subjectService } from '../../services/subjectService';
 import { locationService } from '../../services/locationService';
 import { X } from 'lucide-react';
-
+import { toast } from 'sonner';
 
 const styles = {
   modalOverlay: {
@@ -12,7 +12,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)', 
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     backdropFilter: 'blur(4px)',
     display: 'flex',
     justifyContent: 'center',
@@ -144,19 +144,19 @@ const styles = {
 };
 
 const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
- 
+
   const [trainers, setTrainers] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    trainer_id: '', 
-    subject_id: '', 
+    trainer_id: '',
+    subject_id: '',
     location_id: '',
-    start_date: '', 
-    end_date: '', 
-    max_participants: 50, 
+    start_date: '',
+    end_date: '',
+    max_participants: 50,
     status: 'scheduled'
   });
 
@@ -165,26 +165,26 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       loadDropdowns();
       if (initialData) {
         // Format dates for input field (YYYY-MM-DD)
-        const formattedStart = initialData.start_date ? 
+        const formattedStart = initialData.start_date ?
           new Date(initialData.start_date).toISOString().split('T')[0] : '';
-        const formattedEnd = initialData.end_date ? 
+        const formattedEnd = initialData.end_date ?
           new Date(initialData.end_date).toISOString().split('T')[0] : '';
-        
-        setFormData({ 
-          ...initialData, 
-          start_date: formattedStart, 
-          end_date: formattedEnd 
+
+        setFormData({
+          ...initialData,
+          start_date: formattedStart,
+          end_date: formattedEnd
         });
       } else {
         // Reset form
-        setFormData({ 
-          trainer_id: '', 
-          subject_id: '', 
-          location_id: '', 
-          start_date: '', 
-          end_date: '', 
-          max_participants: 50, 
-          status: 'scheduled' 
+        setFormData({
+          trainer_id: '',
+          subject_id: '',
+          location_id: '',
+          start_date: '',
+          end_date: '',
+          max_participants: 50,
+          status: 'scheduled'
         });
       }
     }
@@ -203,7 +203,8 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
       setLocations(lData);
     } catch (error) {
       console.error("Failed to load dropdowns:", error);
-      alert('Failed to load dropdown data');
+      // SONNER TOAST
+      toast.error('Failed to load dropdown data');
     }
     setLoading(false);
   };
@@ -211,29 +212,30 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     const needsNumber = ['trainer_id', 'subject_id', 'location_id', 'max_participants'].includes(name);
-    setFormData({ 
-      ...formData, 
-      [name]: needsNumber ? (value === '' ? '' : Number(value)) : value 
+    setFormData({
+      ...formData,
+      [name]: needsNumber ? (value === '' ? '' : Number(value)) : value
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!formData.trainer_id || !formData.subject_id || !formData.location_id || !formData.start_date) {
-      alert('Please fill all required fields');
+      // SONNER TOAST
+      toast.error('Please fill all required fields');
       return;
     }
-    
+
     // Create clean data object for API
     const cleanData = { ...formData };
-    delete cleanData.id;           
-    delete cleanData.actual_participants; 
-    delete cleanData.created_at;  
-    delete cleanData.updated_at;   
-    
-    onSubmit(cleanData); 
+    delete cleanData.id;
+    delete cleanData.actual_participants;
+    delete cleanData.created_at;
+    delete cleanData.updated_at;
+
+    onSubmit(cleanData);
   };
 
   if (!isOpen) return null;
@@ -241,14 +243,14 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modalContent}>
-        
+
         {/* Modal Header */}
         <div style={styles.modalHeader}>
           <h3 style={styles.title}>
             {initialData ? 'Edit Training' : 'Schedule New Training'}
           </h3>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             style={styles.closeIconBtn}
             onMouseEnter={(e) => Object.assign(e.target.style, styles.closeIconBtnHover)}
             onMouseLeave={(e) => Object.assign(e.target.style, { backgroundColor: 'transparent', color: '#64748b' })}
@@ -261,16 +263,16 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
         {!loading && (
           <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-            
+
             {/* Dropdowns Row 1 */}
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Select Subject *</label>
-                <select 
-                  required 
-                  name="subject_id" 
+                <select
+                  required
+                  name="subject_id"
                   style={styles.input}
-                  value={formData.subject_id} 
+                  value={formData.subject_id}
                   onChange={handleChange}
                   onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                   onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
@@ -283,11 +285,11 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Assign Trainer *</label>
-                <select 
-                  required 
-                  name="trainer_id" 
+                <select
+                  required
+                  name="trainer_id"
                   style={styles.input}
-                  value={formData.trainer_id} 
+                  value={formData.trainer_id}
                   onChange={handleChange}
                   onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                   onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
@@ -303,11 +305,11 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
             {/* Location Dropdown */}
             <div style={styles.formGroup}>
               <label style={styles.label}>Select Location *</label>
-              <select 
-                required 
-                name="location_id" 
+              <select
+                required
+                name="location_id"
                 style={styles.input}
-                value={formData.location_id} 
+                value={formData.location_id}
                 onChange={handleChange}
                 onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                 onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
@@ -325,24 +327,24 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Start Date *</label>
-                <input 
-                  required 
-                  type="date" 
-                  name="start_date" 
+                <input
+                  required
+                  type="date"
+                  name="start_date"
                   style={styles.input}
-                  value={formData.start_date} 
-                  onChange={handleChange} 
+                  value={formData.start_date}
+                  onChange={handleChange}
                   onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                   onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
                 />
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>End Date</label>
-                <input 
-                  type="date" 
-                  name="end_date" 
+                <input
+                  type="date"
+                  name="end_date"
                   style={styles.input}
-                  value={formData.end_date} 
+                  value={formData.end_date}
                   onChange={handleChange}
                   onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                   onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
@@ -354,13 +356,13 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Max Participants</label>
-                <input 
-                  type="number" 
-                  name="max_participants" 
+                <input
+                  type="number"
+                  name="max_participants"
                   style={styles.input}
-                  value={formData.max_participants} 
-                  onChange={handleChange} 
-                  min="1" 
+                  value={formData.max_participants}
+                  onChange={handleChange}
+                  min="1"
                   max="1000"
                   onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                   onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
@@ -368,10 +370,10 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Current Status</label>
-                <select 
-                  name="status" 
+                <select
+                  name="status"
                   style={styles.input}
-                  value={formData.status} 
+                  value={formData.status}
                   onChange={handleChange}
                   onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                   onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
@@ -386,18 +388,18 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
             {/* Actions */}
             <div style={styles.actions}>
-              <button 
-                type="button" 
-                style={{...styles.btn, ...styles.btnSecondary}}
+              <button
+                type="button"
+                style={{ ...styles.btn, ...styles.btnSecondary }}
                 onClick={onClose}
                 onMouseEnter={(e) => Object.assign(e.target.style, styles.btnSecondaryHover)}
                 onMouseLeave={(e) => Object.assign(e.target.style, { backgroundColor: '#fff', borderColor: '#cbd5e1', color: '#475569' })}
               >
                 Cancel
               </button>
-              <button 
-                type="submit" 
-                style={{...styles.btn, ...styles.btnPrimary}}
+              <button
+                type="submit"
+                style={{ ...styles.btn, ...styles.btnPrimary }}
                 onMouseEnter={(e) => Object.assign(e.target.style, styles.btnPrimaryHover)}
                 onMouseLeave={(e) => Object.assign(e.target.style, { backgroundColor: '#3b82f6', color: '#fff' })}
               >
@@ -412,3 +414,4 @@ const TrainingForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 };
 
 export default TrainingForm;
+

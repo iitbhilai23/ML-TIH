@@ -3,6 +3,24 @@ import api from '../services/api';
 
 export const dashboardService = {
 
+  getDistricts: async () => {
+    try {
+      const response = await api.get('/reports/districts');
+      return response.data;
+    } catch (error) {
+      console.error("District Fetch Error:", error);
+      throw error;
+    }
+  },
+
+  getBlocksByDistrict: async (district_cd) => {
+    if (!district_cd) return [];
+    const res = await api.get('/reports/blocks', {
+      params: { district_cd }
+    });
+    return res.data;
+  },
+
   // Existing: Summary data
   getDashboardData: async (filters = {}) => {
     try {
@@ -12,6 +30,7 @@ export const dashboardService = {
       // const response = await api.get('/dashboard/complete', { params: cleanFilters });
       const response = await api.get('/dashboard/summary', { params: cleanFilters });
       return response.data;
+
     } catch (error) {
       console.error("Dashboard Fetch Error:", error);
       throw error;

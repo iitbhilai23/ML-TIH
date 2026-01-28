@@ -3,6 +3,9 @@ import { trainingService } from '../../services/trainingService';
 import styles from './Participants.module.css';
 import { X, User, Camera } from 'lucide-react';
 
+// IMPORT SONNER
+import { toast } from 'sonner';
+
 const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [trainings, setTrainings] = useState([]);
 
@@ -74,6 +77,8 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
         setFormData({ ...formData, profile_image_url: compressedBase64 });
       } catch (error) {
         console.error("Error compressing image:", error);
+        // SONNER TOAST FOR IMAGE ERROR
+        toast.error('Failed to process image. Please try another file.');
       }
     }
   };
@@ -108,7 +113,11 @@ const ParticipantForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     try {
       const data = await trainingService.getAll();
       setTrainings(data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      // SONNER TOAST FOR LOADING ERROR
+      toast.error('Failed to load trainings list');
+    }
   };
 
   const handleChange = (e) => {

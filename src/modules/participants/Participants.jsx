@@ -3,14 +3,22 @@ import { participantService } from '../../services/participantService';
 import { trainingService } from '../../services/trainingService';
 import ParticipantForm from './ParticipantForm';
 import styles from './Participants.module.css';
-import { Plus, Pencil, Trash2, User, Phone, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
+import { toast, Toaster } from 'sonner';
 
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
-  const [trainings, setTrainings] = useState([]); // Filter dropdown ke liye
+  const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
 
   const THEME = {
     primary: '#7c3aed',
@@ -19,9 +27,7 @@ const Participants = () => {
     success: '#10b981',
     danger: '#ef4444',
     warning: '#f59e0b',
-
     bgGradient: 'linear-gradient(-45deg, #f8fafc, #f1f5f9, #fdfbf7, #f0fdf4)',
-
     glass: {
       background: 'rgba(255, 255, 255, 0.85)',
       backdropFilter: 'blur(16px)',
@@ -31,7 +37,6 @@ const Participants = () => {
       boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     },
-
     softShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
     mediumShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
     hoverShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
@@ -52,13 +57,22 @@ const Participants = () => {
   // 2. Load Participants when filter changes
   useEffect(() => {
     loadParticipants();
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
   }, [selectedTrainingId]);
+
+  // 3. Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const loadTrainings = async () => {
     try {
       const data = await trainingService.getAll();
       setTrainings(data);
-    } catch (e) { }
+    } catch (e) {
+      toast.error('Failed to load trainings list');
+    }
   };
 
   const loadParticipants = async () => {
@@ -67,32 +81,71 @@ const Participants = () => {
       const filters = selectedTrainingId ? { training_id: selectedTrainingId } : {};
       const data = await participantService.getAll(filters);
       setParticipants(data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load participants');
+    }
     setLoading(false);
   };
 
   const handleSave = async (data) => {
-    if (editingData) {
-      const { training_id, ...updateData } = data; // 🔥 REMOVE
-      await participantService.update(editingData.id, updateData);
-    } else {
-      await participantService.create(data);
-    }
+    try {
+      if (editingData) {
+        const { training_id, ...updateData } = data;
+        await participantService.update(editingData.id, updateData);
+        toast.success('Participant updated successfully');
+      } else {
+        await participantService.create(data);
+        toast.success('Participant registered successfully');
+      }
 
-    setIsModalOpen(false);
-    setEditingData(null);
-    await loadParticipants();
+      setIsModalOpen(false);
+      setEditingData(null);
+      await loadParticipants();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to save participant');
+    }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are You Sure Delete?')) {
+    // if (window.confirm('Are You Sure Delete?')) {
+    try {
       await participantService.delete(id);
-      await loadParticipants(); //  MUST
+      toast.success('Participant deleted successfully');
+      await loadParticipants();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to delete participant');
+    }
+    // }
+  };
+
+  // --- Filtering Logic ---
+  // Filter participants by name based on searchQuery
+  const filteredParticipants = participants.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination Logic (Updated to use filteredParticipants)
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentParticipants = filteredParticipants.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredParticipants.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      // Optional: scroll to top of table on page change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
     <div className={styles.container}>
+      {/* ADD TOASTER COMPONENT */}
+      <Toaster position="top-right" richColors />
+
       {/* Modern Header Section */}
       <div style={{
         display: 'flex',
@@ -100,72 +153,201 @@ const Participants = () => {
         gap: '10px',
         marginBottom: '20px'
       }}>
-        {/* Header Card */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'nowrap',
+          gap: '24px',
           background: '#FFFFFF',
-          padding: '20px 32px',
+          padding: '24px 32px',
           borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
-          //  marginBottom: '20px'
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          overflow: 'hidden', // Prevents content spill if too long
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', }}>
+
+          {/* Left Section: Title & Stat */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            minWidth: '280px',
+            flexShrink: 0
+          }}>
             <h2 style={{
               fontSize: '1.5rem',
               fontWeight: 700,
               color: '#1e293b',
               margin: 0,
+              letterSpacing: '-0.025em',
               display: 'flex',
               alignItems: 'center',
               gap: '12px'
             }}>
-              <User size={26} color={THEME.primary} /> Participants / Beneficiaries
+              Participants / Beneficiaries
             </h2>
-            <p style={{
-              fontSize: '0.95rem',
-              color: '#64748b',
-              margin: 0,
-              marginLeft: '42px'
-            }}>
-              Manage participant registrations and attendance
-            </p>
+
+            {/* Modern Pill Badge */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                backgroundColor: '#f1f5f9',
+                padding: '6px 16px',
+                borderRadius: '9999px',
+                border: '1px solid transparent',
+                alignSelf: 'flex-start',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {/* Icon */}
+              <User size={18} color="#6366f1" strokeWidth={2} />
+
+              {/* Label */}
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#64748b',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                Total Participants
+              </span>
+
+              {/* Count */}
+              <span
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 800,
+                  color: '#1e293b',
+                  lineHeight: 1
+                }}
+              >
+                {participants.length}
+              </span>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            {/* Vibrant Total Trainer Card (Fixing "Light" look) */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)' // Stronger shadow
-            }}>
-              <div style={{
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: '2px'
-              }}>
-                Total Participants
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>
-                {participants.length}
-              </div>
+          {/* Middle Section: Filters & Search */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'nowrap',
+            flexGrow: 1,
+            justifyContent: 'flex-end',
+            overflow: 'hidden' // Prevents inputs from breaking layout
+          }}>
+
+            {/* Training Filter Dropdown */}
+            <div style={{ minWidth: '200px', maxWidth: '280px' }}>
+              <select
+                value={selectedTrainingId}
+                onChange={(e) => setSelectedTrainingId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  color: '#334155',
+                  backgroundColor: '#f8fafc',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 14px center',
+                  backgroundSize: '16px'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#6366f1';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <option value="">Show All Participants</option>
+                {trainings.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.subject_name} ({t.location_details?.district})
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* Search By Name Input */}
+            <div style={{ position: 'relative', minWidth: '220px', flex: '1' }}>
+              <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px 12px 46px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  color: '#334155',
+                  backgroundColor: '#f8fafc',
+                  outline: 'none',
+                  transition: 'all 0.2s ease'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#6366f1';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            {/* Results Counter */}
+            {selectedTrainingId && (
+              <div style={{
+                fontSize: '0.85rem',
+                color: '#64748b',
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                minWidth: '70px'
+              }}>
+                <span style={{ color: '#1e293b', fontWeight: 700 }}>{filteredParticipants.length}</span> found
+              </div>
+            )}
+
+          </div>
+
+          {/* Right Section: Action Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+
+            {/* Add Button */}
             <button
-              onClick={() => { setEditingData(null); setIsModalOpen(true); }}
+              onClick={() => {
+                setEditingData(null);
+                setIsModalOpen(true);
+              }}
               style={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 color: 'white',
-                padding: '12px 20px',
-                borderRadius: '10px',
+                padding: '14px 24px',
+                borderRadius: '12px',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: '0.9rem',
@@ -173,78 +355,23 @@ const Participants = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease',
+                fontFamily: 'inherit'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+              }}
             >
               <Plus size={18} /> Add Participant
             </button>
           </div>
-        </div>
-
-        {/* Filter Bar */}
-        <div className={styles.filterBar} style={{
-          background: '#FFFFFF',
-          padding: '16px 20px',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            paddingRight: '16px',
-            borderRight: '2px solid #e2e8f0',
-            minWidth: '100px'
-          }}>
-            <Filter size={18} style={{ color: '#6366f1' }} />
-            <span style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              color: '#1e293b',
-              letterSpacing: '0.5px'
-            }}>FILTER</span>
-          </div>
-          <select
-            className={styles.select}
-            value={selectedTrainingId}
-            onChange={(e) => setSelectedTrainingId(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#334155',
-              outline: 'none',
-              transition: 'all 0.2s ease',
-              minWidth: '300px',
-              cursor: 'pointer',
-              background: 'white'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <option value="">-- Show All Participants --</option>
-            {trainings.map(t => (
-              <option key={t.id} value={t.id}>
-                {t.subject_name} ({t.location_details?.district})
-              </option>
-            ))}
-          </select>
-          {selectedTrainingId && (
-            <span style={{ fontSize: '0.875rem', color: '#64748b', marginLeft: '8px' }}>
-              Showing {participants.length} students
-            </span>
-          )}
         </div>
       </div>
 
@@ -265,26 +392,24 @@ const Participants = () => {
               {loading ? <tr><td colSpan="5" className="p-4 text-center">
                 <Spinner overlay={false} />
               </td></tr> :
-                participants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
-                  participants.map(p => (
+                filteredParticipants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
+                  currentParticipants.map(p => (
                     <tr key={p.id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           {p.profile_image_url ? (
-                            // Image with FORCED small size using inline styles
                             <img
                               src={p.profile_image_url}
                               alt={p.name}
                               style={{
-                                width: '36px',      // Fixed Width
-                                height: '36px',     // Fixed Height
-                                objectFit: 'cover', // Prevents stretching
-                                borderRadius: '50%', // Makes it a circle
+                                width: '36px',
+                                height: '36px',
+                                objectFit: 'cover',
+                                borderRadius: '50%',
                                 border: '1px solid #e2e8f0'
                               }}
                             />
                           ) : (
-                            // Fallback Initials with matching size
                             <div style={{
                               width: '36px',
                               height: '36px',
@@ -404,6 +529,111 @@ const Participants = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && filteredParticipants.length > 0 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '16px 20px',
+            borderTop: '1px solid #e2e8f0',
+            background: '#ffffff',
+            borderBottomLeftRadius: '16px',
+            borderBottomRightRadius: '16px',
+            marginTop: '0px'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredParticipants.length)} of {filteredParticipants.length} entries
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
+                  color: currentPage === 1 ? '#cbd5e1' : '#475569',
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1';
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                <ChevronLeft size={16} /> Previous
+              </button>
+
+              <div style={{
+                display: 'flex',
+                gap: '4px',
+                margin: '0 8px'
+              }}>
+                <span style={{
+                  padding: '8px 12px',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+                }}>
+                  {currentPage}
+                </span>
+                <span style={{
+                  padding: '8px 4px',
+                  color: '#64748b',
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  of {totalPages}
+                </span>
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff',
+                  color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569',
+                  cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1';
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                Next <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ParticipantForm
@@ -417,3 +647,4 @@ const Participants = () => {
 };
 
 export default Participants;
+

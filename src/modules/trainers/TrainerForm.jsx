@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { trainerService } from '../../services/trainerService';
 import styles from './Trainers.module.css';
+import { toast, Toaster } from 'sonner';
 
 const CameraIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#94a3b8' }}>
@@ -9,6 +10,7 @@ const CameraIcon = () => (
   </svg>
 )
 
+// REMOVED showToast from props
 const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', bio: '', profile_image_url: ''
@@ -29,33 +31,19 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     } else {
       setFormData({ name: '', email: '', phone: '', bio: '', profile_image_url: '' });
       setSelectedFile(null);
-      // Reset preview to placeholder on close or new open
       setFilePreview('');
     }
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  // Helper to clean payload
-  // const cleanPayload = (data) =>
-  //   Object.fromEntries(
-  //     Object.entries(data).filter(
-  //       ([_, v]) => v !== '' && v !== null && v !== undefined
-  //     )
-  //   );
-
-  // In TrainerForm.js
-
   const cleanPayload = (data) =>
     Object.fromEntries(
       Object.entries(data).filter(
-        // CHANGE THIS LINE: Allow empty strings, but filter null/undefined
         ([_, v]) => v !== null && v !== undefined
       )
     );
 
-
-  // new code here 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUploading(true);
@@ -63,7 +51,6 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     try {
       let trainer;
 
-      //  CREATE / UPDATE TRAINER (TEXT DATA)
       if (initialData) {
         trainer = await trainerService.updateTrainer(
           initialData.id,
@@ -83,42 +70,34 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
         });
       }
 
-
       if (selectedFile) {
         const uploadRes = await trainerService.uploadTrainerPhoto(
           trainer.id,
           selectedFile
         );
 
-        // update trainer with image url
         await trainerService.updateTrainer(trainer.id, {
           profile_image_url: uploadRes.file_url,
         });
-
       }
 
-      //  SUCCESS MESSAGE
-      alert(
+      // SONNER TOAST
+      toast.success(
         initialData
           ? 'Trainer updated successfully!'
           : 'Trainer created successfully!'
       );
 
-      // refresh list
       onSubmit();
-
-      // close modal
       onClose();
     } catch (error) {
       console.error(error);
-      alert(error.message || 'Something went wrong');
+      // SONNER TOAST
+      toast.error(error.message || 'Something went wrong');
     } finally {
       setIsUploading(false);
     }
   };
-
-
-
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -139,23 +118,7 @@ const TrainerForm = ({ isOpen, onClose, onSubmit, initialData }) => {
           {/* Profile Image Upload */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Profile Image</label>
-            {/* <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              {filePreview && (
-                <img
-                  src={filePreview}
-                  alt="Preview"
-                  style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
-                />
-              )}
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-            <small style={{ color: '#64748b', fontSize: '0.75rem' }}>Accepts JPG, PNG, GIF (Max 5MB)</small> */}
-            <div onClick={() => fileInputRef.current.click()} // Trigger hidden input
+            <div onClick={() => fileInputRef.current.click()}
               style={{
                 width: '100px',
                 height: '100px',
