@@ -15,6 +15,7 @@ const sanitizeFilters = (filters, blockedKeys = []) => {
   );
 };
 
+
 export const dashboardService = {
 
   getDistricts: async () => {
