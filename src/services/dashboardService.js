@@ -22,20 +22,42 @@ export const dashboardService = {
   },
 
   // Existing: Summary data
+  // getDashboardData: async (filters = {}) => {
+  //   try {
+  //     const cleanFilters = Object.fromEntries(
+  //       Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+  //     );
+  //     // const response = await api.get('/dashboard/complete', { params: cleanFilters });
+  //     const response = await api.get('/dashboard/summary', { params: cleanFilters });
+  //     return response.data;
+
+  //   } catch (error) {
+  //     console.error("Dashboard Fetch Error:", error);
+  //     throw error;
+  //   }
+  // },
   getDashboardData: async (filters = {}) => {
     try {
       const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+        Object.entries(filters)
+          .filter(([_, v]) => v != null && v !== '')
+          .map(([k, v]) => [
+            k,
+            k === 'district_cd' || k === 'block_cd' ? Number(v) : v
+          ])
       );
-      // const response = await api.get('/dashboard/complete', { params: cleanFilters });
-      const response = await api.get('/dashboard/summary', { params: cleanFilters });
-      return response.data;
 
+      const response = await api.get('/dashboard/summary', {
+        params: cleanFilters
+      });
+
+      return response.data;
     } catch (error) {
       console.error("Dashboard Fetch Error:", error);
       throw error;
     }
   },
+
 
   //  Get dashboard view data (from your training_dashboard view)
   getDashboardViewData: async (filters = {}) => {
