@@ -425,6 +425,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       district: pt.district
     }
   }));
+  
 
   const allTrainingData = [...(trainingLocations || []), ...SPECIFIC_FAKE_LOCATIONS];
 
