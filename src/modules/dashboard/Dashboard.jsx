@@ -447,6 +447,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
   useEffect(() => {
     setGeoJsonData(cgGeoJson);
   }, []);
+  
 
   const createCustomIcon = (color = '#9647bb') =>
     L.divIcon({
