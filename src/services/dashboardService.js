@@ -35,7 +35,21 @@ export const dashboardService = {
     return res.data;
   },
 
-  // Summary data (district_cd NOT allowed)
+  
+  // getDashboardData: async (filters = {}) => {
+  //   try {
+  //     const cleanFilters = Object.fromEntries(
+  //       Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+  //     );
+  //     // const response = await api.get('/dashboard/complete', { params: cleanFilters });
+  //     const response = await api.get('/dashboard/summary', { params: cleanFilters });
+  //     return response.data;
+
+  //   } catch (error) {
+  //     console.error("Dashboard Fetch Error:", error);
+  //     throw error;
+  //   }
+  // },
   getDashboardData: async (filters = {}) => {
     try {
       const cleanFilters = sanitizeFilters(filters, ['district_cd', 'block_cd']);
