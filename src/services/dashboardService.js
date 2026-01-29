@@ -1,19 +1,5 @@
-import api from '../services/api';
 
-/**
- * Helper: remove unsupported filters safely
- */
-const sanitizeFilters = (filters, blockedKeys = []) => {
-  return Object.fromEntries(
-    Object.entries(filters).filter(
-      ([key, value]) =>
-        !blockedKeys.includes(key) &&
-        value !== null &&
-        value !== undefined &&
-        value !== ''
-    )
-  );
-};
+import api from '../services/api';
 
 
 export const dashboardService = {
@@ -36,10 +22,31 @@ export const dashboardService = {
     return res.data;
   },
 
-  // Summary data (district_cd NOT allowed)
+
+  // getDashboardData: async (filters = {}) => {
+  //   try {
+  //     const cleanFilters = Object.fromEntries(
+  //       Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+  //     );
+  //     // const response = await api.get('/dashboard/complete', { params: cleanFilters });
+  //     const response = await api.get('/dashboard/summary', { params: cleanFilters });
+  //     return response.data;
+
+  //   } catch (error) {
+  //     console.error("Dashboard Fetch Error:", error);
+  //     throw error;
+  //   }
+  // },
   getDashboardData: async (filters = {}) => {
     try {
-      const cleanFilters = sanitizeFilters(filters, ['district_cd', 'block_cd']);
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters)
+          .filter(([_, v]) => v != null && v !== '')
+          .map(([k, v]) => [
+            k,
+            k === 'district_cd' || k === 'block_cd' ? Number(v) : v
+          ])
+      );
 
       const response = await api.get('/dashboard/summary', {
         params: cleanFilters
@@ -52,15 +59,14 @@ export const dashboardService = {
     }
   },
 
-  // Dashboard view data (district_cd NOT allowed)
+
+  //  Get dashboard view data (from your training_dashboard view)
   getDashboardViewData: async (filters = {}) => {
     try {
-      const cleanFilters = sanitizeFilters(filters, ['district_cd', 'block_cd']);
-
-      const response = await api.get('/dashboard/training-stats', {
-        params: cleanFilters
-      });
-
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+      );
+      const response = await api.get('/dashboard/training-stats', { params: cleanFilters });
       return response.data;
     } catch (error) {
       console.error("Dashboard View Fetch Error:", error);
@@ -68,15 +74,13 @@ export const dashboardService = {
     }
   },
 
-  // Map data (district_cd NOT allowed)
+  //  Get map data
   getMapData: async (filters = {}) => {
     try {
-      const cleanFilters = sanitizeFilters(filters, ['district_cd', 'block_cd']);
-
-      const response = await api.get('/dashboard-view/map', {
-        params: cleanFilters
-      });
-
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+      );
+      const response = await api.get('/dashboard-view/map', { params: cleanFilters });
       return response.data;
     } catch (error) {
       console.error("Map Data Fetch Error:", error);
@@ -84,15 +88,13 @@ export const dashboardService = {
     }
   },
 
-  // Location-wise statistics (same endpoint, same rule)
+  //  Get location-wise statistics
   getLocationStats: async (filters = {}) => {
     try {
-      const cleanFilters = sanitizeFilters(filters, ['district_cd', 'block_cd']);
-
-      const response = await api.get('/dashboard/training-stats', {
-        params: cleanFilters
-      });
-
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+      );
+      const response = await api.get('/dashboard/training-stats', { params: cleanFilters });
       return response.data;
     } catch (error) {
       console.error("Location Stats Fetch Error:", error);
