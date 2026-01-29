@@ -88,7 +88,6 @@ const Dashboard = () => {
   //   fetchData();
   // }, [filters]);
   useEffect(() => {
-    // avoid calling API when district is changing but blocks not ready
     fetchData();
   }, [
     filters.district_cd,
