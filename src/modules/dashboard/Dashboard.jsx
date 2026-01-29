@@ -142,7 +142,7 @@ const Dashboard = () => {
         const data = await dashboardService.getBlocksByDistrict(filters.district_cd);
         setBlocks(Array.isArray(data) ? data : []);
 
-        // Reset selected block when district changes
+
         setFilters((prev) => ({ ...prev, block_cd: '' }));
       } catch (error) {
         console.error('Error loading blocks', error);
