@@ -84,9 +84,20 @@ const Dashboard = () => {
     status: ''
   });
 
+  // useEffect(() => {
+  //   fetchData();
+  // }, [filters]);
   useEffect(() => {
+    // avoid calling API when district is changing but blocks not ready
     fetchData();
-  }, [filters]);
+  }, [
+    filters.district_cd,
+    filters.block_cd,
+    filters.start_date,
+    filters.end_date,
+    filters.status
+  ]);
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -425,7 +436,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       district: pt.district
     }
   }));
-  
+
 
   const allTrainingData = [...(trainingLocations || []), ...SPECIFIC_FAKE_LOCATIONS];
 
