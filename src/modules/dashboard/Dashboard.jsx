@@ -142,7 +142,7 @@ const Dashboard = () => {
         const data = await dashboardService.getBlocksByDistrict(filters.district_cd);
         setBlocks(Array.isArray(data) ? data : []);
 
-        // Reset selected block when district changes
+
         setFilters((prev) => ({ ...prev, block_cd: '' }));
       } catch (error) {
         console.error('Error loading blocks', error);
@@ -405,8 +405,6 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     { name: 'Sukma', lat: 18.3900, lng: 81.6500, district: 'Sukma' },
     { name: 'Konta', lat: 17.8100, lng: 81.3900, district: 'Sukma' },
     { name: 'Chhindgarh', lat: 18.5000, lng: 81.8300, district: 'Sukma' },
-
-    
     { name: 'Baloda Bazar', lat: 21.6570, lng: 82.1600, district: 'Baloda Bazar' },
     { name: 'Bhatapara', lat: 21.7350, lng: 81.9500, district: 'Baloda Bazar' },
     { name: 'Simga', lat: 21.6300, lng: 81.7000, district: 'Baloda Bazar' },
@@ -438,6 +436,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     }
   }));
 
+
   const allTrainingData = [...(trainingLocations || []), ...SPECIFIC_FAKE_LOCATIONS];
 
   const validTrainingLocations = allTrainingData.filter(t => {
@@ -458,7 +457,6 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
   useEffect(() => {
     setGeoJsonData(cgGeoJson);
   }, []);
-
 
   const createCustomIcon = (color = '#9647bb') =>
     L.divIcon({
