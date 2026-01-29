@@ -22,7 +22,7 @@ export const trainingService = {
     try {
 
       const response = await api.get('/trainings', { params: filters });
-      console.log('Get trainings response:', response);
+     // console.log('Get trainings response:', response);
       return response.data;
     } catch (error) {
       console.error('Get trainings error:', error);

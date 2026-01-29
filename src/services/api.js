@@ -16,12 +16,12 @@ api.interceptors.request.use(
     }
 
     // Log the request for debugging
-    console.log('API Request:', {
-      url: config.url,
-      method: config.method,
-      headers: config.headers,
-      data: config.data,
-    });
+    // console.log('API Request:', {
+    //   url: config.url,
+    //   method: config.method,
+    //   headers: config.headers,
+    //   data: config.data,
+    // });
 
     return config;
   },
@@ -33,11 +33,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Log successful response
-    console.log('API Response:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
+    // console.log('API Response:', {
+    //   url: response.config.url,
+    //   status: response.status,
+    //   data: response.data,
+    // });
     return response;
   },
   (error) => {

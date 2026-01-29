@@ -6,6 +6,7 @@ import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
 import { Users, BookOpen, MapPin, Calendar, Filter, TrendingUp, Table, BarChart2, User, Map as MapIcon, Maximize, Minimize, House } from 'lucide-react';
+import cgGeoJson from '../../assets/cg.json';
 
 const THEME = {
   gap: {
@@ -240,9 +241,6 @@ const Dashboard = () => {
         </div>
         <select name="district_cd" style={THEME.input} onChange={handleFilterChange} value={filters.district_cd}>
           <option value="">All Districts</option>
-          {/* <option value="2230">Khairagarh</option>
-          <option value="2210">Durg</option>
-          <option value="2209">Rajnandgaon</option> */}
           {districts.map((d) => (
             <option key={d.district_cd} value={d.district_cd}>
               {d.district_name}
@@ -250,15 +248,6 @@ const Dashboard = () => {
           ))}
         </select>
         <select name="block_cd" style={THEME.input} onChange={handleFilterChange} value={filters.block_cd} >
-          {/* <option value="">All Blocks</option>
-          <option value="220908">Khairagarh</option>
-          <option value="221011">Patan</option>
-          <option value="220904">Churia</option> */}
-          {/* <option value="">
-            {filters.district_cd ? 'All Blocks' : 'Select District First'}
-          </option>
-          disabled={!filters.district_cd}
-           */}
           <option value="">All Blocks</option>
           {blocks.map((b) => (
             <option key={b.block_cd} value={b.block_cd}>
@@ -315,12 +304,12 @@ const MapResizer = ({ trigger }) => {
   return null;
 };
 
-// ===== MAP COMPONENT WITH SPECIFIC FAKE LOCATIONS =====
+
 const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // STRICT BOUNDS FOR CHHATTISGARH
+  // STRICT BOUNDS FOR CHHATTISGARH (Keep for filtering)
   const MIN_LAT = 17.5;
   const MAX_LAT = 24.0;
   const MIN_LNG = 79.5;
@@ -331,7 +320,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     return lat >= MIN_LAT && lat <= MAX_LAT && lng >= MIN_LNG && lng <= MAX_LNG;
   };
 
-  // ===== SPECIFIC FAKE DATA POINTS (OLD + NEW) =====
+  // ===== SPECIFIC FAKE DATA POINTS =====
   const rawSpecificLocations = [
     // Old Locations
     { name: 'Balod', lat: 20.7304, lng: 81.2042, district: 'Balod' },
@@ -389,47 +378,38 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     { name: 'Narayanpur', lat: 19.7200, lng: 81.2400, district: 'Narayanpur' },
     { name: 'Gariaband', lat: 20.6300, lng: 82.0600, district: 'Gariaband' },
     { name: 'Chhura', lat: 20.8800, lng: 82.2500, district: 'Gariaband' },
-
     // NEW Locations
     { name: 'Dhamtari', lat: 20.7075, lng: 81.5482, district: 'Dhamtari' },
     { name: 'Kurud', lat: 20.8300, lng: 81.7200, district: 'Dhamtari' },
     { name: 'Magarlod', lat: 20.6800, lng: 81.8300, district: 'Dhamtari' },
-
     { name: 'Mahasamund', lat: 21.1074, lng: 82.0979, district: 'Mahasamund' },
     { name: 'Saraipali', lat: 21.3150, lng: 83.0000, district: 'Mahasamund' },
     { name: 'Basna', lat: 21.2800, lng: 82.8300, district: 'Mahasamund' },
     { name: 'Pithora', lat: 21.2500, lng: 82.9300, district: 'Mahasamund' },
-
     { name: 'Kanker', lat: 20.2719, lng: 81.4917, district: 'Kanker' },
     { name: 'Bhanupratappur', lat: 20.3500, lng: 81.1000, district: 'Kanker' },
     { name: 'Charama', lat: 20.4500, lng: 81.2500, district: 'Kanker' },
     { name: 'Durgkondal', lat: 20.1500, lng: 81.0000, district: 'Kanker' },
     { name: 'Antagarh', lat: 20.0900, lng: 81.1500, district: 'Kanker' },
     { name: 'Pakhanjur', lat: 20.0300, lng: 80.6200, district: 'Kanker' },
-
     { name: 'Sukma', lat: 18.3900, lng: 81.6500, district: 'Sukma' },
     { name: 'Konta', lat: 17.8100, lng: 81.3900, district: 'Sukma' },
     { name: 'Chhindgarh', lat: 18.5000, lng: 81.8300, district: 'Sukma' },
-
     { name: 'Baloda Bazar', lat: 21.6570, lng: 82.1600, district: 'Baloda Bazar' },
     { name: 'Bhatapara', lat: 21.7350, lng: 81.9500, district: 'Baloda Bazar' },
     { name: 'Simga', lat: 21.6300, lng: 81.7000, district: 'Baloda Bazar' },
     { name: 'Palari', lat: 21.5500, lng: 82.0500, district: 'Baloda Bazar' },
-
     { name: 'Surajpur', lat: 23.2200, lng: 82.8700, district: 'Surajpur' },
     { name: 'Pratappur', lat: 23.3500, lng: 82.7800, district: 'Surajpur' },
     { name: 'Ramanujnagar', lat: 23.1900, lng: 82.9800, district: 'Surajpur' },
-
     { name: 'Baikunthpur', lat: 23.2600, lng: 82.5600, district: 'Korea' },
     { name: 'Manendragarh', lat: 23.1200, lng: 82.2000, district: 'Korea' },
     { name: 'Khadgawan', lat: 23.0500, lng: 82.5000, district: 'Korea' },
-
     { name: 'Gaurela', lat: 22.7600, lng: 81.9000, district: 'Gaurela-Pendra-Marwahi' },
     { name: 'Pendra', lat: 22.7700, lng: 81.9600, district: 'Gaurela-Pendra-Marwahi' },
     { name: 'Marwahi', lat: 22.8000, lng: 82.0000, district: 'Gaurela-Pendra-Marwahi' }
   ];
 
-  // Format raw data to match the training object structure
   const SPECIFIC_FAKE_LOCATIONS = rawSpecificLocations.map((pt, i) => ({
     id: `specific-fake-${i}`,
     isFake: true,
@@ -446,17 +426,13 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     }
   }));
 
-  // Merge Real and Specific Fake Data
   const allTrainingData = [...(trainingLocations || []), ...SPECIFIC_FAKE_LOCATIONS];
 
-  // ===== FILTERING LOGIC =====
-  const validTrainingLocations = allTrainingData.filter(
-    t => {
-      const lat = Number(t.location_details?.latitude);
-      const lng = Number(t.location_details?.longitude);
-      return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
-    }
-  );
+  const validTrainingLocations = allTrainingData.filter(t => {
+    const lat = Number(t.location_details?.latitude);
+    const lng = Number(t.location_details?.longitude);
+    return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
+  });
 
   const validLocations = (locationsData || []).filter(loc => {
     const lat = Number(loc.latitude);
@@ -464,63 +440,20 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
   });
 
-  // Center logic - Fixed to use only filtered data
-  let center = [21.2787, 81.8661]; // Default Center of CG
-  let zoom = 7; // Default Zoom
-
-  if (validTrainingLocations.length > 0 || validLocations.length > 0) {
-    const allPoints = [
-      ...validLocations,
-      ...validTrainingLocations.map(t => t.location_details)
-    ];
-
-    const avgLat = allPoints.reduce((s, l) => s + Number(l.latitude), 0) / allPoints.length;
-    const avgLng = allPoints.reduce((s, l) => s + Number(l.longitude), 0) / allPoints.length;
-    center = [avgLat, avgLng];
-    zoom = 8;
-  }
+  // Default center - will be overridden by fitBounds
+  const defaultCenter = [21.2787, 81.8661];
 
   useEffect(() => {
-    // fetch('http://127.0.0.1:4001/files/Map/topojsons/states/cg.json')
-    fetch('https://www.ibitf.co.in/files/Map/topojsons/states/cg.json')
-      .then(res => res.json())
-      .then(setGeoJsonData)
-      .catch(console.error);
+    setGeoJsonData(cgGeoJson);
   }, []);
 
-  // Icon definition - Using the detailed pin shape
   const createCustomIcon = (color = '#9647bb') =>
     L.divIcon({
       className: 'custom-div-icon',
       html: `
-        <div style="
-          position: relative;
-          width: 22px;
-          height: 32px;
-        ">
-          <div style="
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            background: ${color}; 
-            border-radius: 50% 50% 50% 0;
-            transform: translateX(-50%) rotate(-45deg);
-            box-shadow: 0 4px 12px ${color}4D; 
-            border: 2px solid rgba(255,255,255,0.85);
-          "></div>
-          <div style="
-            position: absolute;
-            top: 6px;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 0 0 3px rgba(226,232,240,0.35);
-          "></div>
+        <div style="position: relative; width: 22px; height: 32px;">
+          <div style="position: absolute; top: 0; left: 50%; width: 20px; height: 20px; background: ${color}; border-radius: 50% 50% 50% 0; transform: translateX(-50%) rotate(-45deg); box-shadow: 0 4px 12px ${color}4D; border: 2px solid rgba(255,255,255,0.85);"></div>
+          <div style="position: absolute; top: 6px; left: 50%; width: 8px; height: 8px; background: #e2e8f0; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 0 3px rgba(226,232,240,0.35);"></div>
         </div>
       `,
       iconSize: [22, 32],
@@ -550,28 +483,14 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
     } : {})
   };
 
-
-
   return (
     <div style={containerStyle}>
       {!isFullScreen && (
         <>
-          <div style={{
-            position: 'absolute', top: '0', left: '0', right: '0', height: '3px',
-            background: 'linear-gradient(to right, #e2e8f0, #f1f5f9, #e2e8f0)', borderTopLeftRadius: '16px', borderTopRightRadius: '16px', zIndex: 1
-          }}></div>
-          <div style={{
-            position: 'absolute', bottom: '0', left: '0', right: '0', height: '3px',
-            background: 'linear-gradient(to right, #e2e8f0, #f1f5f9, #e2e8f0)', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', zIndex: 1
-          }}></div>
-          <div style={{
-            position: 'absolute', top: '0', left: '0', bottom: '0', width: '3px',
-            background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9, #e2e8f0)', borderTopLeftRadius: '16px', borderBottomLeftRadius: '16px', zIndex: 1
-          }}></div>
-          <div style={{
-            position: 'absolute', top: '0', right: '0', bottom: '0', width: '3px',
-            background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9, #e2e8f0)', borderTopRightRadius: '16px', borderBottomRightRadius: '16px', zIndex: 1
-          }}></div>
+          <div style={{ position: 'absolute', top: '0', left: '0', right: '0', height: '3px', background: 'linear-gradient(to right, #e2e8f0, #f1f5f9, #e2e8f0)', borderTopLeftRadius: '16px', borderTopRightRadius: '16px', zIndex: 1 }}></div>
+          <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', height: '3px', background: 'linear-gradient(to right, #e2e8f0, #f1f5f9, #e2e8f0)', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', zIndex: 1 }}></div>
+          <div style={{ position: 'absolute', top: '0', left: '0', bottom: '0', width: '3px', background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9, #e2e8f0)', borderTopLeftRadius: '16px', borderBottomLeftRadius: '16px', zIndex: 1 }}></div>
+          <div style={{ position: 'absolute', top: '0', right: '0', bottom: '0', width: '3px', background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9, #e2e8f0)', borderTopRightRadius: '16px', borderBottomRightRadius: '16px', zIndex: 1 }}></div>
           <div style={{ position: 'absolute', top: '8px', left: '8px', width: '16px', height: '16px', borderTop: '2px solid #e2e8f0', borderLeft: '2px solid #e2e8f0', borderTopLeftRadius: '8px', zIndex: 2 }}></div>
           <div style={{ position: 'absolute', top: '8px', right: '8px', width: '16px', height: '16px', borderTop: '2px solid #e2e8f0', borderRight: '2px solid #e2e8f0', borderTopRightRadius: '8px', zIndex: 2 }}></div>
           <div style={{ position: 'absolute', bottom: '8px', left: '8px', width: '16px', height: '16px', borderBottom: '2px solid #e2e8f0', borderLeft: '2px solid #e2e8f0', borderBottomLeftRadius: '8px', zIndex: 2 }}></div>
@@ -579,12 +498,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
         </>
       )}
 
-      <div style={{
-        position: 'absolute', top: '10px', left: '10px', zIndex: 1000,
-        background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)',
-        padding: '12px 18px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-        border: '1px solid rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'auto'
-      }}>
+      <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)', padding: '12px 18px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', border: '1px solid rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '10px', pointerEvents: 'auto' }}>
         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: THEME.gradients.primary, border: '2px solid white', boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)' }}></div>
         <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b', letterSpacing: '-0.01em' }}>
           Training Center Locations ({validTrainingLocations.length})
@@ -594,11 +508,7 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
       <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, pointerEvents: 'auto' }}>
         <button
           onClick={() => setIsFullScreen(!isFullScreen)}
-          style={{
-            background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '8px', cursor: 'pointer',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s', width: '36px', height: '36px'
-          }}
+          style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '8px', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', width: '36px', height: '36px' }}
           onMouseEnter={(e) => { e.currentTarget.style.borderColor = THEME.primary; e.currentTarget.style.transform = 'scale(1.05)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.transform = 'scale(1)'; }}
           title={isFullScreen ? "Exit Fullscreen" : "View Fullscreen"}
@@ -607,69 +517,61 @@ const TraineeLocationMap = ({ locationsData, trainingLocations }) => {
         </button>
       </div>
 
-      <MapContainer center={center} zoom={zoom} style={{ width: '100%', height: '100%', borderRadius: isFullScreen ? 0 : '12px' }} zoomControl={false}>
+      <MapContainer
+        style={{ width: '100%', height: '100%' }}
+        zoomControl={false}
+      >
+
         <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+
+        {/* <MapBoundsAdjuster geoJsonData={geoJsonData} /> */}
+        <MapBoundsAdjuster
+          geoJsonData={geoJsonData}
+          trigger={isFullScreen}
+        />
+
+        <MapResizer trigger={isFullScreen} />
 
         {geoJsonData && (
           <GeoJSON data={geoJsonData} style={{ color: THEME.primary, weight: 2, fillOpacity: 0.05 }} />
         )}
 
-        <MapResizer trigger={isFullScreen} />
-
-        {/* Plain Locations */}
         {validLocations.map((loc, i) => (
           <Marker key={`loc-${i}`} position={[loc.latitude, loc.longitude]} icon={createCustomIcon()}>
             <Popup><strong>{loc.village}</strong><br />{loc.block}, {loc.district}</Popup>
           </Marker>
         ))}
-
-        {/* Training Markers */}
-        {/* {validTrainingLocations.map((training, i) => {
-          const loc = training.location_details;
-          const markerColor = training.isFake ? '#2563EB' : '#9647bb';
-
-          return (
-            <Marker
-              key={`training-${training.id}`}
-              position={[loc.latitude, loc.longitude]}
-              icon={createCustomIcon(markerColor)}
-            >
-              <Popup>
-                <div style={{ minWidth: '240px' }}>
-                  <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                    <img
-                      src={training.trainer_profile_image}
-                      alt={training.trainer_name}
-                      style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover' }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{training.trainer_name}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>
-                        {training.subject_name}
-                        Marketplace Literacy
-                      </div>
-                      {training.isFake && (
-                        <span style={{ fontSize: 10, background: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>DEMO</span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ fontWeight: 700, color: THEME.primary }}>{loc.village}</div>
-                  <div style={{ fontSize: 12, color: '#475569' }}>{loc.block}, {loc.district}</div>
-                  <div style={{
-                    marginTop: 8, fontSize: 12, fontWeight: 700,
-                    color: training.status === 'completed' ? THEME.success : training.status === 'ongoing' ? THEME.warning : THEME.primary
-                  }}>
-                    Status: {training.status}
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })} */}
       </MapContainer>
     </div>
   );
 };
+
+// ===== HELPER COMPONENT TO CENTER MAP BALANCED =====
+const MapBoundsAdjuster = ({ geoJsonData, trigger }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !geoJsonData) return;
+
+    const layer = L.geoJSON(geoJsonData);
+    const bounds = layer.getBounds();
+    if (!bounds.isValid()) return;
+
+    setTimeout(() => {
+      map.invalidateSize();
+
+      map.fitBounds(bounds, {
+        paddingTopLeft: [20, 40],      // ⬆️ TOP kam
+        paddingBottomRight: [160, 40], // ⬇️ BOTTOM zyada = MAP UP
+        maxZoom: 8
+      });
+
+    }, 300);
+  }, [geoJsonData, trigger, map]);
+
+  return null;
+};
+
 
 
 // ===== SUB COMPONENTS =====
@@ -686,7 +588,7 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => 
     </div>
 
     {/* FULL WIDTH MAP */}
-    <div style={{ width: '100%', height: '600px' }}>
+    <div style={{ width: '100%', height: '460px' }}>
       <TraineeLocationMap
         locationsData={locationsData}
         trainingLocations={trainingLocations}
