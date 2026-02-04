@@ -1,6 +1,7 @@
 
 import api from '../services/api';
 
+
 export const dashboardService = {
 
   getDistricts: async () => {
@@ -12,6 +13,8 @@ export const dashboardService = {
       throw error;
     }
   },
+
+  
 
   getBlocksByDistrict: async (district_cd) => {
     if (!district_cd) return [];
@@ -60,18 +63,45 @@ export const dashboardService = {
 
 
   //  Get dashboard view data (from your training_dashboard view)
+  // getDashboardViewData: async (filters = {}) => {
+  //   try {
+  //     const cleanFilters = Object.fromEntries(
+  //       Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+  //     );
+  //     const response = await api.get('/dashboard/training-stats', { params: cleanFilters });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Dashboard View Fetch Error:", error);
+  //     throw error;
+  //   }
+  // },
   getDashboardViewData: async (filters = {}) => {
     try {
       const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+        Object.entries(filters)
+          .filter(([_, v]) => v !== null && v !== '')
+          .map(([k, v]) => {
+            if (k === 'district_cd' || k === 'block_cd') {
+              return [k, Number(v)];
+            }
+            if (k === 'start_date') return [k, `${v} 00:00:00`];
+            if (k === 'end_date') return [k, `${v} 23:59:59`];
+            return [k, v];
+          })
       );
-      const response = await api.get('/dashboard/training-stats', { params: cleanFilters });
+
+      const response = await api.get(
+        '/dashboard/training-stats',
+        { params: cleanFilters }
+      );
+
       return response.data;
     } catch (error) {
       console.error("Dashboard View Fetch Error:", error);
       throw error;
     }
   },
+
 
   //  Get map data
   getMapData: async (filters = {}) => {

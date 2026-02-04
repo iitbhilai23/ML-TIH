@@ -84,18 +84,31 @@ const Dashboard = () => {
     status: ''
   });
 
+  const activeFilters = JSON.stringify({
+    district_cd: filters.district_cd,
+    block_cd: filters.block_cd,
+    start_date: filters.start_date,
+    end_date: filters.end_date,
+    status: filters.status
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, [activeFilters]);
+
   // useEffect(() => {
   //   fetchData();
   // }, [filters]);
-  useEffect(() => {
-    fetchData();
-  }, [
-    filters.district_cd,
-    filters.block_cd,
-    filters.start_date,
-    filters.end_date,
-    filters.status
-  ]);
+
+  // useEffect(() => {
+  //   fetchData();
+  // }, [
+  //   filters.district_cd,
+  //   filters.block_cd,
+  //   filters.start_date,
+  //   filters.end_date,
+  //   filters.status
+  // ]);
 
 
   const fetchData = async () => {
@@ -129,7 +142,35 @@ const Dashboard = () => {
     fetchDistricts();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchBlocks = async () => {
+  //     try {
+  //       if (!filters.district_cd) {
+  //         // Reset blocks if "All Districts"
+  //         setBlocks([]);
+  //         setFilters((prev) => ({ ...prev, block_cd: '' }));
+  //         return;
+  //       }
+
+  //       const data = await dashboardService.getBlocksByDistrict(filters.district_cd);
+  //       setBlocks(Array.isArray(data) ? data : []);
+
+
+  //       setFilters((prev) => ({ ...prev, block_cd: '' }));
+  //     } catch (error) {
+  //       console.error('Error loading blocks', error);
+  //     }
+  //   };
+
+  //   fetchBlocks();
+  // }, [filters.district_cd]);
+
   useEffect(() => {
+    if (!filters.district_cd) {
+      setBlocks([]);
+      return;
+    }
+
     const fetchBlocks = async () => {
       try {
         if (!filters.district_cd) {
@@ -180,9 +221,20 @@ const Dashboard = () => {
     fetchTrainingsForMap();
   }, []);
 
+  // const handleFilterChange = (e) => {
+  //   setFilters({ ...filters, [e.target.name]: e.target.value });
+  // };
+
   const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setFilters(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'district_cd' ? { block_cd: '' } : {})
+    }));
   };
+
 
   if (loading) return (
     <div style={{
