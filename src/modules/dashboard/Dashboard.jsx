@@ -172,10 +172,22 @@ const Dashboard = () => {
     }
 
     const fetchBlocks = async () => {
-      const data = await dashboardService.getBlocksByDistrict(
-        filters.district_cd
-      );
-      setBlocks(Array.isArray(data) ? data : []);
+      try {
+        if (!filters.district_cd) {
+          // Reset blocks if "All Districts"
+          setBlocks([]);
+          setFilters((prev) => ({ ...prev, block_cd: '' }));
+          return;
+        }
+
+        const data = await dashboardService.getBlocksByDistrict(filters.district_cd);
+        setBlocks(Array.isArray(data) ? data : []);
+
+
+        setFilters((prev) => ({ ...prev, block_cd: '' }));
+      } catch (error) {
+        console.error('Error loading blocks', error);
+      }
     };
 
     fetchBlocks();
