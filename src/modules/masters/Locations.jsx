@@ -9,6 +9,8 @@ const Locations = () => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [districts, setDistricts] = useState([]);
+  const [blocks, setBlocks] = useState([]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,6 +23,8 @@ const Locations = () => {
     state: 'Chhattisgarh',
     district: '',
     block: '',
+    district_cd: '',
+    block_cd: '',
     village: '',
     pincode: '',
     address_line: ''
@@ -47,6 +51,34 @@ const Locations = () => {
     loadLocations();
     setCurrentPage(1);
   }, [filters]);
+
+  useEffect(() => {
+    loadDistricts();
+  }, []);
+
+  const loadDistricts = async () => {
+    try {
+      const res = await locationService.getDistricts();
+      setDistricts(res);
+    } catch (err) {
+      toast.error('Failed to load districts');
+    }
+  };
+
+
+  const loadBlocks = async (district_cd) => {
+    if (!district_cd) {
+      return;
+    }
+
+    try {
+      const res = await locationService.getBlocksByDistrict(district_cd);
+      setBlocks(Array.isArray(res) ? res : []);
+    } catch (err) {
+      toast.error('Failed to load blocks');
+    }
+  };
+
 
   const loadLocations = async () => {
     setLoading(true);
@@ -663,23 +695,96 @@ const Locations = () => {
               <div className={styles.row}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>District *</label>
-                  <input
+                  {/* <input
                     required
                     className={styles.input}
                     value={formData.district}
                     placeholder="e.g. Raipur"
                     onChange={e => setFormData({ ...formData, district: e.target.value })}
-                  />
+                  /> */}
+                  <select
+                    required
+                    className={styles.input}
+                    value={formData.district_cd}
+                    onChange={(e) => {
+                      const districtCd = e.target.value;
+
+                      console.log("District selected:", districtCd);
+
+                      const selectedDistrict = districts.find(
+                        d => String(d.district_cd) === String(districtCd)
+                      );
+
+                      if (!selectedDistrict) {
+                        console.error("District NOT FOUND");
+                        return;
+                      }
+
+                      // Reset block before loading new ones
+                      setFormData(prev => ({
+                        ...prev,
+                        district_cd: Number(selectedDistrict.district_cd),
+                        district: selectedDistrict.district_name,
+                        block: '',
+                        block_cd: ''
+                      }));
+
+                      // Call block API
+                      loadBlocks(selectedDistrict.district_cd);
+                    }}
+                  >
+                    <option value="">Select District</option>
+                    {districts.map(d => (
+                      <option key={d.district_cd} value={d.district_cd}>
+                        {d.district_name}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Block *</label>
-                  <input
+                  {/* <input
                     required
                     className={styles.input}
                     value={formData.block}
                     placeholder="e.g. Dharsiwa"
                     onChange={e => setFormData({ ...formData, block: e.target.value })}
-                  />
+                  /> */}
+                  <select
+                    required
+                    className={styles.input}
+                    value={formData.block_cd}
+                    disabled={!blocks.length}
+                    onChange={(e) => {
+                      const blockCd = e.target.value;
+
+                      console.log("Block selected:", blockCd);
+
+                      const selectedBlock = blocks.find(
+                        b => String(b.block_cd) === String(blockCd)
+                      );
+
+                      if (!selectedBlock) {
+                        console.error("Block NOT FOUND");
+                        return;
+                      }
+
+                      setFormData(prev => ({
+                        ...prev,
+                        block_cd: Number(selectedBlock.block_cd),
+                        block: selectedBlock.block_name
+                      }));
+                    }}
+                  >
+                    <option value="">Select Block</option>
+                    {blocks.map(b => (
+                      <option key={b.block_cd} value={b.block_cd}>
+                        {b.block_name}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
               </div>
 
