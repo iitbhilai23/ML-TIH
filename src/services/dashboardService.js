@@ -14,8 +14,6 @@ export const dashboardService = {
     }
   },
 
-  
-
   getBlocksByDistrict: async (district_cd) => {
     if (!district_cd) return [];
     const res = await api.get('/reports/blocks', {
