@@ -49,6 +49,8 @@ export const trainingService = {
     }
   },
 
+  
+
   delete: async (id) => {
     try {
       await api.delete(`/trainings/${id}`);
