@@ -1,7 +1,6 @@
 
 import api from '../services/api';
 
-
 export const dashboardService = {
 
   getDistricts: async () => {
@@ -23,20 +22,6 @@ export const dashboardService = {
   },
 
 
-  // getDashboardData: async (filters = {}) => {
-  //   try {
-  //     const cleanFilters = Object.fromEntries(
-  //       Object.entries(filters).filter(([_, v]) => v != null && v !== '')
-  //     );
-  //     // const response = await api.get('/dashboard/complete', { params: cleanFilters });
-  //     const response = await api.get('/dashboard/summary', { params: cleanFilters });
-  //     return response.data;
-
-  //   } catch (error) {
-  //     console.error("Dashboard Fetch Error:", error);
-  //     throw error;
-  //   }
-  // },
   getDashboardData: async (filters = {}) => {
     try {
       const cleanFilters = Object.fromEntries(
@@ -59,20 +44,6 @@ export const dashboardService = {
     }
   },
 
-
-  //  Get dashboard view data (from your training_dashboard view)
-  // getDashboardViewData: async (filters = {}) => {
-  //   try {
-  //     const cleanFilters = Object.fromEntries(
-  //       Object.entries(filters).filter(([_, v]) => v != null && v !== '')
-  //     );
-  //     const response = await api.get('/dashboard/training-stats', { params: cleanFilters });
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Dashboard View Fetch Error:", error);
-  //     throw error;
-  //   }
-  // },
   getDashboardViewData: async (filters = {}) => {
     try {
       const cleanFilters = Object.fromEntries(

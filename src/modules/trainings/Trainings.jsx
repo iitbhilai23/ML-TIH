@@ -1,11 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { trainingService } from '../../services/trainingService';
 import TrainingForm from './TrainingForm';
 import styles from './Trainings.module.css';
-import { Plus, Pencil, Trash2, Calendar, MapPin, User, BookOpen, Filter, ChevronLeft, ChevronRight, AlertTriangle, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Calendar, MapPin, User, BookOpen, ChevronLeft, ChevronRight, AlertTriangle, Check } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
+
+// --- HELPER FUNCTIONS MOVED OUTSIDE COMPONENT (Performance Fix) ---
+
+const getTrainingDetails = (training) => {
+  if (!training) return {
+    subject_name: 'N/A',
+    trainer_name: 'N/A',
+    location_details: {},
+    start_date: null,
+    end_date: null,
+    actual_participants: 0,
+    max_participants: 0,
+    status: 'scheduled',
+    id: null
+  };
+
+  return {
+    subject_name: training.subject_name || 'N/A',
+    trainer_name: training.trainer_name || 'N/A',
+    location_details: training.location_details || {},
+    start_date: training.start_date,
+    end_date: training.end_date,
+    actual_participants: training.actual_participants || 0,
+    max_participants: training.max_participants || 0,
+    status: training.status || 'scheduled',
+    id: training.id
+  };
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+
+// -----------------------------------------------------------------
 
 const Trainings = () => {
   const [trainings, setTrainings] = useState([]);
@@ -29,21 +68,13 @@ const Trainings = () => {
     type: 'danger' // 'danger' for delete, 'primary' for save
   });
 
-  // Saving State (moved here to handle API logic outside form)
+  // Saving State
   const [isSaving, setIsSaving] = useState(false);
 
-  const THEME = {
-    primary: '#6366f1',
-    danger: '#ef4444',
-    // ... other theme constants
-  };
+  // --- API LOGIC ---
 
-  useEffect(() => {
-    loadTrainings();
-    setCurrentPage(1);
-  }, [filterStatus]);
-
-  const loadTrainings = async () => {
+  // FIX: Wrapped in useCallback to prevent infinite loops
+  const loadTrainings = useCallback(async () => {
     setLoading(true);
     try {
       const filters = filterStatus ? { status: filterStatus } : {};
@@ -52,11 +83,15 @@ const Trainings = () => {
     } catch (err) {
       console.error('Failed to load trainings:', err);
       toast.error('Failed to load trainings');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [filterStatus]);
 
-  // --- API LOGIC (Executed after confirmation) ---
+  useEffect(() => {
+    loadTrainings();
+    setCurrentPage(1);
+  }, [loadTrainings]);
 
   const executeSave = async (data) => {
     setIsSaving(true);
@@ -90,11 +125,10 @@ const Trainings = () => {
     }
   };
 
-  // --- HANDLERS (Triggers Confirmation) ---
+  // --- HANDLERS ---
 
   const handleSaveRequest = (data) => {
     if (editingTraining) {
-      // If editing, show confirmation before saving
       openConfirm(
         'Save Changes?',
         'Are you sure you want to update the details for this training?',
@@ -102,7 +136,6 @@ const Trainings = () => {
         'primary'
       );
     } else {
-      // If new, save directly
       executeSave(data);
     }
   };
@@ -140,43 +173,6 @@ const Trainings = () => {
 
   const closeConfirm = () => {
     setConfirmState({ ...confirmState, isOpen: false });
-  };
-
-  // Helper to format date nicely
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
-
-  // Helper to get training details safely
-  const getTrainingDetails = (training) => {
-    if (!training) return {
-      subject_name: 'N/A',
-      trainer_name: 'N/A',
-      location_details: {},
-      start_date: null,
-      end_date: null,
-      actual_participants: 0,
-      max_participants: 0,
-      status: 'scheduled',
-      id: null
-    };
-
-    return {
-      subject_name: training.subject_name || 'N/A',
-      trainer_name: training.trainer_name || 'N/A',
-      location_details: training.location_details || {},
-      start_date: training.start_date,
-      end_date: training.end_date,
-      actual_participants: training.actual_participants || 0,
-      max_participants: training.max_participants || 0,
-      status: training.status || 'scheduled',
-      id: training.id
-    };
   };
 
   // Pagination Logic
@@ -304,8 +300,9 @@ const Trainings = () => {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Training Details (Subject/Trainer)</th>
-                <th>Training Subject</th>
+                {/* FIX: Updated Headers to match the data rendered below */}
+                <th>Trainer</th>
+                <th>Subject</th>
                 <th>Location</th>
                 <th>Dates</th>
                 <th>Participants</th>
@@ -316,19 +313,20 @@ const Trainings = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="p-4 text-center">
+                  <td colSpan="7" className="p-4 text-center">
                     <Spinner overlay={false} />
                   </td>
                 </tr>
               ) : trainings.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="p-4 text-center">No trainings found</td>
+                  <td colSpan="7" className="p-4 text-center">No trainings found</td>
                 </tr>
               ) : (
-                currentTrainings.map(t => {
+                currentTrainings.map((t, index) => {
                   const details = getTrainingDetails(t);
+                  // FIX: Use index as fallback for key to prevent collision
                   return (
-                    <tr key={details.id}>
+                    <tr key={details.id || index}>
                       <td>
                         <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
                           <User size={12} /> {details.trainer_name}
@@ -507,7 +505,7 @@ const Trainings = () => {
               background: '#ffffff',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
               border: 'none',
-              animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              /* Animation name removed from inline style, must be in CSS file */
               zIndex: 9999
             }}
           >
@@ -646,15 +644,17 @@ const Trainings = () => {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes modalPopIn {
-          0% { opacity: 0; transform: scale(0.9) translateY(10px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>
     </div>
   );
 };
 
 export default Trainings;
+
+
+//   IMPORTANT: Add the following CSS to your Trainings.module.css file 
+//   (or the CSS file of your choice) to restore the modal animation:
+
+// @keyframes modalPopIn {
+//   0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+//   100% { opacity: 1; transform: scale(1) translateY(0); }
+// }
