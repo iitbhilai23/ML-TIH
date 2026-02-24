@@ -190,43 +190,43 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
   //   }
   // }, [isOpen, initialData]);
 
-useEffect(() => {
-  if (isOpen) {
-    loadDropdowns();
+  useEffect(() => {
+    if (isOpen) {
+      loadDropdowns();
 
-    if (initialData) {
-      const formattedStart = initialData.start_date
-        ? new Date(initialData.start_date).toISOString().split('T')[0]
-        : '';
+      if (initialData) {
+        const formattedStart = initialData.start_date
+          ? new Date(initialData.start_date).toISOString().split('T')[0]
+          : '';
 
-      const formattedEnd = initialData.end_date
-        ? new Date(initialData.end_date).toISOString().split('T')[0]
-        : '';
+        const formattedEnd = initialData.end_date
+          ? new Date(initialData.end_date).toISOString().split('T')[0]
+          : '';
 
-      // ✅ Only allowed backend fields
-      setFormData({
-        trainer_id: initialData.trainer_id || '',
-        subject_id: initialData.subject_id || '',
-        location_id: initialData.location_id || '',
-        start_date: formattedStart,
-        end_date: formattedEnd,
-        max_participants: initialData.max_participants || 50,
-        status: initialData.status || 'scheduled'
-      });
+        // ✅ Only allowed backend fields
+        setFormData({
+          trainer_id: initialData.trainer_id || '',
+          subject_id: initialData.subject_id || '',
+          location_id: initialData.location_id || '',
+          start_date: formattedStart,
+          end_date: formattedEnd,
+          max_participants: initialData.max_participants || 50,
+          status: initialData.status || 'scheduled'
+        });
 
-    } else {
-      setFormData({
-        trainer_id: '',
-        subject_id: '',
-        location_id: '',
-        start_date: '',
-        end_date: '',
-        max_participants: 50,
-        status: 'scheduled'
-      });
+      } else {
+        setFormData({
+          trainer_id: '',
+          subject_id: '',
+          location_id: '',
+          start_date: '',
+          end_date: '',
+          max_participants: 50,
+          status: 'scheduled'
+        });
+      }
     }
-  }
-}, [isOpen, initialData]);
+  }, [isOpen, initialData]);
 
   const loadDropdowns = async () => {
     setLoading(true);
@@ -276,26 +276,26 @@ useEffect(() => {
   // };
 
   const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!formData.trainer_id || !formData.subject_id || !formData.location_id || !formData.start_date) {
-    toast.error('Please fill all required fields');
-    return;
-  }
+    if (!formData.trainer_id || !formData.subject_id || !formData.location_id || !formData.start_date) {
+      toast.error('Please fill all required fields');
+      return;
+    }
 
-  // ✅ Send only required fields to backend
-  const cleanData = {
-    trainer_id: formData.trainer_id,
-    subject_id: formData.subject_id,
-    location_id: formData.location_id,
-    start_date: formData.start_date,
-    end_date: formData.end_date,
-    max_participants: formData.max_participants,
-    status: formData.status
+    // ✅ Send only required fields to backend
+    const cleanData = {
+      trainer_id: formData.trainer_id,
+      subject_id: formData.subject_id,
+      location_id: formData.location_id,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      max_participants: formData.max_participants,
+      status: formData.status
+    };
+
+    onSave(cleanData);
   };
-
-  onSave(cleanData);
-};
 
   if (!isOpen) return null;
 
