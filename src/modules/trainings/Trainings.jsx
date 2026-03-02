@@ -2,10 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { trainingService } from '../../services/trainingService';
 import TrainingForm from './TrainingForm';
 import styles from './Trainings.module.css';
-import { Plus, Pencil, Trash2, Calendar, MapPin, User, BookOpen, ChevronLeft, ChevronRight, AlertTriangle, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Calendar, MapPin, User, BookOpen, ChevronLeft, ChevronRight, AlertTriangle, Check, FileText, Table } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
+import { useExport } from '../../features/export/useExport';
+import ExportButtons from '../../features/export/ExportButton';
+
 
 // --- HELPER FUNCTIONS MOVED OUTSIDE COMPONENT (Performance Fix) ---
 
@@ -44,7 +47,7 @@ const formatDate = (dateString) => {
   });
 };
 
-// -----------------------------------------------------------------
+
 
 const Trainings = () => {
   const [trainings, setTrainings] = useState([]);
@@ -65,15 +68,15 @@ const Trainings = () => {
     title: '',
     message: '',
     onConfirm: null,
-    type: 'danger' // 'danger' for delete, 'primary' for save
+    type: 'danger'
   });
 
   // Saving State
   const [isSaving, setIsSaving] = useState(false);
+  const { exportPDF, exportExcel } = useExport(trainings);
 
   // --- API LOGIC ---
 
-  // FIX: Wrapped in useCallback to prevent infinite loops
   const loadTrainings = useCallback(async () => {
     setLoading(true);
     try {
@@ -188,6 +191,58 @@ const Trainings = () => {
     }
   };
 
+  const handlePDFExport = () => {
+    exportPDF({
+      title: 'Trainings Report',
+      fileName: 'trainings.pdf',
+      columns: [
+        { header: '#', dataKey: 'index' },
+        { header: 'Trainer', dataKey: 'trainer' },
+        { header: 'Subject', dataKey: 'subject' },
+        { header: 'Location', dataKey: 'location' },
+        { header: 'Start Date', dataKey: 'start' },
+        { header: 'End Date', dataKey: 'end' },
+        { header: 'Participants', dataKey: 'participants' },
+        { header: 'Status', dataKey: 'status' }
+      ],
+      mapper: (t, index) => {
+        const d = getTrainingDetails(t);
+        return {
+          index: index + 1,
+          trainer: d.trainer_name,
+          subject: d.subject_name,
+          location: `${d.location_details?.village || 'N/A'}, ${d.location_details?.block || 'N/A'}`,
+          start: formatDate(d.start_date),
+          end: formatDate(d.end_date),
+          participants: `${d.actual_participants} / ${d.max_participants}`,
+          status: d.status.charAt(0).toUpperCase() + d.status.slice(1)
+        };
+      }
+    });
+  };
+
+  const handleExcelExport = () => {
+    exportExcel({
+      fileName: 'trainings.xlsx',
+      mapper: (t, index) => {
+        const d = getTrainingDetails(t);
+        return {
+          No: index + 1,
+          'Trainer Name': d.trainer_name,
+          'Subject': d.subject_name,
+          'Village': d.location_details?.village || 'N/A',
+          'Block': d.location_details?.block || 'N/A',
+          'District': d.location_details?.district || 'N/A',
+          'Start Date': formatDate(d.start_date),
+          'End Date': formatDate(d.end_date),
+          'Actual Participants': d.actual_participants,
+          'Max Participants': d.max_participants,
+          'Status': d.status.charAt(0).toUpperCase() + d.status.slice(1)
+        };
+      }
+    });
+  };
+
   return (
     <div className={styles.container}>
       <Toaster position="top-right" richColors />
@@ -259,8 +314,20 @@ const Trainings = () => {
             </select>
           </div>
 
-          {/* Add Button */}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: '0 0 auto' }}>
+          {/* Action Buttons Area */}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: '0 0 auto' }}>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <ExportButtons
+                onPDF={handlePDFExport}
+                onExcel={handleExcelExport}
+              />
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: '1px', height: '30px', background: '#e2e8f0' }}></div>
+
+            {/* Add Button */}
             <button
               onClick={openAdd}
               style={{
@@ -300,7 +367,6 @@ const Trainings = () => {
           <table className={styles.table}>
             <thead>
               <tr>
-                {/* FIX: Updated Headers to match the data rendered below */}
                 <th>Trainer</th>
                 <th>Subject</th>
                 <th>Location</th>
@@ -324,7 +390,6 @@ const Trainings = () => {
               ) : (
                 currentTrainings.map((t, index) => {
                   const details = getTrainingDetails(t);
-                  // FIX: Use index as fallback for key to prevent collision
                   return (
                     <tr key={details.id || index}>
                       <td>
@@ -505,7 +570,6 @@ const Trainings = () => {
               background: '#ffffff',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
               border: 'none',
-              /* Animation name removed from inline style, must be in CSS file */
               zIndex: 9999
             }}
           >
@@ -522,7 +586,6 @@ const Trainings = () => {
               color: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
               position: 'relative'
             }}>
-              {/* Decorative outer ring */}
               <div style={{
                 position: 'absolute',
                 top: '-4px',
@@ -542,7 +605,6 @@ const Trainings = () => {
               )}
             </div>
 
-            {/* Text Content */}
             <h3 style={{
               fontSize: '1.25rem',
               fontWeight: 700,
@@ -564,7 +626,6 @@ const Trainings = () => {
               {confirmState.message}
             </p>
 
-            {/* Button Group */}
             <div style={{
               display: 'flex',
               gap: '12px',
@@ -649,12 +710,3 @@ const Trainings = () => {
 };
 
 export default Trainings;
-
-
-//   IMPORTANT: Add the following CSS to your Trainings.module.css file 
-//   (or the CSS file of your choice) to restore the modal animation:
-
-// @keyframes modalPopIn {
-//   0% { opacity: 0; transform: scale(0.9) translateY(10px); }
-//   100% { opacity: 1; transform: scale(1) translateY(0); }
-// }

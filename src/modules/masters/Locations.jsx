@@ -4,6 +4,8 @@ import styles from './Masters.module.css';
 import { Plus, Pencil, Trash2, MapPin, X, AlertCircle, ChevronLeft, ChevronRight, Check, AlertTriangle } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
+import { useExport } from '../../features/export/useExport';
+import ExportButtons from '../../features/export/ExportButton';
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -38,6 +40,17 @@ const Locations = () => {
     onConfirm: null,
     type: 'danger' // 'danger' for delete, 'primary' for save
   });
+
+  const { exportPDF, exportExcel } = useExport(locations);
+
+  const locationColumns = [
+    { header: "No", dataKey: "index" },
+    { header: "District", dataKey: "district" },
+    { header: "Block", dataKey: "block" },
+    { header: "Village", dataKey: "village" },
+    { header: "Pincode", dataKey: "pincode" },
+    { header: "Address", dataKey: "address" }
+  ];
 
   const THEME = {
     primary: '#6366f1',
@@ -85,7 +98,27 @@ const Locations = () => {
     setError(null);
     try {
       const data = await locationService.getAll(filters);
-      setLocations(Array.isArray(data) ? [...data] : []);
+      // setLocations(Array.isArray(data) ? [...data] : []);
+      setLocations(
+        Array.isArray(data)
+          ? [...data].sort((a, b) => {
+            const aHasDistrict = a.district && a.district.trim() !== '';
+            const bHasDistrict = b.district && b.district.trim() !== '';
+
+            // If both have district → keep original order
+            if (aHasDistrict && bHasDistrict) return 0;
+
+            // If only A has district → A first
+            if (aHasDistrict) return -1;
+
+            // If only B has district → B first
+            if (bHasDistrict) return 1;
+
+            // If neither has district → keep order
+            return 0;
+          })
+          : []
+      );
     } catch (err) {
       console.error("Load Locations Error:", err);
       setError('Failed to load locations. Please try again.');
@@ -369,6 +402,37 @@ const Locations = () => {
 
           {/* Right Section: Action Button */}
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: '0 0 auto' }}>
+            <ExportButtons
+              onPDF={() =>
+                exportPDF({
+                  title: "Locations Report",
+                  columns: locationColumns,
+                  fileName: "locations_report.pdf",
+                  mapper: (loc, index) => ({
+                    index: index + 1,
+                    district: loc.district || "N/A",
+                    block: loc.block || "N/A",
+                    village: loc.village || "N/A",
+                    pincode: loc.pincode || "N/A",
+                    address: loc.address_line || "N/A"
+                  })
+                })
+              }
+
+              onExcel={() =>
+                exportExcel({
+                  fileName: "locations_report.xlsx",
+                  mapper: (loc, index) => ({
+                    No: index + 1,
+                    District: loc.district || "N/A",
+                    Block: loc.block || "N/A",
+                    Village: loc.village || "N/A",
+                    Pincode: loc.pincode || "N/A",
+                    Address: loc.address_line || "N/A"
+                  })
+                })
+              }
+            />
             <button
               onClick={openAdd}
               style={{

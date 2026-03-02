@@ -5,6 +5,8 @@ import styles from './Trainers.module.css';
 import { Plus, Search, Pencil, Trash2, Phone, Mail, User, Users, ChevronLeft, ChevronRight, AlertTriangle, Check, AlertCircle } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
+import { useExport } from '../../features/export/useExport';
+import ExportButtons from '../../features/export/ExportButton';
 
 const TrainerList = () => {
   const [trainers, setTrainers] = useState([]);
@@ -18,7 +20,7 @@ const TrainerList = () => {
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrainer, setEditingTrainer] = useState(null);
-  
+
   // State for the Custom Confirmation Modal
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
@@ -30,6 +32,16 @@ const TrainerList = () => {
 
   // Saving State (moved here to handle API logic outside form)
   const [isSaving, setIsSaving] = useState(false);
+  const { exportPDF, exportExcel } = useExport(trainers);
+
+
+  const trainerColumns = [
+    { header: "No", dataKey: "index" },
+    { header: "Name", dataKey: "name" },
+    { header: "Email", dataKey: "email" },
+    { header: "Phone", dataKey: "phone" },
+    { header: "Bio", dataKey: "bio" }
+  ];
 
   const THEME = {
     primary: '#6366f1',
@@ -232,6 +244,33 @@ const TrainerList = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: '0 0 auto' }}>
+            <ExportButtons
+              onPDF={() => exportPDF({
+                title: "Trainers Report",
+                columns: trainerColumns,
+                fileName: "trainers_report.pdf",
+                mapper: (trainer, index) => ({
+                  index: index + 1,
+                  name: trainer.name || "N/A",
+                  email: trainer.email || "N/A",
+                  phone: trainer.phone || "N/A",
+                  bio: trainer.bio || "N/A"
+                })
+              })
+              }
+              onExcel={() => exportExcel({
+                fileName: "trainers_report.xlsx",
+                mapper: (trainer, index) => ({
+                  No: index + 1,
+                  Name: trainer.name || "N/A",
+                  Email: trainer.email || "N/A",
+                  Phone: trainer.phone || "N/A",
+                  Bio: trainer.bio || "N/A"
+                })
+              })
+              }
+            />
+
             <button onClick={openAddModal} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', padding: '14px 24px', borderRadius: '12px', border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)', transition: 'all 0.2s ease', fontFamily: 'inherit' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)'; }}>
               <Plus size={18} /> Add Trainer
             </button>
@@ -343,108 +382,108 @@ const TrainerList = () => {
 
       {/* --- ENHANCED CUSTOM CONFIRMATION MODAL --- */}
       {confirmState.isOpen && (
-        <div 
-            className={styles.modalOverlay} 
-            style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(15, 23, 42, 0.4)', zIndex: 9999 }} 
+        <div
+          className={styles.modalOverlay}
+          style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(15, 23, 42, 0.4)', zIndex: 9999 }}
         >
-          <div 
-            className={styles.modalBox} 
+          <div
+            className={styles.modalBox}
             style={{
-                maxWidth: '440px',
-                width: '90%',
-                padding: '36px 32px',
-                textAlign: 'center',
-                borderRadius: '24px',
-                background: '#ffffff',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                border: 'none',
-                animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                zIndex: 9999
+              maxWidth: '440px',
+              width: '90%',
+              padding: '36px 32px',
+              textAlign: 'center',
+              borderRadius: '24px',
+              background: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: 'none',
+              animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              zIndex: 9999
             }}
           >
             {/* Icon Container with Glow */}
             <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 24px',
-                backgroundColor: confirmState.type === 'danger' ? '#fef2f2' : '#eef2ff',
-                color: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
-                position: 'relative'
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              backgroundColor: confirmState.type === 'danger' ? '#fef2f2' : '#eef2ff',
+              color: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
+              position: 'relative'
             }}>
-                {/* Decorative outer ring */}
-                <div style={{
-                    position: 'absolute',
-                    top: '-4px',
-                    left: '-4px',
-                    right: '-4px',
-                    bottom: '-4px',
-                    borderRadius: '50%',
-                    border: '2px solid',
-                    borderColor: confirmState.type === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)',
-                    borderStyle: 'dashed'
-                }}></div>
-                
-                {confirmState.type === 'danger' ? (
-                    <Trash2 size={32} strokeWidth={1.5} />
-                ) : (
-                    <AlertTriangle size={32} strokeWidth={1.5} />
-                )}
+              {/* Decorative outer ring */}
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                left: '-4px',
+                right: '-4px',
+                bottom: '-4px',
+                borderRadius: '50%',
+                border: '2px solid',
+                borderColor: confirmState.type === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                borderStyle: 'dashed'
+              }}></div>
+
+              {confirmState.type === 'danger' ? (
+                <Trash2 size={32} strokeWidth={1.5} />
+              ) : (
+                <AlertTriangle size={32} strokeWidth={1.5} />
+              )}
             </div>
 
             {/* Text Content */}
             <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#1e293b',
-                margin: '0 0 12px',
-                letterSpacing: '-0.025em'
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              margin: '0 0 12px',
+              letterSpacing: '-0.025em'
             }}>
-                {confirmState.title}
+              {confirmState.title}
             </h3>
             <p style={{
-                fontSize: '0.95rem',
-                color: '#64748b',
-                lineHeight: '1.6',
-                margin: '0 0 32px',
-                maxWidth: '340px',
-                marginLeft: 'auto',
-                marginRight: 'auto'
+              fontSize: '0.95rem',
+              color: '#64748b',
+              lineHeight: '1.6',
+              margin: '0 0 32px',
+              maxWidth: '340px',
+              marginLeft: 'auto',
+              marginRight: 'auto'
             }}>
-                {confirmState.message}
+              {confirmState.message}
             </p>
 
             {/* Button Group */}
-            <div style={{ 
-                display: 'flex', 
-                gap: '12px', 
-                justifyContent: 'center' 
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'center'
             }}>
               <button
                 onClick={closeConfirm}
                 style={{
-                    flex: 1,
-                    padding: '12px 20px',
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    background: '#ffffff',
-                    color: '#64748b',
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  background: '#ffffff',
+                  color: '#64748b',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                 }}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f8fafc';
-                    e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
                 }}
                 onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#ffffff';
-                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
                 }}
               >
                 Cancel
@@ -452,52 +491,52 @@ const TrainerList = () => {
 
               <button
                 onClick={() => {
-                    if(confirmState.onConfirm) confirmState.onConfirm();
-                    closeConfirm();
+                  if (confirmState.onConfirm) confirmState.onConfirm();
+                  closeConfirm();
                 }}
                 style={{
-                    flex: 1,
-                    padding: '12px 20px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: confirmState.type === 'danger' 
-                        ? '0 4px 12px rgba(239, 68, 68, 0.25)' 
-                        : '0 4px 12px rgba(99, 102, 241, 0.25)',
-                    transition: 'all 0.2s ease'
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: confirmState.type === 'danger' ? '#ef4444' : '#6366f1',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: confirmState.type === 'danger'
+                    ? '0 4px 12px rgba(239, 68, 68, 0.25)'
+                    : '0 4px 12px rgba(99, 102, 241, 0.25)',
+                  transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                    e.currentTarget.style.opacity = '0.9';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.opacity = '0.9';
                 }}
                 onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.opacity = '1';
                 }}
               >
                 {confirmState.type === 'danger' ? (
-                    <>
-                        <Trash2 size={18} /> Delete
-                    </>
+                  <>
+                    <Trash2 size={18} /> Delete
+                  </>
                 ) : (
-                    <>
-                        <Check size={18} /> Save Changes
-                    </>
+                  <>
+                    <Check size={18} /> Save Changes
+                  </>
                 )}
               </button>
             </div>
           </div>
         </div>
       )}
-      
+
       <style>{`
         @keyframes modalPopIn {
           0% { opacity: 0; transform: scale(0.9) translateY(10px); }

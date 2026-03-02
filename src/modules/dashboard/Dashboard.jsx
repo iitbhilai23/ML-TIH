@@ -8,6 +8,7 @@ import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
 import { Users, BookOpen, MapPin, Calendar, Filter, Table, User, House, Maximize, Minimize, X } from 'lucide-react';
 import cgGeoJson from '../../assets/cg.json';
+import { Country, State } from "country-state-city";
 
 // --- THEME CONFIGURATION (Original Colors Restored) ---
 const THEME = {
@@ -60,6 +61,15 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({
     district_cd: '', block_cd: '', village: '', start_date: '', end_date: '', subject: '', status: ''
   });
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
+
+  const states = useMemo(() => {
+    if (!selectedCountry) return [];
+    return State.getStatesOfCountry(selectedCountry);
+  }, [selectedCountry]);
 
   const activeFilters = JSON.stringify({
     district_cd: filters.district_cd, block_cd: filters.block_cd,
@@ -169,7 +179,7 @@ const Dashboard = () => {
 
       {/* --- GLASSMORPHISM FILTER BAR --- */}
       <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, mb: 0.5 }}>
-        <div style={{ ...THEME.glass, width: '100%', maxWidth: '1300px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
+        <div style={{ ...THEME.glass, width: '100%', maxWidth: '1500px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.sm, borderRight: '1px solid rgba(0,0,0,0.05)', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.75rem' }}>
             <Filter size={14} /> Filters
           </div>
@@ -177,10 +187,54 @@ const Dashboard = () => {
             <MenuItem value="">All Districts</MenuItem>
             {districts.map((d) => (<MenuItem key={d.district_cd} value={d.district_cd}>{d.district_name}</MenuItem>))}
           </Select>
-          <Select name="block_cd" value={filters.block_cd} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx} disabled={!filters.district_cd}>
+          {/* <Select name="block_cd" value={filters.block_cd} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx} disabled={!filters.district_cd}>
             <MenuItem value="">All Blocks</MenuItem>
             {blocks.map((b) => (<MenuItem key={b.block_cd} value={b.block_cd}>{b.block_name}</MenuItem>))}
+          </Select> */}
+          <Select
+            name="country"
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            displayEmpty
+            size="small"
+            sx={selectSx}   // optional if you're using custom styling
+          >
+            <MenuItem value="">
+              -- Select Country --
+            </MenuItem>
+
+            {countries.map((country) => (
+              <MenuItem
+                key={country.isoCode}
+                value={country.isoCode}
+              >
+                {country.name}
+              </MenuItem>
+            ))}
           </Select>
+          <Select
+            name="state"
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            displayEmpty
+            size="small"
+            sx={selectSx}
+            disabled={!selectedCountry}   // disables until country selected
+          >
+            <MenuItem value="">
+              -- Select State --
+            </MenuItem>
+
+            {states.map((state) => (
+              <MenuItem
+                key={state.isoCode}
+                value={state.isoCode}
+              >
+                {state.name}
+              </MenuItem>
+            ))}
+          </Select>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
             <Calendar size={14} style={{ color: '#94a3b8' }} />
             <input type="date" name="start_date" style={{ ...THEME.input, height: '38px', fontSize: '0.8rem' }} onChange={handleFilterChange} value={filters.start_date} />
