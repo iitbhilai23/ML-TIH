@@ -18,6 +18,10 @@
     "@turf/turf": "^7.3.1",
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
+    "country-state-city": "^3.2.1",
+    "file-saver": "^2.0.5",
+    "jspdf": "^4.2.0",
+    "jspdf-autotable": "^5.0.7",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.561.0",
     "react": "^19.2.0",
@@ -29,7 +33,8 @@
     "react-tsparticles": "^2.12.2",
     "recharts": "^3.6.0",
     "sonner": "^2.0.7",
-    "tsparticles": "^3.9.1"
+    "tsparticles": "^3.9.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

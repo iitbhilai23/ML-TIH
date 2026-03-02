@@ -7,6 +7,8 @@ import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, S
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
+import { useExport } from '../../features/export/useExport';
+import ExportButtons from '../../features/export/ExportButton';
 
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
@@ -38,6 +40,18 @@ const Participants = () => {
 
   // Saving State (moved here to handle API logic outside form)
   const [isSaving, setIsSaving] = useState(false);
+
+
+
+  const participantColumns = [
+    { header: "No", dataKey: "index" },
+    { header: "Name", dataKey: "name" },
+    { header: "Phone", dataKey: "phone" },
+    { header: "Training", dataKey: "training" },
+    { header: "Village", dataKey: "village" },
+    { header: "Category", dataKey: "category" },
+    { header: "Attendance", dataKey: "attendance" }
+  ];
 
   const THEME = {
     primary: '#6366f1',
@@ -175,6 +189,8 @@ const Participants = () => {
   const filteredParticipants = participants.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const { exportPDF, exportExcel } = useExport(filteredParticipants);
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -327,6 +343,40 @@ const Participants = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+
+            <ExportButtons
+              onPDF={() =>
+                exportPDF({
+                  title: "Participants Report",
+                  columns: participantColumns,
+                  fileName: "participants_report.pdf",
+                  mapper: (p, index) => ({
+                    index: index + 1,
+                    name: p.name || "N/A",
+                    phone: p.phone || "N/A",
+                    training: p.training_details?.subject_name || "N/A",
+                    village: p.training_details?.location_details?.village || "N/A",
+                    category: `${p.category || ""} / ${p.caste || ""}`,
+                    attendance: p.attendance_status || "N/A"
+                  })
+                })
+              }
+
+              onExcel={() =>
+                exportExcel({
+                  fileName: "participants_report.xlsx",
+                  mapper: (p, index) => ({
+                    No: index + 1,
+                    Name: p.name || "N/A",
+                    Phone: p.phone || "N/A",
+                    Training: p.training_details?.subject_name || "N/A",
+                    Village: p.training_details?.location_details?.village || "N/A",
+                    Category: `${p.category || ""} / ${p.caste || ""}`,
+                    Attendance: p.attendance_status || "N/A"
+                  })
+                })
+              }
+            />
             <button
               onClick={openAdd}
               style={{

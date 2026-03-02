@@ -8,6 +8,7 @@ import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
 import { Users, BookOpen, MapPin, Calendar, Filter, Table, User, House, Maximize, Minimize, X } from 'lucide-react';
 import cgGeoJson from '../../assets/cg.json';
+import { Country, State } from "country-state-city";
 
 // --- THEME CONFIGURATION (Original Colors Restored) ---
 const THEME = {
@@ -60,6 +61,15 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({
     district_cd: '', block_cd: '', village: '', start_date: '', end_date: '', subject: '', status: ''
   });
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
+
+  const states = useMemo(() => {
+    if (!selectedCountry) return [];
+    return State.getStatesOfCountry(selectedCountry);
+  }, [selectedCountry]);
 
   const activeFilters = JSON.stringify({
     district_cd: filters.district_cd, block_cd: filters.block_cd,
@@ -169,7 +179,7 @@ const Dashboard = () => {
 
       {/* --- GLASSMORPHISM FILTER BAR --- */}
       <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, mb: 0.5 }}>
-        <div style={{ ...THEME.glass, width: '100%', maxWidth: '1300px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
+        <div style={{ ...THEME.glass, width: '100%', maxWidth: '1500px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.sm, borderRight: '1px solid rgba(0,0,0,0.05)', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.75rem' }}>
             <Filter size={14} /> Filters
           </div>
@@ -177,10 +187,54 @@ const Dashboard = () => {
             <MenuItem value="">All Districts</MenuItem>
             {districts.map((d) => (<MenuItem key={d.district_cd} value={d.district_cd}>{d.district_name}</MenuItem>))}
           </Select>
-          <Select name="block_cd" value={filters.block_cd} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx} disabled={!filters.district_cd}>
+          {/* <Select name="block_cd" value={filters.block_cd} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx} disabled={!filters.district_cd}>
             <MenuItem value="">All Blocks</MenuItem>
             {blocks.map((b) => (<MenuItem key={b.block_cd} value={b.block_cd}>{b.block_name}</MenuItem>))}
+          </Select> */}
+          <Select
+            name="country"
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            displayEmpty
+            size="small"
+            sx={selectSx}   // optional if you're using custom styling
+          >
+            <MenuItem value="">
+              -- Select Country --
+            </MenuItem>
+
+            {countries.map((country) => (
+              <MenuItem
+                key={country.isoCode}
+                value={country.isoCode}
+              >
+                {country.name}
+              </MenuItem>
+            ))}
           </Select>
+          <Select
+            name="state"
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            displayEmpty
+            size="small"
+            sx={selectSx}
+            disabled={!selectedCountry}   // disables until country selected
+          >
+            <MenuItem value="">
+              -- Select State --
+            </MenuItem>
+
+            {states.map((state) => (
+              <MenuItem
+                key={state.isoCode}
+                value={state.isoCode}
+              >
+                {state.name}
+              </MenuItem>
+            ))}
+          </Select>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
             <Calendar size={14} style={{ color: '#94a3b8' }} />
             <input type="date" name="start_date" style={{ ...THEME.input, height: '38px', fontSize: '0.8rem' }} onChange={handleFilterChange} value={filters.start_date} />
@@ -213,13 +267,11 @@ const MapResizer = ({ trigger }) => {
 };
 
 // --- SMART MAP COMPONENT ---
-// ===== TRAINING LOCATION MAP COMPONENT (FIXED) =====
 const TraineeLocationMap = ({ trainingLocations }) => {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState(null);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
     if (selectedTraining) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = 'auto';
@@ -238,10 +290,12 @@ const TraineeLocationMap = ({ trainingLocations }) => {
   const totalTrainings = validTrainingLocations.length;
   useEffect(() => { setGeoJsonData(cgGeoJson); }, []);
 
+  // Smart Grouping Logic: Proximity Merge
   const groupedLocations = useMemo(() => {
     return validTrainingLocations.reduce((acc, training) => {
       const lat = Number(training.location_details?.latitude);
       const lng = Number(training.location_details?.longitude);
+      // Round to 4 decimal places (~11m) to group nearby markers
       const key = `${lat.toFixed(4)}-${lng.toFixed(4)}`;
       if (!acc[key]) acc[key] = { lat, lng, trainings: [] };
       acc[key].trainings.push(training);
@@ -249,23 +303,19 @@ const TraineeLocationMap = ({ trainingLocations }) => {
     }, {});
   }, [validTrainingLocations]);
 
-  // --- FIXED ICON FUNCTION ---
-  // Added pointer-events: auto and cursor: pointer directly to the HTML element
+  // Modern "Stacked" Visual Marker
   const createCustomIcon = (count, color = '#7b3f99') => {
+    // Create a "Stacked Card" effect if count > 1
     const stackShadow = count > 1
       ? `2px -2px 0 rgba(255,255,255,0.9), 3px -3px 0 ${color}, 4px -4px 0 rgba(255,255,255,0.9), 5px -5px 0 ${color}`
       : '0 4px 14px rgba(0,0,0,0.15)';
 
     return L.divIcon({
-      // 'leaflet-interactive' is crucial for single-click detection
-      className: 'custom-marker-icon leaflet-interactive',
+      className: 'smart-marker-container',
       html: `
-        <div style="
-            width: 40px; 
-            height: 40px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+        <div class="smart-marker-body" style="
+            width: 40px; height: 40px; 
+            display: flex; align-items: center; justify-content: center;
             background: ${color}; 
             border-radius: 50%; 
             color: white; 
@@ -274,16 +324,17 @@ const TraineeLocationMap = ({ trainingLocations }) => {
             font-family: 'Inter', sans-serif;
             border: 2.5px solid #ffffff;
             box-shadow: ${stackShadow};
+            cursor: pointer;
             transition: transform 0.2s ease;
-            /* CRITICAL FIX: Force pointer events */
-            pointer-events: auto !important;
-            cursor: pointer !important;
+            position: relative;
+            z-index: 10;
         ">
             ${count}
         </div>
       `,
       iconSize: [40, 40],
       iconAnchor: [20, 20],
+      interactive: true
     });
   };
 
@@ -317,17 +368,7 @@ const TraineeLocationMap = ({ trainingLocations }) => {
     <div style={containerStyle}>
       <style>{`
         @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        /* Global CSS fallback for the marker class */
-        .custom-marker-icon {
-            pointer-events: auto !important;
-            cursor: pointer !important;
-            background: transparent !important;
-            border: none !important;
-        }
-        .custom-marker-icon:hover div {
-            transform: scale(1.15) translateY(-2px); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
-        }
+        .smart-marker-container:hover .smart-marker-body { transform: scale(1.1) translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important; }
       `}</style>
 
       {/* Map Control: Info Badge */}
@@ -358,11 +399,12 @@ const TraineeLocationMap = ({ trainingLocations }) => {
               key={`group-${i}`}
               position={[location.lat, location.lng]}
               icon={createCustomIcon(count, statusColor)}
-              eventHandlers={{
-                click: (e) => {
-                  // Stop the map from thinking we clicked on it
-                  L.DomEvent.stopPropagation(e);
-                  setSelectedTraining(trainings);
+              ref={(marker) => {
+                if (marker) {
+                  marker.off('click'); // remove old listeners
+                  marker.on('click', () => {
+                    setSelectedTraining([...trainings]);
+                  });
                 }
               }}
             />

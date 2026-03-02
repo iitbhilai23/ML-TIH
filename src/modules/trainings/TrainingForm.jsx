@@ -160,36 +160,6 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
     status: 'scheduled'
   });
 
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     loadDropdowns();
-  //     if (initialData) {
-  //       // Format dates for input field (YYYY-MM-DD)
-  //       const formattedStart = initialData.start_date ?
-  //         new Date(initialData.start_date).toISOString().split('T')[0] : '';
-  //       const formattedEnd = initialData.end_date ?
-  //         new Date(initialData.end_date).toISOString().split('T')[0] : '';
-
-  //       setFormData({
-  //         ...initialData,
-  //         start_date: formattedStart,
-  //         end_date: formattedEnd
-  //       });
-  //     } else {
-  //       // Reset form
-  //       setFormData({
-  //         trainer_id: '',
-  //         subject_id: '',
-  //         location_id: '',
-  //         start_date: '',
-  //         end_date: '',
-  //         max_participants: 50,
-  //         status: 'scheduled'
-  //       });
-  //     }
-  //   }
-  // }, [isOpen, initialData]);
-
   useEffect(() => {
     if (isOpen) {
       loadDropdowns();
@@ -255,25 +225,6 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
     });
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   // Validate required fields
-  //   if (!formData.trainer_id || !formData.subject_id || !formData.location_id || !formData.start_date) {
-  //     toast.error('Please fill all required fields');
-  //     return;
-  //   }
-
-  //   // Create clean data object for API
-  //   const cleanData = { ...formData };
-  //   delete cleanData.id;
-  //   delete cleanData.actual_participants;
-  //   delete cleanData.created_at;
-  //   delete cleanData.updated_at;
-
-  //   // Pass data up to parent (Parent handles confirm & API)
-  //   onSave(cleanData);
-  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -283,7 +234,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
       return;
     }
 
-    // ✅ Send only required fields to backend
+    //  Send only required fields to backend
     const cleanData = {
       trainer_id: formData.trainer_id,
       subject_id: formData.subject_id,
