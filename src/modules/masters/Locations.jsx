@@ -13,6 +13,8 @@ const Locations = () => {
   const [error, setError] = useState(null);
   const [districts, setDistricts] = useState([]);
   const [blocks, setBlocks] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,7 +31,11 @@ const Locations = () => {
     block_cd: '',
     village: '',
     pincode: '',
-    address_line: ''
+    address_line: '',
+    country_code: '',
+    country_name: '',
+    state_code: '',
+    state_name: ''
   });
 
   // State for the Custom Confirmation Modal
@@ -55,7 +61,6 @@ const Locations = () => {
   const THEME = {
     primary: '#6366f1',
     danger: '#ef4444',
-    // ... other theme colors if needed locally, though mostly using inline styles
   };
 
   const [filters, setFilters] = useState({ district: '', block: '' });
@@ -92,29 +97,55 @@ const Locations = () => {
     }
   };
 
+  const loadStates = (countryCode) => {
+    const filteredStates = [
+      ...new Map(
+        locations
+          .filter(loc => loc.country_code === countryCode && loc.state_code)
+          .map(loc => [
+            loc.state_code,
+            {
+              state_code: loc.state_code,
+              state_name: loc.state_name
+            }
+          ])
+      ).values()
+    ];
+
+    setStates(filteredStates);
+  };
+
 
   const loadLocations = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await locationService.getAll(filters);
-      // setLocations(Array.isArray(data) ? [...data] : []);
+      
+      const uniqueCountries = [
+        ...new Map(
+          data
+            .filter(loc => loc.country_code && loc.country_name)
+            .map(loc => [
+              loc.country_code,
+              {
+                country_code: loc.country_code,
+                country_name: loc.country_name
+              }
+            ])
+        ).values()
+      ];
+
+      setCountries(uniqueCountries);
       setLocations(
         Array.isArray(data)
           ? [...data].sort((a, b) => {
             const aHasDistrict = a.district && a.district.trim() !== '';
             const bHasDistrict = b.district && b.district.trim() !== '';
 
-            // If both have district → keep original order
             if (aHasDistrict && bHasDistrict) return 0;
-
-            // If only A has district → A first
             if (aHasDistrict) return -1;
-
-            // If only B has district → B first
             if (bHasDistrict) return 1;
-
-            // If neither has district → keep order
             return 0;
           })
           : []
@@ -127,6 +158,8 @@ const Locations = () => {
       setLoading(false);
     }
   };
+
+
 
   const cleanPayload = (data) => {
     const cleaned = {};
@@ -142,8 +175,6 @@ const Locations = () => {
     });
     return cleaned;
   };
-
-  // --- ACTUAL API LOGIC (Executed after confirmation) ---
 
   const executeSave = async () => {
     try {
@@ -172,12 +203,8 @@ const Locations = () => {
     }
   };
 
-  // --- HANDLERS (Triggers Confirmation) ---
-
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // If it's an edit, show confirmation before saving
     if (formData.id) {
       openConfirm(
         'Save Changes?',
@@ -186,7 +213,6 @@ const Locations = () => {
         'primary'
       );
     } else {
-      // If it's new, just save directly
       executeSave();
     }
   };
@@ -203,6 +229,10 @@ const Locations = () => {
   const openAdd = () => {
     setFormData({
       id: null,
+      country_name: '',
+      country_code: '',
+      state_name: '',
+      state_code: '',
       state: 'Chhattisgarh',
       district: '',
       block: '',
@@ -210,15 +240,27 @@ const Locations = () => {
       pincode: '',
       address_line: ''
     });
+    setStates([]); // Reset states for new form
+    setBlocks([]); // Reset blocks for new form
     setIsModalOpen(true);
   };
 
   const openEdit = (loc) => {
+    // Load dependent dropdowns first
+    if (loc.country_code) loadStates(loc.country_code);
+    if (loc.district_cd) loadBlocks(loc.district_cd);
+
     setFormData({
       id: loc.id,
+      country_code: loc.country_code || '',
+      country_name: loc.country_name || '',
+      state_code: loc.state_code || '',
+      state_name: loc.state_name || '',
       state: loc.state || 'Chhattisgarh',
       district: loc.district || '',
+      district_cd: loc.district_cd || '',
       block: loc.block || '',
+      block_cd: loc.block_cd || '',
       village: loc.village || '',
       pincode: loc.pincode || '',
       address_line: loc.address_line || '',
@@ -227,8 +269,6 @@ const Locations = () => {
     });
     setIsModalOpen(true);
   };
-
-  // --- CONFIRMATION MODAL LOGIC ---
 
   const openConfirm = (title, message, onConfirm, type) => {
     setConfirmState({
@@ -418,17 +458,27 @@ const Locations = () => {
                   })
                 })
               }
-
               onExcel={() =>
                 exportExcel({
-                  fileName: "locations_report.xlsx",
-                  mapper: (loc, index) => ({
-                    No: index + 1,
-                    District: loc.district || "N/A",
-                    Block: loc.block || "N/A",
-                    Village: loc.village || "N/A",
-                    Pincode: loc.pincode || "N/A",
-                    Address: loc.address_line || "N/A"
+                  fileName: "locations_report.csv",
+                  mapper: (loc) => ({
+                    id: loc.id || "",
+                    village: loc.village || "",
+                    block: loc.block || "",
+                    district: loc.district || "",
+                    state: loc.state || "",
+                    pincode: loc.pincode || "",
+                    latitude: loc.latitude || "",
+                    longitude: loc.longitude || "",
+                    address_line: loc.address_line || "",
+                    created_at: loc.created_at || "",
+                    district_cd: loc.district_cd || "",
+                    block_cd: loc.block_cd || "",
+                    city: loc.city || "",
+                    country_name: loc.country_name || "",
+                    country_code: loc.country_code || "",
+                    state_name: loc.state_name || "",
+                    state_code: loc.state_code || ""
                   })
                 })
               }
@@ -755,36 +805,88 @@ const Locations = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {/* Row 1: District / Block */}
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>District *</label>
-                  {/* <input
-                    required
+              {/* Row 1: Country & State */}
+              <div className={styles.row} style={{ display: 'flex', gap: '16px' }}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label className={styles.label}>Country</label>
+                  <select
                     className={styles.input}
-                    value={formData.district}
-                    placeholder="e.g. Raipur"
-                    onChange={e => setFormData({ ...formData, district: e.target.value })}
-                  /> */}
+                    value={formData.country_code}
+                    onChange={(e) => {
+                      const countryCode = e.target.value;
+                      const selectedCountry = countries.find(
+                        c => String(c.country_code) === String(countryCode)
+                      );
+
+                      if (!selectedCountry) return;
+
+                      setFormData(prev => ({
+                        ...prev,
+                        country_code: selectedCountry.country_code,
+                        country_name: selectedCountry.country_name,
+                        state_code: '',
+                        state_name: ''
+                      }));
+
+                      loadStates(selectedCountry.country_code);
+                    }}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map(c => (
+                      <option key={c.country_code} value={c.country_code}>
+                        {c.country_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label className={styles.label}>State</label>
+                  <select
+                    className={styles.input}
+                    value={formData.state_code}
+                    disabled={!states.length}
+                    onChange={(e) => {
+                      const stateCode = e.target.value;
+                      const selectedState = states.find(
+                        s => String(s.state_code) === String(stateCode)
+                      );
+
+                      if (!selectedState) return;
+
+                      setFormData(prev => ({
+                        ...prev,
+                        state_code: selectedState.state_code,
+                        state_name: selectedState.state_name
+                      }));
+                    }}
+                  >
+                    <option value="">Select State</option>
+                    {states.map(s => (
+                      <option key={s.state_code} value={s.state_code}>
+                        {s.state_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: District & Block */}
+              <div className={styles.row} style={{ display: 'flex', gap: '16px' }}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label className={styles.label}>District *</label>
                   <select
                     required
                     className={styles.input}
                     value={formData.district_cd}
                     onChange={(e) => {
                       const districtCd = e.target.value;
-
-                      console.log("District selected:", districtCd);
-
                       const selectedDistrict = districts.find(
                         d => String(d.district_cd) === String(districtCd)
                       );
 
-                      if (!selectedDistrict) {
-                        console.error("District NOT FOUND");
-                        return;
-                      }
+                      if (!selectedDistrict) return;
 
-                      // Reset block before loading new ones
                       setFormData(prev => ({
                         ...prev,
                         district_cd: Number(selectedDistrict.district_cd),
@@ -793,7 +895,6 @@ const Locations = () => {
                         block_cd: ''
                       }));
 
-                      // Call block API
                       loadBlocks(selectedDistrict.district_cd);
                     }}
                   >
@@ -804,17 +905,10 @@ const Locations = () => {
                       </option>
                     ))}
                   </select>
-
                 </div>
-                <div className={styles.formGroup}>
+
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Block *</label>
-                  {/* <input
-                    required
-                    className={styles.input}
-                    value={formData.block}
-                    placeholder="e.g. Dharsiwa"
-                    onChange={e => setFormData({ ...formData, block: e.target.value })}
-                  /> */}
                   <select
                     required
                     className={styles.input}
@@ -822,17 +916,11 @@ const Locations = () => {
                     disabled={!blocks.length}
                     onChange={(e) => {
                       const blockCd = e.target.value;
-
-                      console.log("Block selected:", blockCd);
-
                       const selectedBlock = blocks.find(
                         b => String(b.block_cd) === String(blockCd)
                       );
 
-                      if (!selectedBlock) {
-                        console.error("Block NOT FOUND");
-                        return;
-                      }
+                      if (!selectedBlock) return;
 
                       setFormData(prev => ({
                         ...prev,
@@ -848,13 +936,12 @@ const Locations = () => {
                       </option>
                     ))}
                   </select>
-
                 </div>
               </div>
 
-              {/* Row 2: Village / Pincode */}
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
+              {/* Row 3: Village / Pincode */}
+              <div className={styles.row} style={{ display: 'flex', gap: '16px' }}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Village *</label>
                   <input
                     required
@@ -864,7 +951,7 @@ const Locations = () => {
                     onChange={e => setFormData({ ...formData, village: e.target.value })}
                   />
                 </div>
-                <div className={styles.formGroup} style={{ maxWidth: '140px' }}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Pincode</label>
                   <input
                     className={styles.input}
@@ -886,9 +973,9 @@ const Locations = () => {
                 />
               </div>
 
-              {/* Row 3: Lat / Long */}
-              <div className={styles.row}>
-                <div className={styles.formGroup}>
+              {/* Row 4: Lat / Long */}
+              <div className={styles.row} style={{ display: 'flex', gap: '16px' }}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Latitude</label>
                   <input
                     type="number"
@@ -899,7 +986,7 @@ const Locations = () => {
                     onChange={e => setFormData({ ...formData, latitude: e.target.value ? parseFloat(e.target.value) : null })}
                   />
                 </div>
-                <div className={styles.formGroup}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
                   <label className={styles.label}>Longitude</label>
                   <input
                     type="number"

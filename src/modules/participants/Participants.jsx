@@ -364,7 +364,7 @@ const Participants = () => {
 
               onExcel={() =>
                 exportExcel({
-                  fileName: "participants_report.xlsx",
+                  fileName: "participants_report.csv",
                   mapper: (p, index) => ({
                     No: index + 1,
                     Name: p.name || "N/A",

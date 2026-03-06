@@ -259,7 +259,7 @@ const TrainerList = () => {
               })
               }
               onExcel={() => exportExcel({
-                fileName: "trainers_report.xlsx",
+                fileName: "trainers_report.csv",
                 mapper: (trainer, index) => ({
                   No: index + 1,
                   Name: trainer.name || "N/A",
