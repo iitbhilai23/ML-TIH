@@ -139,33 +139,29 @@ export const generatePDF = ({
     }
 };
 
-/* ======================================================
-   EXCEL GENERATOR (Clean Version)
-====================================================== */
+// /* ======================================================
+//    EXCEL GENERATOR (Clean Version)
+// ====================================================== */
 
 export const generateExcel = ({
     data = [],
-    fileName = "report.xlsx"
+    fileName = "report.csv"
 }) => {
     try {
+
+        // convert JSON → sheet
         const worksheet = XLSX.utils.json_to_sheet(data);
 
-        const workbook = {
-            Sheets: { Sheet1: worksheet },
-            SheetNames: ["Sheet1"]
-        };
+        // convert sheet → CSV
+        const csv = XLSX.utils.sheet_to_csv(worksheet);
 
-        const buffer = XLSX.write(workbook, {
-            bookType: "xlsx",
-            type: "array"
-        });
-
-        const blob = new Blob([buffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        const blob = new Blob([csv], {
+            type: "text/csv;charset=utf-8;"
         });
 
         saveAs(blob, fileName);
+
     } catch (error) {
-        console.error("Excel Generation Error:", error);
+        console.error("CSV Generation Error:", error);
     }
 };

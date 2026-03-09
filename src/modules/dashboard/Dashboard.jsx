@@ -8,15 +8,15 @@ import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
 import { Users, BookOpen, MapPin, Calendar, Filter, Table, User, House, Maximize, Minimize, X } from 'lucide-react';
 import cgGeoJson from '../../assets/cg.json';
-import { Country, State } from "country-state-city";
 
-// --- THEME CONFIGURATION (Original Colors Restored) ---
+
+// --- THEME CONFIGURATION ---
 const THEME = {
   gap: { xs: '8px', sm: '12px', md: '16px', lg: '24px', xl: '32px' },
   pad: { s: '2', sm: '12px', md: '16px', lg: '20px', xl: '28px' },
   bgGradient: 'linear-gradient(to bottom, #f8fafc, #f1f5f9)',
   glass: {
-    background: 'rgba(255, 255, 255, 0.85)', // Slight glass effect
+    background: 'rgba(255, 255, 255, 0.85)',
     border: '1px solid rgba(255, 255, 255, 0.9)',
     borderRadius: '16px',
     boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
@@ -29,17 +29,16 @@ const THEME = {
   success: '#059669',
   warning: '#d97706',
   danger: '#dc2626',
-  // --- ORIGINAL CARD GRADIENTS (KEPT AS REQUESTED) ---
   gradients: {
     primary: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
     success: 'linear-gradient(135deg, #0f766e 0%, #0f172a 120%)',
     warning: 'linear-gradient(135deg, #b45309 0%, #1f2937 120%)',
     secondary: 'linear-gradient(135deg, #334155 0%, #111827 100%)',
     cyan: 'linear-gradient(135deg, #0e7490 0%, #0f172a 120%)',
-    kpiA: 'linear-gradient(135deg, #7b3f99 0%, #5a2b7a 100%)', // Original Purple
-    kpiB: 'linear-gradient(135deg, #9b59b6 0%, #7b3f99 100%)', // Original Light Purple
-    kpiC: 'linear-gradient(135deg, #6a0dad 0%, #4c1d95 100%)', // Original Deep Purple
-    kpiD: 'linear-gradient(135deg, #b06ad9 0%, #7b3f99 100%)'  // Original Soft Purple
+    kpiA: 'linear-gradient(135deg, #7b3f99 0%, #5a2b7a 100%)',
+    kpiB: 'linear-gradient(135deg, #9b59b6 0%, #7b3f99 100%)',
+    kpiC: 'linear-gradient(135deg, #6a0dad 0%, #4c1d95 100%)',
+    kpiD: 'linear-gradient(135deg, #b06ad9 0%, #7b3f99 100%)'
   },
   input: {
     padding: '10px 16px', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '0.9rem',
@@ -64,12 +63,96 @@ const Dashboard = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
 
-  const countries = useMemo(() => Country.getAllCountries(), []);
+  // const mapFocusPoint = useMemo(() => {
+  //   if (selectedState && locationsData.length > 0) {
+  //     const targetLocation = locationsData.find(loc => loc.state_code === selectedState);
+  //     if (targetLocation && targetLocation.latitude && targetLocation.longitude) {
+  //       return [Number(targetLocation.latitude), Number(targetLocation.longitude)];
+  //     }
+  //   }
+  //   return null;
+  // }, [selectedState, locationsData]);
 
-  const states = useMemo(() => {
+  // const mapFocusPoint = useMemo(() => {
+  //   if (selectedState && locationsData.length > 0) {
+  //     const targetLocation = locationsData.find(loc => loc.state_code === selectedState);
+
+  //     if (targetLocation && targetLocation.latitude && targetLocation.longitude) {
+
+  //       console.log("🎯 Focus State:", targetLocation.state_name);
+  //       console.log("📍 Focus Lat:", targetLocation.latitude);
+  //       console.log("📍 Focus Lng:", targetLocation.longitude);
+
+  //       return [Number(targetLocation.latitude), Number(targetLocation.longitude)];
+  //     }
+  //   }
+  //   return null;
+  // }, [selectedState, locationsData]);
+
+  const mapFocusPoint = useMemo(() => {
+    if (!selectedState) return null;
+
+    const targetLocation = locationsData.find(
+      loc => String(loc.state_code) === String(selectedState)
+    );
+
+    if (targetLocation?.latitude && targetLocation?.longitude) {
+      console.log("🌍 Country:", targetLocation.country_name);
+      console.log("🏙 State:", targetLocation.state_name);
+      console.log("📍 Latitude:", targetLocation.latitude);
+      console.log("📍 Longitude:", targetLocation.longitude);
+
+      return [
+        Number(targetLocation.latitude),
+        Number(targetLocation.longitude)
+      ];
+    }
+
+    return null;
+  }, [selectedState, locationsData]);
+
+  // const filteredLocationsForMap = useMemo(() => {
+  //   return locationsData.filter(loc => {
+  //     const matchCountry = !selectedCountry || loc.country_code === selectedCountry;
+  //     const matchState = !selectedState || loc.state_code === selectedState;
+  //     return matchCountry && matchState;
+  //   });
+  // }, [locationsData, selectedCountry, selectedState]);
+
+  const filteredLocationsForMap = useMemo(() => {
+    return locationsData.filter(loc => {
+      const matchCountry =
+        !selectedCountry ||
+        String(loc.country_code) === String(selectedCountry);
+
+      const matchState =
+        !selectedState ||
+        String(loc.state_code) === String(selectedState);
+
+      return matchCountry && matchState;
+    });
+  }, [locationsData, selectedCountry, selectedState]);
+
+  const countriesFromAPI = useMemo(() => {
+    const map = new Map();
+    locationsData.forEach(loc => {
+      if (loc.country_code && loc.country_name) {
+        map.set(loc.country_code, { code: loc.country_code, name: loc.country_name });
+      }
+    });
+    return Array.from(map.values());
+  }, [locationsData]);
+
+  const statesFromAPI = useMemo(() => {
     if (!selectedCountry) return [];
-    return State.getStatesOfCountry(selectedCountry);
-  }, [selectedCountry]);
+    const map = new Map();
+    locationsData.forEach(loc => {
+      if (loc.country_code === selectedCountry && loc.state_code && loc.state_name) {
+        map.set(loc.state_code, { code: loc.state_code, name: loc.state_name });
+      }
+    });
+    return Array.from(map.values());
+  }, [selectedCountry, locationsData]);
 
   const activeFilters = JSON.stringify({
     district_cd: filters.district_cd, block_cd: filters.block_cd,
@@ -109,7 +192,12 @@ const Dashboard = () => {
   }, [filters.district_cd]);
 
   useEffect(() => {
-    const fetchMapLocation = async () => { try { const data = await locationService.getAll(); setLocationsData(Array.isArray(data) ? data : []); } catch (error) { console.error("Error fetching locations for map:", error); } };
+    const fetchMapLocation = async () => {
+      try {
+        const data = await locationService.getAll();
+        setLocationsData(Array.isArray(data) ? data : []);
+      } catch (error) { console.error("Error fetching locations for map:", error); }
+    };
     fetchMapLocation();
   }, []);
 
@@ -165,19 +253,15 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: '10px 15px 15px 15px', display: 'flex', flexDirection: 'column', gap: THEME.gap.xs, minHeight: '100vh', background: THEME.bgGradient, overflowX: "hidden" }}>
-
-      {/* --- HEADER --- */}
       <Box sx={{ textAlign: 'center', mb: 0.5, opacity: 0, animation: 'fadeIn 0.8s ease-out forwards' }}>
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         <Typography variant="h4" component="h1" fontWeight="700" color="text.primary" gutterBottom sx={{ fontSize: { xs: '1.4rem', md: '1.8rem' }, mb: 0.5 }}>
           Marketplace Literacy <Box component="span" sx={{ background: "linear-gradient(90deg, #D4AF37 0%, #2E8B57 50%, #1976d2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Chhattisgarh</Box>
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, mx: 'auto', fontSize: { xs: '0.75rem', md: '0.85rem' }, fontWeight: 400 }}>
+        {/* <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, mx: 'auto', fontSize: { xs: '0.75rem', md: '0.85rem' }, fontWeight: 400 }}>
           Empowering women through financial education and entrepreneurship skills
-        </Typography>
+        </Typography> */}
       </Box>
-
-      {/* --- GLASSMORPHISM FILTER BAR --- */}
       <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, mb: 0.5 }}>
         <div style={{ ...THEME.glass, width: '100%', maxWidth: '1500px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.sm, borderRight: '1px solid rgba(0,0,0,0.05)', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.75rem' }}>
@@ -187,54 +271,14 @@ const Dashboard = () => {
             <MenuItem value="">All Districts</MenuItem>
             {districts.map((d) => (<MenuItem key={d.district_cd} value={d.district_cd}>{d.district_name}</MenuItem>))}
           </Select>
-          {/* <Select name="block_cd" value={filters.block_cd} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx} disabled={!filters.district_cd}>
-            <MenuItem value="">All Blocks</MenuItem>
-            {blocks.map((b) => (<MenuItem key={b.block_cd} value={b.block_cd}>{b.block_name}</MenuItem>))}
-          </Select> */}
-          <Select
-            name="country"
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-            displayEmpty
-            size="small"
-            sx={selectSx}   // optional if you're using custom styling
-          >
-            <MenuItem value="">
-              -- Select Country --
-            </MenuItem>
-
-            {countries.map((country) => (
-              <MenuItem
-                key={country.isoCode}
-                value={country.isoCode}
-              >
-                {country.name}
-              </MenuItem>
-            ))}
+          <Select name="country" value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); }} displayEmpty size="small" sx={selectSx}>
+            <MenuItem value="">Select Country</MenuItem>
+            {countriesFromAPI.map((country) => (<MenuItem key={country.code} value={country.code}>{country.name}</MenuItem>))}
           </Select>
-          <Select
-            name="state"
-            value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            displayEmpty
-            size="small"
-            sx={selectSx}
-            disabled={!selectedCountry}   // disables until country selected
-          >
-            <MenuItem value="">
-              -- Select State --
-            </MenuItem>
-
-            {states.map((state) => (
-              <MenuItem
-                key={state.isoCode}
-                value={state.isoCode}
-              >
-                {state.name}
-              </MenuItem>
-            ))}
+          <Select name="state" value={selectedState} onChange={(e) => setSelectedState(e.target.value)} displayEmpty size="small" sx={selectSx} disabled={!selectedCountry}>
+            <MenuItem value="">-- Select State --</MenuItem>
+            {statesFromAPI.map((state) => (<MenuItem key={state.code} value={state.code}>{state.name}</MenuItem>))}
           </Select>
-
           <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
             <Calendar size={14} style={{ color: '#94a3b8' }} />
             <input type="date" name="start_date" style={{ ...THEME.input, height: '38px', fontSize: '0.8rem' }} onChange={handleFilterChange} value={filters.start_date} />
@@ -248,11 +292,10 @@ const Dashboard = () => {
             <MenuItem value="scheduled">Scheduled</MenuItem>
           </Select>
         </div>
-      </Box>
-
-      {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} locationsData={locationsData} trainingLocations={filteredTrainingLocations} />}
+      </Box >
+      {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} locationsData={locationsData} trainingLocations={filteredTrainingLocations} focusTarget={mapFocusPoint} />}
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} />}
-    </div>
+    </div >
   );
 };
 
@@ -266,8 +309,18 @@ const MapResizer = ({ trigger }) => {
   return null;
 };
 
-// --- SMART MAP COMPONENT ---
-const TraineeLocationMap = ({ trainingLocations }) => {
+const MapLocationController = ({ target }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (target && target.length === 2) {
+      map.flyTo(target, 10, { animate: true, duration: 1.5 });
+    }
+  }, [target, map]);
+  return null;
+};
+
+// --- SMART MAP COMPONENT (UPDATED WITH MARKER) ---
+const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState(null);
@@ -284,18 +337,17 @@ const TraineeLocationMap = ({ trainingLocations }) => {
   const validTrainingLocations = (trainingLocations || []).filter(training => {
     const lat = Number(training?.location_details?.latitude);
     const lng = Number(training?.location_details?.longitude);
-    return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
+    // return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
+    return !isNaN(lat) && !isNaN(lng);
   });
 
   const totalTrainings = validTrainingLocations.length;
   useEffect(() => { setGeoJsonData(cgGeoJson); }, []);
 
-  // Smart Grouping Logic: Proximity Merge
   const groupedLocations = useMemo(() => {
     return validTrainingLocations.reduce((acc, training) => {
       const lat = Number(training.location_details?.latitude);
       const lng = Number(training.location_details?.longitude);
-      // Round to 4 decimal places (~11m) to group nearby markers
       const key = `${lat.toFixed(4)}-${lng.toFixed(4)}`;
       if (!acc[key]) acc[key] = { lat, lng, trainings: [] };
       acc[key].trainings.push(training);
@@ -303,9 +355,8 @@ const TraineeLocationMap = ({ trainingLocations }) => {
     }, {});
   }, [validTrainingLocations]);
 
-  // Modern "Stacked" Visual Marker
+  // --- Training Markers Icon ---
   const createCustomIcon = (count, color = '#7b3f99') => {
-    // Create a "Stacked Card" effect if count > 1
     const stackShadow = count > 1
       ? `2px -2px 0 rgba(255,255,255,0.9), 3px -3px 0 ${color}, 4px -4px 0 rgba(255,255,255,0.9), 5px -5px 0 ${color}`
       : '0 4px 14px rgba(0,0,0,0.15)';
@@ -335,6 +386,49 @@ const TraineeLocationMap = ({ trainingLocations }) => {
       iconSize: [40, 40],
       iconAnchor: [20, 20],
       interactive: true
+    });
+  };
+
+  // --- NEW: Focus/Center Marker Icon ---
+  const createFocusIcon = () => {
+    return L.divIcon({
+      className: 'focus-marker-container',
+      html: `
+        <style>
+          @keyframes pulse-ring {
+            0% { transform: scale(0.33); opacity: 1; }
+            80%, 100% { opacity: 0; transform: scale(2.5); }
+          }
+          .pulse-circle {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%; height: 100%;
+            background: rgba(220, 38, 38, 0.4);
+            border-radius: 50%;
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+          }
+        </style>
+        <div style="
+            width: 30px; height: 30px; 
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            color: #ffffff;
+        ">
+          <div class="pulse-circle"></div>
+          <div style="
+            width: 20px; height: 20px;
+            background: #dc2626; /* Red color for focus */
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+            z-index: 10;
+          "></div>
+        </div>
+      `,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      interactive: false // No need to click this center marker
     });
   };
 
@@ -386,10 +480,23 @@ const TraineeLocationMap = ({ trainingLocations }) => {
 
       <MapContainer style={{ width: '100%', height: '100%' }} zoomControl={false}>
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
-        <MapBoundsAdjuster geoJsonData={geoJsonData} trigger={isFullScreen} />
+
+        {/* Controller to handle map movement based on selection */}
+        <MapLocationController target={focusTarget} />
+
+        {/* Adjusts bounds if no specific target is selected */}
+        <MapBoundsAdjuster geoJsonData={geoJsonData} trigger={isFullScreen} focusTarget={focusTarget} />
+
         <MapResizer trigger={isFullScreen} />
+
         {geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#7c3aed', weight: 1.5, fillOpacity: 0.03 }} />}
 
+        {/* NEW: Render Focus Marker if a target is selected */}
+        {focusTarget && (
+          <Marker position={focusTarget} icon={createFocusIcon()} />
+        )}
+
+        {/* Render Training Markers */}
         {Object.values(groupedLocations).map((location, i) => {
           const trainings = location.trainings;
           const count = trainings.length;
@@ -401,7 +508,7 @@ const TraineeLocationMap = ({ trainingLocations }) => {
               icon={createCustomIcon(count, statusColor)}
               ref={(marker) => {
                 if (marker) {
-                  marker.off('click'); // remove old listeners
+                  marker.off('click');
                   marker.on('click', () => {
                     setSelectedTraining([...trainings]);
                   });
@@ -442,29 +549,27 @@ const TraineeLocationMap = ({ trainingLocations }) => {
   );
 };
 
-const MapBoundsAdjuster = ({ geoJsonData, trigger }) => {
+const MapBoundsAdjuster = ({ geoJsonData, trigger, focusTarget }) => {
   const map = useMap();
   useEffect(() => {
-    if (!map || !geoJsonData) return;
+    if (!map || !geoJsonData || focusTarget) return;
     const layer = L.geoJSON(geoJsonData); const bounds = layer.getBounds(); if (!bounds.isValid()) return;
     const timeout = setTimeout(() => { if (map._container) { map.invalidateSize(); map.fitBounds(bounds, { paddingTopLeft: [40, 40], paddingBottomRight: [40, 40], maxZoom: 8 }); } }, 400);
     return () => clearTimeout(timeout);
-  }, [geoJsonData, trigger, map]);
+  }, [geoJsonData, trigger, focusTarget, map]);
   return null;
 };
 
-const SummaryTab = ({ summary, viewData, locationsData, trainingLocations }) => (
+const SummaryTab = ({ summary, viewData, locationsData, trainingLocations, focusTarget }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.sm }}>
-    {/* --- KPI ROW (Original Colors) --- */}
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.sm }}>
       <StatCard title="Total Trainings" value={summary?.total_trainings || 0} icon={BookOpen} gradient={THEME.gradients.kpiA} />
       <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.kpiB} />
       <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.kpiC} />
       <StatCard title="Total Locations" value={summary?.total_locations || 0} icon={House} gradient={THEME.gradients.kpiD} />
     </div>
-    {/* --- MAP AREA --- */}
     <div style={{ width: '100%', height: '560px', marginTop: '8px', borderRadius: '20px', overflow: 'hidden' }}>
-      <TraineeLocationMap trainingLocations={trainingLocations} />
+      <TraineeLocationMap trainingLocations={trainingLocations} focusTarget={focusTarget} />
     </div>
   </div>
 );
@@ -492,7 +597,6 @@ const DetailedTab = ({ viewData }) => (
   </div>
 );
 
-// --- KPI CARD COMPONENT (Original Style) ---
 const StatCard = ({ title, value, icon: Icon, gradient }) => {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', padding: '14px 16px', borderRadius: '12px', position: 'relative', backgroundImage: `${gradient}`, backgroundSize: 'cover', border: '1px solid rgba(255, 255, 255, 0.15)', boxShadow: `0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)`, transition: 'transform 220ms cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 220ms ease', cursor: 'default', overflow: 'hidden', userSelect: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 10px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)`; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)`; }}>

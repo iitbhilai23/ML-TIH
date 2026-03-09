@@ -223,7 +223,7 @@ const Trainings = () => {
 
   const handleExcelExport = () => {
     exportExcel({
-      fileName: 'trainings.xlsx',
+      fileName: 'trainings.csv',
       mapper: (t, index) => {
         const d = getTrainingDetails(t);
         return {
