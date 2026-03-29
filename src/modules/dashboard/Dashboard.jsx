@@ -10,7 +10,6 @@ import { Users, BookOpen, MapPin, Calendar, Filter, Table, User, House, Maximize
 import cgGeoJson from '../../assets/cg.json';
 
 
-// --- THEME CONFIGURATION ---
 const THEME = {
   gap: { xs: '8px', sm: '12px', md: '16px', lg: '24px', xl: '32px' },
   pad: { s: '2', sm: '12px', md: '16px', lg: '20px', xl: '28px' },
