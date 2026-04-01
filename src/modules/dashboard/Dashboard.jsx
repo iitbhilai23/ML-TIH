@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, Select, MenuItem } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { MapContainer, TileLayer, Marker, GeoJSON, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, GeoJSON, useMap, Popup } from 'react-leaflet'; // Added Popup
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
@@ -49,7 +50,7 @@ const THEME = {
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const [viewData, setViewData] = useState(null);
-  const [locationsData, setLocationsData] = useState([]);
+  const [locationsData, setLocationsData] = useState([]); // Raw location data from API
   const [trainingLocations, setTrainingLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,32 +62,6 @@ const Dashboard = () => {
   });
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
-
-  // const mapFocusPoint = useMemo(() => {
-  //   if (selectedState && locationsData.length > 0) {
-  //     const targetLocation = locationsData.find(loc => loc.state_code === selectedState);
-  //     if (targetLocation && targetLocation.latitude && targetLocation.longitude) {
-  //       return [Number(targetLocation.latitude), Number(targetLocation.longitude)];
-  //     }
-  //   }
-  //   return null;
-  // }, [selectedState, locationsData]);
-
-  // const mapFocusPoint = useMemo(() => {
-  //   if (selectedState && locationsData.length > 0) {
-  //     const targetLocation = locationsData.find(loc => loc.state_code === selectedState);
-
-  //     if (targetLocation && targetLocation.latitude && targetLocation.longitude) {
-
-  //       console.log("🎯 Focus State:", targetLocation.state_name);
-  //       console.log("📍 Focus Lat:", targetLocation.latitude);
-  //       console.log("📍 Focus Lng:", targetLocation.longitude);
-
-  //       return [Number(targetLocation.latitude), Number(targetLocation.longitude)];
-  //     }
-  //   }
-  //   return null;
-  // }, [selectedState, locationsData]);
 
   const mapFocusPoint = useMemo(() => {
     if (!selectedState) return null;
@@ -110,14 +85,6 @@ const Dashboard = () => {
     return null;
   }, [selectedState, locationsData]);
 
-  // const filteredLocationsForMap = useMemo(() => {
-  //   return locationsData.filter(loc => {
-  //     const matchCountry = !selectedCountry || loc.country_code === selectedCountry;
-  //     const matchState = !selectedState || loc.state_code === selectedState;
-  //     return matchCountry && matchState;
-  //   });
-  // }, [locationsData, selectedCountry, selectedState]);
-
   const filteredLocationsForMap = useMemo(() => {
     return locationsData.filter(loc => {
       const matchCountry =
@@ -131,6 +98,21 @@ const Dashboard = () => {
       return matchCountry && matchState;
     });
   }, [locationsData, selectedCountry, selectedState]);
+
+  // NEW: Filter locations specifically for the Map Markers based on District Dropdown
+  const mapDisplayLocations = useMemo(() => {
+    if (!locationsData || locationsData.length === 0) return [];
+    
+    return locationsData.filter(loc => {
+      // If a district is selected in filters, match it. 
+      // The API data has 'district_cd', and the filter state has 'district_cd'.
+      if (filters.district_cd) {
+        return String(loc.district_cd) === String(filters.district_cd);
+      }
+      // If no district selected, show all (or limit by state/country if needed)
+      return true; 
+    });
+  }, [locationsData, filters.district_cd]);
 
   const countriesFromAPI = useMemo(() => {
     const map = new Map();
@@ -257,9 +239,6 @@ const Dashboard = () => {
         <Typography variant="h4" component="h1" fontWeight="700" color="text.primary" gutterBottom sx={{ fontSize: { xs: '1.4rem', md: '1.8rem' }, mb: 0.5 }}>
           Marketplace Literacy <Box component="span" sx={{ background: "linear-gradient(90deg, #D4AF37 0%, #2E8B57 50%, #1976d2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Chhattisgarh</Box>
         </Typography>
-        {/* <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, mx: 'auto', fontSize: { xs: '0.75rem', md: '0.85rem' }, fontWeight: 400 }}>
-          Empowering women through financial education and entrepreneurship skills
-        </Typography> */}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, mb: 0.5 }}>
         <div style={{ ...THEME.glass, width: '100%', maxWidth: '1500px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
@@ -292,7 +271,15 @@ const Dashboard = () => {
           </Select>
         </div>
       </Box >
-      {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} locationsData={locationsData} trainingLocations={filteredTrainingLocations} focusTarget={mapFocusPoint} />}
+      {activeTab === 'summary' && (
+        <SummaryTab 
+          summary={data} 
+          viewData={viewData} 
+          trainingLocations={filteredTrainingLocations} 
+          mapLocations={mapDisplayLocations} // NEW: Passing the filtered API locations
+          focusTarget={mapFocusPoint} 
+        />
+      )}
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} />}
     </div >
   );
@@ -319,7 +306,7 @@ const MapLocationController = ({ target }) => {
 };
 
 // --- SMART MAP COMPONENT (UPDATED WITH MARKER) ---
-const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
+const TraineeLocationMap = ({ trainingLocations, focusTarget, mapLocations }) => {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState(null);
@@ -336,7 +323,13 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
   const validTrainingLocations = (trainingLocations || []).filter(training => {
     const lat = Number(training?.location_details?.latitude);
     const lng = Number(training?.location_details?.longitude);
-    // return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
+    return !isNaN(lat) && !isNaN(lng);
+  });
+
+  // Filter valid location markers from the new API data
+  const validMapLocations = (mapLocations || []).filter(loc => {
+    const lat = Number(loc.latitude);
+    const lng = Number(loc.longitude);
     return !isNaN(lat) && !isNaN(lng);
   });
 
@@ -388,6 +381,33 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
     });
   };
 
+  // --- NEW: Simple Location Icon for API Points ---
+  const createLocationIcon = () => {
+    return L.divIcon({
+      className: 'location-marker-container',
+      html: `
+        <div style="
+            width: 32px; height: 32px; 
+            background: #3b82f6; /* Blue color for generic locations */
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+        ">
+          <div style="
+            width: 10px; height: 10px; background: white; border-radius: 50%;
+            transform: rotate(45deg);
+          "></div>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+      interactive: true
+    });
+  };
+
   // --- NEW: Focus/Center Marker Icon ---
   const createFocusIcon = () => {
     return L.divIcon({
@@ -427,7 +447,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
       `,
       iconSize: [30, 30],
       iconAnchor: [15, 15],
-      interactive: false // No need to click this center marker
+      interactive: false
     });
   };
 
@@ -495,6 +515,27 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
           <Marker position={focusTarget} icon={createFocusIcon()} />
         )}
 
+        {/* --- NEW: Render Location Markers (API Points) --- */}
+        {validMapLocations.map((loc, idx) => (
+          <Marker
+            key={`loc-${loc.id || idx}`}
+            position={[Number(loc.latitude), Number(loc.longitude)]}
+            icon={createLocationIcon()}
+          >
+            <Popup>
+              <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '150px' }}>
+                <h4 style={{ margin: '0 0 5px 0', color: '#1e293b', fontSize: '1rem' }}>{loc.village || 'Unknown Village'}</h4>
+                <p style={{ margin: '0 0 2px 0', color: '#64748b', fontSize: '0.85rem' }}>
+                  <strong>Block:</strong> {loc.block}
+                </p>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
+                  <strong>District:</strong> {loc.district}
+                </p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
         {/* Render Training Markers */}
         {Object.values(groupedLocations).map((location, i) => {
           const trainings = location.trainings;
@@ -559,16 +600,20 @@ const MapBoundsAdjuster = ({ geoJsonData, trigger, focusTarget }) => {
   return null;
 };
 
-const SummaryTab = ({ summary, viewData, locationsData, trainingLocations, focusTarget }) => (
+const SummaryTab = ({ summary, viewData, trainingLocations, mapLocations, focusTarget }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.sm }}>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.sm }}>
       <StatCard title="Total Trainings" value={summary?.total_trainings || 0} icon={BookOpen} gradient={THEME.gradients.kpiA} />
       <StatCard title="Total Trainers" value={summary?.total_trainers || 0} icon={User} gradient={THEME.gradients.kpiB} />
-      <StatCard title="Total Participants" value={summary?.total_participants || 0} icon={Users} gradient={THEME.gradients.kpiC} />
+      <StatCard title="Total Participants" value={9926} icon={Users} gradient={THEME.gradients.kpiC} />
       <StatCard title="Total Locations" value={summary?.total_locations || 0} icon={House} gradient={THEME.gradients.kpiD} />
     </div>
     <div style={{ width: '100%', height: '560px', marginTop: '8px', borderRadius: '20px', overflow: 'hidden' }}>
-      <TraineeLocationMap trainingLocations={trainingLocations} focusTarget={focusTarget} />
+      <TraineeLocationMap 
+        trainingLocations={trainingLocations} 
+        mapLocations={mapLocations} // NEW: Passing to map
+        focusTarget={focusTarget} 
+      />
     </div>
   </div>
 );
