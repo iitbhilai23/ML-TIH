@@ -565,9 +565,9 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                   <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>{selectedTraining.length} training sessions found here</p>
                 </div>
               </div>
+
               {selectedTraining.map((training, index) => (
                 <div key={training.id || index} style={{ padding: '16px', borderRadius: '16px', background: '#f8fafc', marginBottom: '10px', border: '1px solid #f1f5f9' }}>
-                  {/* <div style={{ fontWeight: '700', color: '#1e293b', marginBottom: '6px' }}>{training.subject_name || 'N/A'}</div> */}
                   <div style={{ fontWeight: '700', color: '#1e293b', marginBottom: '6px' }}>Marketplace Literacy</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ ...getStatusStyle(training.status), padding: '4px 12px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase' }}>{training.status}</span>
