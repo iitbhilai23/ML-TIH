@@ -786,6 +786,8 @@ const Dashboard = () => {
     return Array.from(map.values());
   }, [selectedCountry, locationsData]);
 
+  //dashboard data fetch on filter change
+
   const activeFilters = JSON.stringify({
     district_cd: filters.district_cd, block_cd: filters.block_cd,
     start_date: filters.start_date, end_date: filters.end_date, status: filters.status
