@@ -30,6 +30,9 @@ const Login = () => {
     try {
       const result = await login(credentials.username, credentials.password);
 
+      console.log(credentials.username, credentials.password);
+
+
       if (result.success) {
         // 2. Trigger Sonner success toast
         toast.success('Login Successful', {
