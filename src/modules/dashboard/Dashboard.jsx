@@ -63,7 +63,7 @@ const Dashboard = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
 
-  console.log(trainingLocations.slice(0, 10));
+  // console.log(trainingLocations.slice(0, 10));
 
   // const mapFocusPoint = useMemo(() => {
   //   if (selectedState && locationsData.length > 0) {
@@ -267,7 +267,7 @@ const Dashboard = () => {
       if (filters.end_date && training.start_date) { if (trainingDate > new Date(filters.end_date)) matchDate = false; }
       return matchDistrict && matchBlock && matchStatus && matchDate;
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trainingLocations, filters, districts, blocks]);
 
   if (loading) return <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: THEME.bgGradient, color: THEME.primary, fontSize: '1rem', fontWeight: '600' }}>Loading Dashboard Data...</div>;
@@ -499,10 +499,10 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
       `}</style>
 
       {/* Map Control: Info Badge */}
-      <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '8px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #f1f5f9' }}>
+      {/* <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '8px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #f1f5f9' }}>
         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#9647bb' }}></div>
         <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}></div>
-      </div>
+      </div> */}
 
       {/* Map Control: Fullscreen */}
       <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 1000 }}>
