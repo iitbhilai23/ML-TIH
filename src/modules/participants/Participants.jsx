@@ -84,20 +84,37 @@ const Participants = () => {
     }
   };
 
+  // const loadParticipants = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const filters = selectedTrainingId ? { training_id: selectedTrainingId } : {};
+  //     const data = await participantService.getAll(filters);
+  //     setParticipants(data);
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error('Failed to load participants');
+  //   }
+  //   setLoading(false);
+  // };
+
+  // --- API LOGIC (Executed after confirmation) ---
+
   const loadParticipants = async () => {
     setLoading(true);
     try {
-      const filters = selectedTrainingId ? { training_id: selectedTrainingId } : {};
-      const data = await participantService.getAll(filters);
+      // Temporary: always load all participants
+      const data = await participantService.getAll();
       setParticipants(data);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load participants');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // --- API LOGIC (Executed after confirmation) ---
+  // console.log(participants[0]);
+  // console.log(participants[0].training_details.location_details);
 
   const executeSave = async (data) => {
     setIsSaving(true);
@@ -186,9 +203,52 @@ const Participants = () => {
   };
 
   // --- Filtering Logic ---
-  const filteredParticipants = participants.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // const filteredParticipants = participants.filter(p =>
+  //   p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+  const selectedTraining = trainings.find(
+    (t) => String(t.id) === String(selectedTrainingId)
   );
+
+  const filteredParticipants = participants.filter((p) => {
+    const matchesSearch = p.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    // Show all if no training is selected
+    if (!selectedTraining) {
+      return matchesSearch;
+    }
+
+    const participantDistrict =
+      p.training_details?.location_details?.district_cd;
+
+    const participantBlock =
+      p.training_details?.location_details?.block_cd;
+
+    // const matchesDistrict =
+    //   String(participantDistrict) ===
+    //   String(selectedTraining.location_details?.district_cd);
+
+    // const matchesBlock =
+    //   String(participantBlock) ===
+    //   String(selectedTraining.location_details?.block_cd);
+
+    const selectedDistrictCd =
+      selectedTraining?.location_details?.district_cd;
+
+    const selectedBlockCd =
+      selectedTraining?.location_details?.block_cd;
+
+    const matchesDistrict =
+      String(participantDistrict) === String(selectedDistrictCd);
+
+    const matchesBlock =
+      String(participantBlock) === String(selectedBlockCd);
+
+    return matchesSearch && matchesDistrict && matchesBlock;
+  });
+
 
   const { exportPDF, exportExcel } = useExport(filteredParticipants);
 
@@ -356,7 +416,7 @@ const Participants = () => {
                     phone: p.phone || "N/A",
                     training: p.training_details?.subject_name || "N/A",
                     village: p.training_details?.location_details?.village || "N/A",
-                    category: `${p.category || ""} / ${p.caste || ""}`,
+                    category: `${p.category || ""}  ${p.caste || ""}`,
                     attendance: p.attendance_status || "N/A"
                   })
                 })
@@ -371,7 +431,7 @@ const Participants = () => {
                     Phone: p.phone || "N/A",
                     Training: p.training_details?.subject_name || "N/A",
                     Village: p.training_details?.location_details?.village || "N/A",
-                    Category: `${p.category || ""} / ${p.caste || ""}`,
+                    Category: `${p.category || ""}  ${p.caste || ""}`,
                     Attendance: p.attendance_status || "N/A"
                   })
                 })
@@ -482,7 +542,7 @@ const Participants = () => {
                       </td>
                       <td>
                         <span className="text-xs bg-gray-100 px-2 py-1 rounded border border-gray-200">
-                          {p.category} / {p.caste}
+                          {p.category}  {p.caste}
                         </span>
                       </td>
                       <td>
