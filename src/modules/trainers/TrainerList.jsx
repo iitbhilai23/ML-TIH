@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { trainerService } from '../../services/trainerService';
 import TrainerForm from './TrainerForm';
 import styles from './Trainers.module.css';
-import { Plus, Search, Pencil, Trash2, Phone, Mail, User, Users, ChevronLeft, ChevronRight, AlertTriangle, Check, AlertCircle } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, User, Users, ChevronLeft, ChevronRight, AlertTriangle, Check } from 'lucide-react';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
 import { useExport } from '../../features/export/useExport';
@@ -34,19 +35,16 @@ const TrainerList = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { exportPDF, exportExcel } = useExport(trainers);
 
-
+  // Updated columns for export (Removed Email and Phone)
   const trainerColumns = [
     { header: "No", dataKey: "index" },
     { header: "Name", dataKey: "name" },
-    { header: "Email", dataKey: "email" },
-    { header: "Phone", dataKey: "phone" },
     { header: "Bio", dataKey: "bio" }
   ];
 
   const THEME = {
     primary: '#6366f1',
     danger: '#ef4444',
-    // ... other theme constants
   };
 
   useEffect(() => {
@@ -59,7 +57,7 @@ const TrainerList = () => {
     try {
       const data = await trainerService.getAllTrainers(searchTerm);
       const sortedData = Array.isArray(data)
-        ? [...data].sort((a, b) => a.name.localeCompare(b.name))
+        ? [...data].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
         : [];
       setTrainers(sortedData);
     } catch (error) {
@@ -83,8 +81,8 @@ const TrainerList = () => {
           editingTrainer.id,
           {
             name: data.name,
-            email: data.email,
-            phone: data.phone,
+            email: data.email, // Still sending to API in case backend requires it
+            phone: data.phone, // Still sending to API
             bio: data.bio,
           }
         );
@@ -141,7 +139,6 @@ const TrainerList = () => {
 
   const handleSaveRequest = (data, file) => {
     if (editingTrainer) {
-      // If editing, show confirmation before saving
       openConfirm(
         'Save Changes?',
         'Are you sure you want to update the details for this trainer?',
@@ -149,7 +146,6 @@ const TrainerList = () => {
         'primary'
       );
     } else {
-      // If new, save directly
       executeSave(data, file);
     }
   };
@@ -235,7 +231,7 @@ const TrainerList = () => {
             <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none', transition: 'color 0.2s' }} />
             <input
               type="text"
-              placeholder="Search by name, email or phone..."
+              placeholder="Search by name..."
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ width: '100%', padding: '14px 16px 14px 46px', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '0.95rem', fontWeight: 500, color: '#334155', backgroundColor: '#f8fafc', outline: 'none', transition: 'all 0.2s ease' }}
               onFocus={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)'; }}
@@ -252,8 +248,6 @@ const TrainerList = () => {
                 mapper: (trainer, index) => ({
                   index: index + 1,
                   name: trainer.name || "N/A",
-                  email: trainer.email || "N/A",
-                  phone: trainer.phone || "N/A",
                   bio: trainer.bio || "N/A"
                 })
               })
@@ -263,8 +257,6 @@ const TrainerList = () => {
                 mapper: (trainer, index) => ({
                   No: index + 1,
                   Name: trainer.name || "N/A",
-                  Email: trainer.email || "N/A",
-                  Phone: trainer.phone || "N/A",
                   Bio: trainer.bio || "N/A"
                 })
               })
@@ -285,8 +277,6 @@ const TrainerList = () => {
             <thead>
               <tr>
                 <th><div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> Trainer</div></th>
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={14} /> Email</div></th>
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> Contact</div></th>
                 <th>Bio / Specialization</th>
                 <th style={{ textAlign: 'center' }}>Profile</th>
                 <th style={{ textAlign: 'center' }}>Actions</th>
@@ -294,9 +284,9 @@ const TrainerList = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}><Spinner overlay={false} /></td></tr>
+                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}><Spinner overlay={false} /></td></tr>
               ) : trainers.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '60px' }}>
+                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '60px' }}>
                   <Users size={64} style={{ margin: '0 auto 16px', opacity: 0.2, color: '#94a3b8' }} />
                   <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b', marginBottom: '8px' }}>No Trainers Found</div>
                   <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>{searchTerm ? 'Try adjusting your search' : 'Add your first trainer to get started'}</div>
@@ -304,36 +294,33 @@ const TrainerList = () => {
               ) : (
                 currentTrainers.map((trainer) => (
                   <tr key={trainer.id}>
+                    {/* Trainer Name Column */}
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {trainer.profile_image_url ? (
                           <img src={`${trainer.profile_image_url}?t=${Date.now()}`} alt={trainer.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }} />
                         ) : (
                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #7B3F99, #9B59B6)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem' }}>
-                            {trainer.name.charAt(0).toUpperCase()}
+                            {(trainer.name || '?').charAt(0).toUpperCase()}
                           </div>
                         )}
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>{trainer.name}</span>
+                        <span style={{ fontWeight: 600, color: '#1e293b' }}>{trainer.name || 'Unknown Trainer'}</span>
                       </div>
                     </td>
-                    <td>
-                      <div style={{ fontSize: '0.9rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Mail size={14} style={{ color: '#94a3b8' }} /> {trainer.email}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '0.9rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Phone size={14} style={{ color: '#94a3b8' }} /> {trainer.phone || 'N/A'}
-                      </div>
-                    </td>
+
+                    {/* Bio Column */}
                     <td style={{ maxWidth: '250px', fontSize: '0.85rem', color: '#64748b', lineHeight: '1.4' }}>
                       {trainer.bio || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>No bio provided</span>}
                     </td>
+
+                    {/* Profile Status Column */}
                     <td style={{ textAlign: 'center' }}>
                       {trainer.profile_image_url && (
                         <span style={{ background: 'linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%)', color: '#065f46', padding: '6px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.02em', border: '1px solid #a7f3d0', boxShadow: '0 2px 6px rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>✓ Set</span>
                       )}
                     </td>
+
+                    {/* Actions Column */}
                     <td>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                         <button onClick={() => openEditModal(trainer)} style={{ padding: '8px 14px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#1e293b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#4338ca'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}>

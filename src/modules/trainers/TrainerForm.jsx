@@ -33,10 +33,12 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
 
   if (!isOpen) return null;
 
+  // Updated cleanPayload: Ab empty strings ('') ko bhi filter karega
+  // Taake backend ko khali email/phone na bhejena pade.
   const cleanPayload = (data) =>
     Object.fromEntries(
       Object.entries(data).filter(
-        ([_, v]) => v !== null && v !== undefined
+        ([_, v]) => v !== null && v !== undefined && v !== ''
       )
     );
 
@@ -154,9 +156,10 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
 
           <div className="flex gap-2">
             <div className={styles.formGroup} style={{ flex: 1 }}>
-              <label className={styles.label}>Email Address *</label>
+              {/* CHANGE 1: Label se '*' hata diya */}
+              <label className={styles.label}>Email Address</label>
+              {/* CHANGE 2: 'required' attribute hata diya */}
               <input
-                required
                 className={styles.input}
                 type="email"
                 value={formData.email}

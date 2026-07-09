@@ -221,17 +221,45 @@ const Dashboard = () => {
     setFilters(prev => ({ ...prev, [name]: value, ...(name === 'district_cd' ? { block_cd: '' } : {}) }));
   };
 
+  // Normalize a name string: lowercase, trim, replace hyphens/underscores with spaces, collapse whitespace
+  // This ensures "Mohla-Manpur-Chowki" matches "Mohla Manpur Chowki" etc.
+  const normalizeName = (str) =>
+    str?.trim().toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' ') || '';
+
   const filteredTrainingLocations = useMemo(() => {
     if (!trainingLocations.length) return [];
+
     const selectedDistrictObj = districts.find(d => String(d.district_cd) === String(filters.district_cd));
-    const selectedDistrictName = selectedDistrictObj?.district_name?.toLowerCase();
+    const selectedDistrictNameNorm = normalizeName(selectedDistrictObj?.district_name);
+    const selectedDistrictCd = selectedDistrictObj ? String(selectedDistrictObj.district_cd) : null;
+
     const selectedBlockObj = blocks.find(b => String(b.block_cd) === String(filters.block_cd));
-    const selectedBlockName = selectedBlockObj?.block_name?.toLowerCase();
+    const selectedBlockNameNorm = normalizeName(selectedBlockObj?.block_name);
+    const selectedBlockCd = selectedBlockObj ? String(selectedBlockObj.block_cd) : null;
 
     return trainingLocations.filter(training => {
       const loc = training.location_details || {};
-      const matchDistrict = !filters.district_cd || (loc.district?.toLowerCase() === selectedDistrictName);
-      const matchBlock = !filters.block_cd || (loc.block?.toLowerCase() === selectedBlockName);
+
+      // Match district: try normalized name first, then fall back to district_cd
+      let matchDistrict = true;
+      if (filters.district_cd && selectedDistrictObj) {
+        const locDistrictNorm = normalizeName(loc.district);
+        const locDistrictCd = loc.district_cd != null ? String(loc.district_cd) : null;
+        matchDistrict =
+          (locDistrictNorm && locDistrictNorm === selectedDistrictNameNorm) ||
+          (locDistrictCd && selectedDistrictCd && locDistrictCd === selectedDistrictCd);
+      }
+
+      // Match block: try normalized name first, then fall back to block_cd
+      let matchBlock = true;
+      if (filters.block_cd && selectedBlockObj) {
+        const locBlockNorm = normalizeName(loc.block);
+        const locBlockCd = loc.block_cd != null ? String(loc.block_cd) : null;
+        matchBlock =
+          (locBlockNorm && locBlockNorm === selectedBlockNameNorm) ||
+          (locBlockCd && selectedBlockCd && locBlockCd === selectedBlockCd);
+      }
+
       const matchStatus = !filters.status || training.status?.toLowerCase() === filters.status.toLowerCase();
       let matchDate = true;
       const trainingDate = new Date(training.start_date);
@@ -239,6 +267,7 @@ const Dashboard = () => {
       if (filters.end_date && training.start_date) { if (trainingDate > new Date(filters.end_date)) matchDate = false; }
       return matchDistrict && matchBlock && matchStatus && matchDate;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trainingLocations, filters, districts, blocks]);
 
   if (loading) return <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: THEME.bgGradient, color: THEME.primary, fontSize: '1rem', fontWeight: '600' }}>Loading Dashboard Data...</div>;
@@ -472,7 +501,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
       {/* Map Control: Info Badge */}
       <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '8px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #f1f5f9' }}>
         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#9647bb' }}></div>
-        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}>{totalTrainings} Trainings</div>
+        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}></div>
       </div>
 
       {/* Map Control: Fullscreen */}

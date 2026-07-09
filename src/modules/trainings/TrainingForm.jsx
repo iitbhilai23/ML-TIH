@@ -153,7 +153,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
   const [formData, setFormData] = useState({
     trainer_id: '',
     subject_id: '',
-    location_id: '',
+    location_name: '',
     start_date: '',
     end_date: '',
     max_participants: 50,
@@ -177,7 +177,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
         setFormData({
           trainer_id: initialData.trainer_id || '',
           subject_id: initialData.subject_id || '',
-          location_id: initialData.location_id || '',
+          location_name: initialData.location_name || '',
           start_date: formattedStart,
           end_date: formattedEnd,
           max_participants: initialData.max_participants || 50,
@@ -188,7 +188,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
         setFormData({
           trainer_id: '',
           subject_id: '',
-          location_id: '',
+          location_name: '',
           start_date: '',
           end_date: '',
           max_participants: 50,
@@ -218,7 +218,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const needsNumber = ['trainer_id', 'subject_id', 'location_id', 'max_participants'].includes(name);
+    const needsNumber = ['trainer_id', 'subject_id', 'location_name', 'max_participants'].includes(name);
     setFormData({
       ...formData,
       [name]: needsNumber ? (value === '' ? '' : Number(value)) : value
@@ -229,7 +229,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.trainer_id || !formData.subject_id || !formData.location_id || !formData.start_date) {
+    if (!formData.trainer_id || !formData.subject_id || !formData.location_name || !formData.start_date) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -238,7 +238,7 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
     const cleanData = {
       trainer_id: formData.trainer_id,
       subject_id: formData.subject_id,
-      location_id: formData.location_id,
+      location_name: formData.location_name,
       start_date: formData.start_date,
       end_date: formData.end_date,
       max_participants: formData.max_participants,
@@ -317,9 +317,9 @@ const TrainingForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
               <label style={styles.label}>Select Location *</label>
               <select
                 required
-                name="location_id"
+                name="location_name"
                 style={styles.input}
-                value={formData.location_id}
+                value={formData.location_name}
                 onChange={handleChange}
                 onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
                 onBlur={(e) => Object.assign(e.target.style, { borderColor: '#e2e8f0', boxShadow: 'none' })}
