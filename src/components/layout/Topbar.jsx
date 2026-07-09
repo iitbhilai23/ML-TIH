@@ -20,7 +20,7 @@ const Topbar = () => {
         zIndex: 50
       }}
     >
-      <div className={styles.headerLeft} style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+      {/* <div className={styles.headerLeft} style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
         <h3
           className={styles.headerTitle}
           style={{
@@ -36,6 +36,43 @@ const Topbar = () => {
           }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          {content.appSubtitle}
+        </h3>
+      </div> */}
+      <div
+        className={styles.headerLeft}
+        style={{ display: 'flex', alignItems: 'center', gap: '18px' }}
+      >
+        <h3
+          style={{
+            fontSize: '1.25rem',
+            fontWeight: '800',
+            margin: 0,
+            color: '#1e293b',
+            letterSpacing: '-0.02em'
+          }}
+        >
+          Marketplace Literacy{" "}
+          <span
+            style={{
+              background: "linear-gradient(90deg, #D4AF37 0%, #2E8B57 50%, #1976d2 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent"
+            }}
+          >
+            Chhattisgarh
+          </span>
+        </h3>
+
+        <h3
+          className={styles.headerTitle}
+          style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            margin: 0,
+            color: '#64748b'
+          }}
         >
           {content.appSubtitle}
         </h3>

@@ -906,7 +906,7 @@ const Dashboard = () => {
     <div style={{ padding: '10px 15px 15px 15px', display: 'flex', flexDirection: 'column', gap: THEME.gap.xs, minHeight: '100vh', background: THEME.bgGradient, overflowX: "hidden" }}>
       <Box sx={{ textAlign: 'center', mb: 0.5, opacity: 0, animation: 'fadeIn 0.8s ease-out forwards' }}>
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-        <Typography variant="h4" component="h1" fontWeight="700" color="text.primary" gutterBottom sx={{ fontSize: { xs: '1.4rem', md: '1.8rem' }, mb: 0.5 }}>
+        {/* <Typography variant="h4" component="h1" fontWeight="700" color="text.primary" gutterBottom sx={{ fontSize: { xs: '1.4rem', md: '1.8rem' }, mb: 0.5 }}>
           Marketplace Literacy <Box component="span" sx={{ background: "linear-gradient(90deg, #D4AF37 0%, #2E8B57 50%, #1976d2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Chhattisgarh</Box>
         </Typography>
       </Box>

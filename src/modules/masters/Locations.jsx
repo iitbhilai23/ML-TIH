@@ -121,7 +121,7 @@ const Locations = () => {
     setError(null);
     try {
       const data = await locationService.getAll(filters);
-      
+
       const uniqueCountries = [
         ...new Map(
           data

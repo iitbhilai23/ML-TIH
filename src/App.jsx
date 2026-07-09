@@ -12,6 +12,7 @@ import Trainings from './modules/trainings/Trainings';
 import Participants from './modules/participants/Participants';
 // import PublicReport from './modules/reports/PublicReport';
 import ChangePassword from './modules/change password/changePassword';
+import Development from './modules/testdev/development';
 function App() {
   return (
     <AuthProvider>
@@ -29,13 +30,13 @@ function App() {
             <Route path="locations" element={<Locations />} />
             <Route path="trainings" element={<Trainings />} />
             <Route path="participants" element={<Participants />} />
+            <Route path="testdev" element={<Development />} />
             <Route path="trainee/chngpass" element={<ChangePassword />} />
           </Route>
         </Route>
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-
     </AuthProvider>
   );
 }
