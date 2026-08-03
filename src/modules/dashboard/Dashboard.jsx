@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, Select, MenuItem } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, GeoJSON, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
-import { Users, BookOpen, MapPin, Calendar, Filter, Table, User, House, Maximize, Minimize, X } from 'lucide-react';
+import { subjectService } from '../../services/subjectService';
+import { Users, BookOpen, MapPin, Table, User, House, Maximize, Minimize, X, SlidersHorizontal, RotateCcw, Filter } from 'lucide-react';
 import cgGeoJson from '../../assets/cg.json';
 
 
@@ -57,6 +61,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [districts, setDistricts] = useState([]);
   const [blocks, setBlocks] = useState([]);
+  const [trainingTypes, setTrainingTypes] = useState([]);
   const [filters, setFilters] = useState({
     district_cd: '', block_cd: '', village: '', start_date: '', end_date: '', subject: '', status: ''
   });
@@ -160,7 +165,7 @@ const Dashboard = () => {
 
   const activeFilters = JSON.stringify({
     district_cd: filters.district_cd, block_cd: filters.block_cd,
-    start_date: filters.start_date, end_date: filters.end_date, status: filters.status
+    subject: filters.subject, start_date: filters.start_date, end_date: filters.end_date, status: filters.status
   });
 
   useEffect(() => { fetchData(); }, [activeFilters]);
@@ -180,6 +185,16 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDistricts = async () => { try { const data = await dashboardService.getDistricts(); setDistricts(Array.isArray(data) ? data : []); } catch (error) { console.error('Error loading districts', error); } };
     fetchDistricts();
+  }, []);
+
+  useEffect(() => {
+    const fetchTrainingTypes = async () => {
+      try {
+        const data = await subjectService.getAll();
+        setTrainingTypes(Array.isArray(data) ? data : data?.data || []);
+      } catch (error) { console.error('Error loading training types', error); }
+    };
+    fetchTrainingTypes();
   }, []);
 
   useEffect(() => {
@@ -233,11 +248,12 @@ const Dashboard = () => {
       const matchDistrict = !filters.district_cd || (loc.district?.toLowerCase() === selectedDistrictName);
       const matchBlock = !filters.block_cd || (loc.block?.toLowerCase() === selectedBlockName);
       const matchStatus = !filters.status || training.status?.toLowerCase() === filters.status.toLowerCase();
+      const matchSubject = !filters.subject || (training.subject_name?.toLowerCase() === filters.subject.toLowerCase() || training.subject?.toLowerCase() === filters.subject.toLowerCase());
       let matchDate = true;
       const trainingDate = new Date(training.start_date);
       if (filters.start_date && training.start_date) { if (trainingDate < new Date(filters.start_date)) matchDate = false; }
       if (filters.end_date && training.start_date) { if (trainingDate > new Date(filters.end_date)) matchDate = false; }
-      return matchDistrict && matchBlock && matchStatus && matchDate;
+      return matchDistrict && matchBlock && matchStatus && matchDate && matchSubject;
     });
   }, [trainingLocations, filters, districts, blocks]);
 
@@ -247,56 +263,210 @@ const Dashboard = () => {
 
   const { summary } = data;
 
+  const handleResetFilters = () => {
+    setFilters(prev => ({ ...prev, district_cd: '', block_cd: '', subject: '' }));
+  };
+
+  const isFiltered = Boolean(filters.district_cd || filters.subject);
+
   const selectSx = {
-    minWidth: 160, height: '42px', background: '#ffffff', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 500,
-    '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #e2e8f0', borderRadius: '10px' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { border: '1px solid #cbd5e1 !important' },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: `1px solid ${THEME.primary} !important` },
-    '& .MuiSelect-select': { padding: '10px 14px', display: 'flex', alignItems: 'center', color: '#1e293b' }
+    minWidth: 210,
+    height: '42px',
+    background: '#ffffff',
+    borderRadius: '12px',
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    color: '#1e293b',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+    '& .MuiOutlinedInput-notchedOutline': {
+      border: '1px solid #cbd5e1',
+      borderRadius: '12px',
+      transition: 'all 0.2s ease-in-out'
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#6366f1 !important',
+      boxShadow: '0 4px 12px rgba(99, 102, 241, 0.08)'
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#4f46e5 !important',
+      borderWidth: '1.5px',
+      boxShadow: '0 0 0 3px rgba(79, 70, 229, 0.12) !important'
+    },
+    '& .MuiSelect-select': {
+      padding: '9px 14px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      color: '#0f172a'
+    }
   };
 
   return (
     <div style={{ padding: '10px 15px 15px 15px', display: 'flex', flexDirection: 'column', gap: THEME.gap.xs, minHeight: '100vh', background: THEME.bgGradient, overflowX: "hidden" }}>
       <Box sx={{ textAlign: 'center', mb: 0.5, opacity: 0, animation: 'fadeIn 0.8s ease-out forwards' }}>
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-        {/* <Typography variant="h4" component="h1" fontWeight="700" color="text.primary" gutterBottom sx={{ fontSize: { xs: '1.4rem', md: '1.8rem' }, mb: 0.5 }}>
-          Marketplace Literacy <Box component="span" sx={{ background: "linear-gradient(90deg, #D4AF37 0%, #2E8B57 50%, #1976d2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Chhattisgarh</Box>
-        </Typography> */}
-        {/* <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, mx: 'auto', fontSize: { xs: '0.75rem', md: '0.85rem' }, fontWeight: 400 }}>
-          Empowering women through financial education and entrepreneurship skills
-        </Typography> */}
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, mb: 0.5 }}>
-        <div style={{ ...THEME.glass, width: '100%', maxWidth: '1500px', justifyContent: 'center', padding: '12px 18px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: THEME.gap.sm, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs, paddingRight: THEME.pad.sm, borderRight: '1px solid rgba(0,0,0,0.05)', color: THEME.primary, fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.75rem' }}>
-            <Filter size={14} /> Filters
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: 1, mb: 1 }}>
+        <div
+          style={{
+            ...THEME.glass,
+            width: '100%',
+            maxWidth: '1500px',
+            padding: '12px 24px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: THEME.gap.sm,
+            margin: '0 auto',
+            borderRadius: '18px',
+            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
+            border: '1px solid rgba(226, 232, 240, 0.9)'
+          }}
+        >
+          {/* Left Title & Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)'
+              }}
+            >
+              <SlidersHorizontal size={18} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.925rem', fontWeight: '700', color: '#0f172a', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Dashboard Controls
+                {isFiltered && (
+                  <span style={{ fontSize: '0.7rem', fontWeight: '700', background: '#e0e7ff', color: '#4338ca', padding: '2px 9px', borderRadius: '20px', letterSpacing: '0.02em' }}>
+                    Active Filters
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '500' }}>
+                Filter trainings & map view by district or type
+              </div>
+            </div>
           </div>
-          <Select name="district_cd" value={filters.district_cd} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx}>
-            <MenuItem value="">All Districts</MenuItem>
-            {districts.map((d) => (<MenuItem key={d.district_cd} value={d.district_cd}>{d.district_name}</MenuItem>))}
-          </Select>
-          <Select name="country" value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); }} displayEmpty size="small" sx={selectSx}>
-            <MenuItem value="">Select Country</MenuItem>
-            {countriesFromAPI.map((country) => (<MenuItem key={country.code} value={country.code}>{country.name}</MenuItem>))}
-          </Select>
-          <Select name="state" value={selectedState} onChange={(e) => setSelectedState(e.target.value)} displayEmpty size="small" sx={selectSx} disabled={!selectedCountry}>
-            <MenuItem value="">-- Select State --</MenuItem>
-            {statesFromAPI.map((state) => (<MenuItem key={state.code} value={state.code}>{state.name}</MenuItem>))}
-          </Select>
-          <div style={{ display: 'flex', alignItems: 'center', gap: THEME.gap.xs }}>
-            <Calendar size={14} style={{ color: '#94a3b8' }} />
-            <input type="date" name="start_date" style={{ ...THEME.input, height: '38px', fontSize: '0.8rem' }} onChange={handleFilterChange} value={filters.start_date} />
-            <span style={{ color: '#94a3b8', fontWeight: '600', fontSize: '0.75rem', margin: `0 ${THEME.gap.xs}` }}>to</span>
-            <input type="date" name="end_date" style={{ ...THEME.input, height: '38px', fontSize: '0.8rem' }} onChange={handleFilterChange} value={filters.end_date} />
+
+          {/* Right Filter Dropdowns + Reset Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {/* District Filter */}
+            <Select
+              name="district_cd"
+              value={filters.district_cd}
+              onChange={handleFilterChange}
+              displayEmpty
+              size="small"
+              sx={selectSx}
+              renderValue={(selected) => {
+                if (!selected) {
+                  return (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
+                      <MapPin size={16} color="#6366f1" />
+                      <span>All Districts</span>
+                    </span>
+                  );
+                }
+                const dist = districts.find(d => String(d.district_cd) === String(selected));
+                return (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 600 }}>
+                    <MapPin size={16} color="#4f46e5" />
+                    <span>{dist?.district_name || 'District'}</span>
+                  </span>
+                );
+              }}
+            >
+              <MenuItem value="">
+                <span style={{ fontWeight: 500, color: '#64748b' }}>All Districts</span>
+              </MenuItem>
+              {districts.map((d) => (
+                <MenuItem key={d.district_cd} value={d.district_cd} sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                  {d.district_name}
+                </MenuItem>
+              ))}
+            </Select>
+
+            {/* Training Type Filter */}
+            <Select
+              name="subject"
+              value={filters.subject}
+              onChange={handleFilterChange}
+              displayEmpty
+              size="small"
+              sx={selectSx}
+              renderValue={(selected) => {
+                if (!selected) {
+                  return (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
+                      <BookOpen size={16} color="#7c3aed" />
+                      <span>All Training Types</span>
+                    </span>
+                  );
+                }
+                return (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 600 }}>
+                    <BookOpen size={16} color="#7c3aed" />
+                    <span>{selected}</span>
+                  </span>
+                );
+              }}
+            >
+              <MenuItem value="">
+                <span style={{ fontWeight: 500, color: '#64748b' }}>All Training Types</span>
+              </MenuItem>
+              {trainingTypes.map((t) => (
+                <MenuItem key={t.id || t.name} value={t.name} sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                  {t.name}
+                </MenuItem>
+              ))}
+            </Select>
+
+            {/* Reset Button */}
+            {isFiltered && (
+              <button
+                onClick={handleResetFilters}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  height: '42px',
+                  padding: '0 14px',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  background: '#ffffff',
+                  color: '#64748b',
+                  fontSize: '0.825rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#fee2e2';
+                  e.currentTarget.style.borderColor = '#fca5a5';
+                  e.currentTarget.style.color = '#dc2626';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.color = '#64748b';
+                }}
+              >
+                <RotateCcw size={14} />
+                Reset
+              </button>
+            )}
           </div>
-          <Select name="status" value={filters.status} onChange={handleFilterChange} displayEmpty size="small" sx={selectSx}>
-            <MenuItem value="">All Status</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="ongoing">Ongoing</MenuItem>
-            <MenuItem value="scheduled">Scheduled</MenuItem>
-          </Select>
         </div>
-      </Box >
+      </Box>
       {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} locationsData={locationsData} trainingLocations={filteredTrainingLocations} focusTarget={mapFocusPoint} />}
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} />}
     </div >
@@ -348,19 +518,47 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
   const totalTrainings = validTrainingLocations.length;
   useEffect(() => { setGeoJsonData(cgGeoJson); }, []);
 
+  // Group by coordinate key for same-spot stacking, keeping district info
   const groupedLocations = useMemo(() => {
     return validTrainingLocations.reduce((acc, training) => {
       const lat = Number(training.location_details?.latitude);
       const lng = Number(training.location_details?.longitude);
       const key = `${lat.toFixed(4)}-${lng.toFixed(4)}`;
-      if (!acc[key]) acc[key] = { lat, lng, trainings: [] };
+      if (!acc[key]) acc[key] = { lat, lng, trainings: [], district: training.location_details?.district || 'Unknown' };
       acc[key].trainings.push(training);
       return acc;
     }, {});
   }, [validTrainingLocations]);
 
+  // Group location-spots by district for district-wise clustering
+  const districtGrouped = useMemo(() => {
+    const byDistrict = {};
+    Object.values(groupedLocations).forEach((loc) => {
+      const district = loc.district || 'Unknown';
+      if (!byDistrict[district]) byDistrict[district] = [];
+      byDistrict[district].push(loc);
+    });
+    return byDistrict;
+  }, [groupedLocations]);
+
+  // Assign a distinct color per district (cycling through a palette)
+  const DISTRICT_PALETTE = [
+    '#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626',
+    '#7c3aed', '#db2777', '#0f766e', '#ca8a04', '#b45309',
+    '#1d4ed8', '#15803d', '#b91c1c', '#6d28d9', '#0369a1',
+  ];
+  const districtColorMap = useMemo(() => {
+    const map = {};
+    Object.keys(districtGrouped).forEach((district, idx) => {
+      map[district] = DISTRICT_PALETTE[idx % DISTRICT_PALETTE.length];
+    });
+    return map;
+  }, [districtGrouped]);
+
   // --- Training Markers Icon ---
-  const createCustomIcon = (count, color = '#7b3f99') => {
+  const MARKER_COLOR = '#16a34a';
+
+  const createCustomIcon = (count, color = MARKER_COLOR) => {
     const stackShadow = count > 1
       ? `2px -2px 0 rgba(255,255,255,0.9), 3px -3px 0 ${color}, 4px -4px 0 rgba(255,255,255,0.9), 5px -5px 0 ${color}`
       : '0 4px 14px rgba(0,0,0,0.15)';
@@ -493,32 +691,74 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
 
         <MapResizer trigger={isFullScreen} />
 
-        {geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#7c3aed', weight: 1.5, fillOpacity: 0.03 }} />}
+        {geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#3a58deff', weight: 1.5, fillOpacity: 0.03 }} />}
 
         {/* NEW: Render Focus Marker if a target is selected */}
         {focusTarget && (
           <Marker position={focusTarget} icon={createFocusIcon()} />
         )}
 
-        {/* Render Training Markers */}
-        {Object.values(groupedLocations).map((location, i) => {
-          const trainings = location.trainings;
-          const count = trainings.length;
-          const statusColor = getStatusColor(trainings[0]?.status);
+        {/* Render Training Markers with Marker Clustering */}
+        {/* District-wise Marker Clustering — one MCG per district */}
+        {Object.entries(districtGrouped).map(([district, locations]) => {
           return (
-            <Marker
-              key={`group-${i}`}
-              position={[location.lat, location.lng]}
-              icon={createCustomIcon(count, statusColor)}
-              ref={(marker) => {
-                if (marker) {
-                  marker.off('click');
-                  marker.on('click', () => {
-                    setSelectedTraining([...trainings]);
-                  });
-                }
+            <MarkerClusterGroup
+              key={`cluster-${district}`}
+              chunkedLoading
+              maxClusterRadius={80}
+              spiderfyOnMaxZoom={true}
+              showCoverageOnHover={false}
+              iconCreateFunction={(cluster) => {
+                const childMarkers = cluster.getAllChildMarkers();
+                let total = 0;
+                childMarkers.forEach((m) => { total += (m.options?.trainingCount || 1); });
+                const size = total > 50 ? 56 : total > 20 ? 50 : 44;
+                const fontSize = total > 99 ? '12px' : '14px';
+                return L.divIcon({
+                  html: `
+                    <div style="
+                      width: ${size}px;
+                      height: ${size}px;
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      background: ${MARKER_COLOR};
+                      border-radius: 50%;
+                      color: white;
+                      font-weight: 800;
+                      font-size: ${fontSize};
+                      font-family: 'Inter', sans-serif;
+                      border: 3px solid #ffffff;
+                      box-shadow: 0 4px 16px rgba(22,163,74,0.35);
+                      cursor: pointer;
+                      line-height: 1.1;
+                    ">
+                      <span>${total}</span>
+                    </div>
+                  `,
+                  className: 'custom-district-cluster-icon',
+                  iconSize: [size, size],
+                  iconAnchor: [size / 2, size / 2],
+                });
               }}
-            />
+            >
+              {locations.map((location, i) => {
+                const trainings = location.trainings;
+                const count = trainings.length;
+                return (
+                  <Marker
+                    key={`${district}-marker-${i}`}
+                    position={[location.lat, location.lng]}
+                    icon={createCustomIcon(count, MARKER_COLOR)}
+                    trainingCount={count}
+                    eventHandlers={{
+                      click: () => { setSelectedTraining([...trainings]); },
+                    }}
+                  />
+                );
+              })}
+            </MarkerClusterGroup>
           );
         })}
       </MapContainer>
