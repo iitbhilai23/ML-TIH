@@ -10,7 +10,7 @@ import { dashboardService } from '../../services/dashboardService';
 import { locationService } from '../../services/locationService';
 import { trainingService } from '../../services/trainingService';
 import { subjectService } from '../../services/subjectService';
-import { Users, BookOpen, MapPin, Table, User, House, Maximize, Minimize, X, SlidersHorizontal, RotateCcw, Filter } from 'lucide-react';
+import { Users, BookOpen, MapPin, Table, User, House, Maximize, Minimize, X, SlidersHorizontal, RotateCcw, Filter, Award } from 'lucide-react';
 import cgGeoJson from '../../assets/cg.json';
 
 
@@ -787,21 +787,21 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
               ))}
             </div>
           </div>
-        </div>
-      )} */}
-      {/* MODAL */}
+             {/* MODAL */}
       {Array.isArray(selectedTraining) && selectedTraining.length > 0 && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(15,23,42,0.45)",
-            backdropFilter: "blur(6px)",
+            background: "rgba(15, 23, 42, 0.55)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             padding: "20px",
             zIndex: 10000,
+            animation: "fadeIn 0.25s ease-out"
           }}
           onClick={() => setSelectedTraining(null)}
         >
@@ -809,200 +809,213 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
             onClick={(e) => e.stopPropagation()}
             style={{
               width: "100%",
-              maxWidth: "900px",
-              maxHeight: "90vh",
+              maxWidth: "880px",
+              maxHeight: "88vh",
               overflowY: "auto",
-              background: "#fff",
-              borderRadius: "20px",
-              boxShadow: "0 20px 60px rgba(0,0,0,.25)",
+              background: "#ffffff",
+              borderRadius: "24px",
+              boxShadow: "0 25px 60px -15px rgba(88, 28, 135, 0.3)",
               position: "relative",
+              border: "1px solid rgba(192, 132, 252, 0.3)"
             }}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedTraining(null)}
-              style={{
-                position: "absolute",
-                top: 18,
-                right: 18,
-                width: 38,
-                height: 38,
-                border: "none",
-                borderRadius: "50%",
-                background: "#f1f5f9",
-                cursor: "pointer",
-                zIndex: 10,
-              }}
-            >
-              <X size={18} />
-            </button>
-
-            {/* Header */}
+            {/* Header Banner */}
             <div
               style={{
                 padding: "24px 30px",
-                borderBottom: "1px solid #e5e7eb",
+                background: "linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7e22ce 100%)",
+                borderRadius: "24px 24px 0 0",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between"
               }}
             >
-              <h2
-                style={{
-                  margin: 0,
-                  color: "#1e293b",
-                  fontSize: "24px",
-                }}
-              >
-                Training Details
-              </h2>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <MapPin size={20} color="#e9d5ff" />
+                  <h2 style={{ margin: 0, color: "#ffffff", fontSize: "20px", fontWeight: "800", letterSpacing: "-0.02em" }}>
+                    {selectedTraining[0]?.location_details?.village || selectedTraining[0]?.location_details?.district || "Training Details"}
+                  </h2>
+                </div>
+                <p style={{ margin: "0 0 0 28px", color: "#e9d5ff", fontSize: "13px", fontWeight: "500" }}>
+                  {selectedTraining[0]?.location_details?.block ? `${selectedTraining[0]?.location_details?.block} Block • ` : ""}{selectedTraining[0]?.location_details?.district || "Chhattisgarh"} District
+                </p>
+              </div>
 
-              <p
-                style={{
-                  margin: "6px 0 0",
-                  color: "#64748b",
-                }}
-              >
-                {selectedTraining.length} Training Session(s)
-              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ background: "rgba(255, 255, 255, 0.2)", color: "#ffffff", padding: "5px 14px", borderRadius: "9999px", fontSize: "12px", fontWeight: "700" }}>
+                  {selectedTraining.length} Session{selectedTraining.length > 1 ? "s" : ""}
+                </span>
+                <button
+                  onClick={() => setSelectedTraining(null)}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    border: "none",
+                    borderRadius: "50%",
+                    background: "rgba(255, 255, 255, 0.25)",
+                    color: "#ffffff",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.4)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"; }}
+                >
+                  <X size={18} color="#ffffff" />
+                </button>
+              </div>
             </div>
 
-            <div style={{ padding: "30px" }}>
-              {selectedTraining.map((training, index) => (
-                <div
-                  key={training.id || index}
-                  style={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "18px",
-                    overflow: "hidden",
-                    marginBottom: "24px",
-                    background: "#fff",
-                  }}
-                >
-                  {/* Training Image */}
-
-                  <img
-                    src={
-                      training.training_image ||
-                      "https://placehold.co/1200x250/e2e8f0/64748b?text=Training+Image"
-                    }
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "220px",
-                      objectFit: "cover",
-                    }}
-                  />
-
-                  {/* Content */}
-
+            {/* Modal Body */}
+            <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: "24px" }}>
+              {selectedTraining.map((training, index) => {
+                const rawSubject = training.subject || training.subject_name;
+                const subject = (rawSubject && !/advanced/i.test(rawSubject) && !/digital/i.test(rawSubject)) ? rawSubject : "Marketplace Literacy";
+                return (
                   <div
+                    key={training.id || index}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "60px",
-                      padding: "35px",
-                      flexWrap: "wrap",
+                      border: "1px solid #ede9fe",
+                      borderRadius: "20px",
+                      overflow: "hidden",
+                      background: "#ffffff",
+                      boxShadow: "0 8px 24px rgba(124, 58, 237, 0.06)"
                     }}
                   >
-                    {/* Trainer Section */}
-
-                    <div
-                      style={{
-                        width: "240px",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textAlign: "center",
-                      }}
-                    >
+                    {/* Training Hero Image Banner */}
+                    <div style={{ position: "relative", width: "100%", height: "200px", overflow: "hidden" }}>
                       <img
                         src={
-                          training.trainer_image ||
-                          "https://placehold.co/110x110/e2e8f0/64748b?text=👤"
+                          training.training_image ||
+                          "https://placehold.co/1200x250/ede9fe/6b21a8?text=Marketplace+Literacy+Training"
                         }
-                        alt=""
+                        alt="Training Session"
                         style={{
-                          width: 110,
-                          height: 110,
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "4px solid white",
-                          boxShadow: "0 6px 20px rgba(0,0,0,.15)",
-                          marginBottom: 18,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover"
                         }}
                       />
-
-                      <h2
-                        style={{
-                          margin: 0,
-                          fontSize: "28px",
-                          color: "#0f172a",
-                        }}
-                      >
-                        {training.trainer_name || "Trainer Name"}
-                      </h2>
-
-                      <p
-                        style={{
-                          marginTop: 8,
-                          color: "#64748b",
-                          fontSize: "17px",
-                        }}
-                      >
-                        Master Trainer
-                      </p>
-                    </div>
-
-                    {/* Details Section */}
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "170px 1fr",
-                        columnGap: "25px",
-                        rowGap: "18px",
-                        alignItems: "center",
-                        minWidth: "420px",
-                      }}
-                    >
-                      <strong style={{ color: "#64748b" }}>Subject</strong>
-                      <span>{training.subject || "Marketplace Literacy"}</span>
-
-                      <strong style={{ color: "#64748b" }}>Status</strong>
-                      <span>
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30, 27, 75, 0.75) 0%, transparent 60%)" }} />
+                      
+                      {/* Image Overlays */}
+                      <div style={{ position: "absolute", bottom: "14px", left: "16px", right: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ color: "#ffffff", fontSize: "16px", fontWeight: "800", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+                          {subject}
+                        </span>
                         <span
                           style={{
                             ...getStatusStyle(training.status),
                             padding: "6px 14px",
-                            borderRadius: "8px",
-                            fontWeight: 700,
+                            borderRadius: "9999px",
+                            fontSize: "12px",
+                            fontWeight: "800",
+                            letterSpacing: "0.04em",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
                           }}
                         >
-                          {training.status}
+                          {training.status ? training.status.toUpperCase() : "SCHEDULED"}
                         </span>
-                      </span>
+                      </div>
+                    </div>
 
-                      <strong style={{ color: "#64748b" }}>Participants</strong>
-                      <span>{training.total_participants || 0}</span>
+                    {/* Content Section */}
+                    <div
+                      style={{
+                        padding: "24px",
+                        display: "grid",
+                        gridTemplateColumns: "200px 1fr",
+                        gap: "24px",
+                        alignItems: "center"
+                      }}
+                    >
+                      {/* Left: Trainer Profile Box */}
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          textAlign: "center",
+                          padding: "16px",
+                          background: "#faf5ff",
+                          borderRadius: "16px",
+                          border: "1px solid #f3e8ff"
+                        }}
+                      >
+                        <div style={{ width: 68, height: 68, borderRadius: "50%", padding: "3px", background: "linear-gradient(135deg, #7c3aed, #c084fc)", marginBottom: 10 }}>
+                          <img
+                            src={
+                              training.trainer_image ||
+                              "https://placehold.co/110x110/f3e8ff/6b21a8?text=👤"
+                            }
+                            alt="Master Trainer"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                              background: "#ffffff"
+                            }}
+                          />
+                        </div>
 
-                      <strong style={{ color: "#64748b" }}>Village</strong>
-                      <span>{training.location_details?.village || "-"}</span>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "800", color: "#3b0764" }}>
+                          {training.trainer_name || "Trainer Name"}
+                        </h3>
+                        <span style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "600", marginTop: "2px" }}>
+                          Master Trainer
+                        </span>
+                      </div>
 
-                      <strong style={{ color: "#64748b" }}>Block</strong>
-                      <span>{training.location_details?.block || "-"}</span>
+                      {/* Right: Grid Metadata Badges */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                        
+                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
+                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                            Participants
+                          </div>
+                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Users size={15} color="#7c3aed" /> {training.total_participants || training.actual_participants || 0} Trainees
+                          </div>
+                        </div>
 
-                      <strong style={{ color: "#64748b" }}>District</strong>
-                      <span>{training.location_details?.district || "-"}</span>
+                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
+                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                            Training ID
+                          </div>
+                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <Award size={15} color="#7c3aed" /> #{training.training_id || training.id || "N/A"}
+                          </div>
+                        </div>
 
-                      <strong style={{ color: "#64748b" }}>Trainer Name</strong>
-                      <span>{training.trainer_name || "Coming Soon"}</span>
+                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
+                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                            District
+                          </div>
+                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <MapPin size={15} color="#7c3aed" /> {training.location_details?.district || "Chhattisgarh"}
+                          </div>
+                        </div>
 
-                      <strong style={{ color: "#64748b" }}>Training ID</strong>
-                      <span>{training.training_id || training.id || "-"}</span>
+                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
+                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                            Block / Village
+                          </div>
+                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <BookOpen size={15} color="#7c3aed" /> {training.location_details?.village || training.location_details?.block || "-"}
+                          </div>
+                        </div>
+
+                      </div>
+
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
