@@ -56,8 +56,17 @@ const TrainerList = () => {
     setLoading(true);
     try {
       const data = await trainerService.getAllTrainers(searchTerm);
+      // const sortedData = Array.isArray(data)
+      //   ? [...data].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      //   : [];
       const sortedData = Array.isArray(data)
-        ? [...data].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        ? [...data].sort((a, b) =>
+          (a.name || "")
+            .trim()
+            .localeCompare((b.name || "").trim(), undefined, {
+              sensitivity: "base",
+            })
+        )
         : [];
       setTrainers(sortedData);
     } catch (error) {

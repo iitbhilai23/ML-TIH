@@ -81,8 +81,23 @@ const Trainings = () => {
     setLoading(true);
     try {
       const filters = filterStatus ? { status: filterStatus } : {};
+      // const data = await trainingService.getAll(filters);
+      // setTrainings(data);
       const data = await trainingService.getAll(filters);
-      setTrainings(data);
+
+const sortedTrainings = Array.isArray(data)
+  ? [...data].sort((a, b) =>
+      (a.trainer_name || "")
+        .trim()
+        .localeCompare(
+          (b.trainer_name || "").trim(),
+          undefined,
+          { sensitivity: "base" }
+        )
+    )
+  : [];
+
+setTrainings(sortedTrainings);
     } catch (err) {
       console.error('Failed to load trainings:', err);
       toast.error('Failed to load trainings');
