@@ -137,19 +137,48 @@ const Locations = () => {
       ];
 
       setCountries(uniqueCountries);
-      setLocations(
-        Array.isArray(data)
-          ? [...data].sort((a, b) => {
-            const aHasDistrict = a.district && a.district.trim() !== '';
-            const bHasDistrict = b.district && b.district.trim() !== '';
+      const sortedLocations = Array.isArray(data)
+        ? [...data].sort((a, b) => {
+          const districtCompare = (a.district || "")
+            .trim()
+            .localeCompare((b.district || "").trim(), undefined, {
+              sensitivity: "base",
+            });
 
-            if (aHasDistrict && bHasDistrict) return 0;
-            if (aHasDistrict) return -1;
-            if (bHasDistrict) return 1;
-            return 0;
-          })
-          : []
-      );
+          if (districtCompare !== 0) return districtCompare;
+
+          // If district is same, sort by block
+          const blockCompare = (a.block || "")
+            .trim()
+            .localeCompare((b.block || "").trim(), undefined, {
+              sensitivity: "base",
+            });
+
+          if (blockCompare !== 0) return blockCompare;
+
+          // If block is same, sort by village
+          return (a.village || "")
+            .trim()
+            .localeCompare((b.village || "").trim(), undefined, {
+              sensitivity: "base",
+            });
+        })
+        : [];
+
+      setLocations(sortedLocations);
+      // setLocations(
+      //   Array.isArray(data)
+      //     ? [...data].sort((a, b) => {
+      //       const aHasDistrict = a.district && a.district.trim() !== '';
+      //       const bHasDistrict = b.district && b.district.trim() !== '';
+
+      //       if (aHasDistrict && bHasDistrict) return 0;
+      //       if (aHasDistrict) return -1;
+      //       if (bHasDistrict) return 1;
+      //       return 0;
+      //     })
+      //     : []
+      // );
     } catch (err) {
       console.error("Load Locations Error:", err);
       setError('Failed to load locations. Please try again.');

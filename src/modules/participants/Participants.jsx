@@ -210,45 +210,82 @@ const Participants = () => {
     (t) => String(t.id) === String(selectedTrainingId)
   );
 
-  const filteredParticipants = participants.filter((p) => {
-    const matchesSearch = p.name
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  // const filteredParticipants = participants.filter((p) => {
+  //   const matchesSearch = p.name
+  //     ?.toLowerCase()
+  //     .includes(searchQuery.toLowerCase());
 
-    // Show all if no training is selected
-    if (!selectedTraining) {
-      return matchesSearch;
-    }
+  //   // Show all if no training is selected
+  //   if (!selectedTraining) {
+  //     return matchesSearch;
+  //   }
 
-    const participantDistrict =
-      p.training_details?.location_details?.district_cd;
+  //   const participantDistrict =
+  //     p.training_details?.location_details?.district_cd;
 
-    const participantBlock =
-      p.training_details?.location_details?.block_cd;
+  //   const participantBlock =
+  //     p.training_details?.location_details?.block_cd;
 
-    // const matchesDistrict =
-    //   String(participantDistrict) ===
-    //   String(selectedTraining.location_details?.district_cd);
+  //   // const matchesDistrict =
+  //   //   String(participantDistrict) ===
+  //   //   String(selectedTraining.location_details?.district_cd);
 
-    // const matchesBlock =
-    //   String(participantBlock) ===
-    //   String(selectedTraining.location_details?.block_cd);
+  //   // const matchesBlock =
+  //   //   String(participantBlock) ===
+  //   //   String(selectedTraining.location_details?.block_cd);
 
-    const selectedDistrictCd =
-      selectedTraining?.location_details?.district_cd;
+  //   const selectedDistrictCd =
+  //     selectedTraining?.location_details?.district_cd;
 
-    const selectedBlockCd =
-      selectedTraining?.location_details?.block_cd;
+  //   const selectedBlockCd =
+  //     selectedTraining?.location_details?.block_cd;
 
-    const matchesDistrict =
-      String(participantDistrict) === String(selectedDistrictCd);
+  //   const matchesDistrict =
+  //     String(participantDistrict) === String(selectedDistrictCd);
 
-    const matchesBlock =
-      String(participantBlock) === String(selectedBlockCd);
+  //   const matchesBlock =
+  //     String(participantBlock) === String(selectedBlockCd);
 
-    return matchesSearch && matchesDistrict && matchesBlock;
-  });
+  //   return matchesSearch && matchesDistrict && matchesBlock;
+  // });
 
+  const filteredParticipants = participants
+    .filter((p) => {
+      const matchesSearch = (p.name || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+      if (!selectedTraining) {
+        return matchesSearch;
+      }
+
+      const participantDistrict =
+        p.training_details?.location_details?.district_cd;
+
+      const participantBlock =
+        p.training_details?.location_details?.block_cd;
+
+      const selectedDistrictCd =
+        selectedTraining?.location_details?.district_cd;
+
+      const selectedBlockCd =
+        selectedTraining?.location_details?.block_cd;
+
+      const matchesDistrict =
+        String(participantDistrict) === String(selectedDistrictCd);
+
+      const matchesBlock =
+        String(participantBlock) === String(selectedBlockCd);
+
+      return matchesSearch && matchesDistrict && matchesBlock;
+    })
+    .sort((a, b) =>
+      (a.name || "").localeCompare(
+        b.name || "",
+        undefined,
+        { sensitivity: "base" }
+      )
+    );
 
   const { exportPDF, exportExcel } = useExport(filteredParticipants);
 
