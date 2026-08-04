@@ -11,7 +11,7 @@ import Locations from './modules/masters/Locations';
 import Trainings from './modules/trainings/Trainings';
 import Participants from './modules/participants/Participants';
 // import PublicReport from './modules/reports/PublicReport';
-import ChangePassword from './modules/change password/changePassword';
+import ChangePassword from './modules/change_password/ChangePassword';
 import Development from './modules/testdev/development';
 function App() {
   return (
