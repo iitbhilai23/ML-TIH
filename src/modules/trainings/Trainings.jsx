@@ -55,7 +55,6 @@ const formatDate = (dateString) => {
 };
 
 
-
 const Trainings = () => {
   const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(false);
