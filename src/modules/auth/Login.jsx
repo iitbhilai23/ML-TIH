@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Lock, User, ArrowRight, TrendingUp, Eye, EyeOff, Sparkles, Award, Users, MapPin, CheckCircle2, BookOpen } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import styles from './Login.module.css';
@@ -351,13 +351,9 @@ const Login = () => {
                   />
                   <span>Remember Me</span>
                 </label>
-                <a
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); toast.info('Contact administrator to reset password.'); }}
-                  className={styles.forgotLink}
-                >
-                  Forgot Password?
-                </a>
+                <Link to="/change-password" className={styles.forgotLink}>
+                  Change Password?
+                </Link>
               </div>
 
               <button type="submit" disabled={isLoading} className={styles.submitBtn}>
