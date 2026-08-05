@@ -6,7 +6,7 @@ import { Toaster, toast } from 'sonner';
 import styles from './Login.module.css';
 import loginimg from '../../assets/loginimg.png';
 
-// Wavy Liquid Canvas + Interactive Purple Particle JS
+// Wavy Liquid Canvas + Glowing Constellation & Interactive Particle JS
 const WavyParticleCanvas = () => {
   const canvasRef = useRef(null);
 
@@ -27,31 +27,52 @@ const WavyParticleCanvas = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // Create particles
-    const numParticles = Math.min(Math.floor((width * height) / 18000), 70);
-    const particles = [];
-
-    const colors = [
-      'rgba(124, 58, 237, ',
-      'rgba(147, 51, 234, ',
-      'rgba(168, 85, 247, ',
-      'rgba(192, 132, 252, ',
-      'rgba(217, 70, 239, '
-    ];
-
-    for (let i = 0; i < numParticles; i++) {
-      particles.push({
+    // 1. Background Glowing Bokeh Orbs
+    const numOrbs = 8;
+    const orbs = [];
+    for (let i = 0; i < numOrbs; i++) {
+      orbs.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.55,
-        vy: (Math.random() - 0.5) * 0.55,
-        radius: Math.random() * 2.2 + 1,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: Math.random() * 0.45 + 0.25
+        radius: Math.random() * 90 + 60,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        hue: 250 + Math.random() * 45,
+        pulseSpeed: 0.008 + Math.random() * 0.012,
+        pulsePhase: Math.random() * Math.PI * 2
       });
     }
 
-    const mouse = { x: null, y: null, radius: 140 };
+    // 2. Interactive Constellation Particles
+    const numParticles = Math.min(Math.floor((width * height) / 14000), 85);
+    const particles = [];
+    const colorPalette = [
+      { r: 99, g: 102, b: 241 },   // Indigo
+      { r: 139, g: 92, b: 246 },   // Violet
+      { r: 168, g: 85, b: 247 },   // Purple
+      { r: 217, g: 70, b: 239 },   // Fuchsia
+      { r: 59, g: 130, b: 246 }    // Sky Blue accent
+    ];
+
+    for (let i = 0; i < numParticles; i++) {
+      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        baseVx: (Math.random() - 0.5) * 0.6,
+        baseVy: (Math.random() - 0.5) * 0.6,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        radius: Math.random() * 2.5 + 1.2,
+        color,
+        alpha: Math.random() * 0.5 + 0.35,
+        pulse: Math.random() * Math.PI
+      });
+    }
+
+    // Mouse & Click Interaction
+    const mouse = { x: null, y: null, radius: 160 };
+    const shockwaves = [];
 
     const handleMouseMove = (e) => {
       mouse.x = e.clientX;
@@ -63,21 +84,54 @@ const WavyParticleCanvas = () => {
       mouse.y = null;
     };
 
+    const handleClick = (e) => {
+      shockwaves.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 0,
+        maxRadius: 180,
+        alpha: 0.8
+      });
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('click', handleClick);
 
     let step = 0;
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      step += 0.012;
+      step += 0.014;
 
-      // 1. Draw Multi-Layered Wavy Liquid Bottom Gradients
-      // Layer 1 (Deepest Wave)
+      // --- A. Render Soft Glowing Bokeh Orbs ---
+      for (let i = 0; i < orbs.length; i++) {
+        const orb = orbs[i];
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+
+        if (orb.x < -100) orb.x = width + 100;
+        if (orb.x > width + 100) orb.x = -100;
+        if (orb.y < -100) orb.y = height + 100;
+        if (orb.y > height + 100) orb.y = -100;
+
+        const pulseAlpha = Math.sin(step * orb.pulseSpeed * 50 + orb.pulsePhase) * 0.06 + 0.12;
+
+        const orbGrad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+        orbGrad.addColorStop(0, `hsla(${orb.hue}, 80%, 70%, ${pulseAlpha})`);
+        orbGrad.addColorStop(1, `hsla(${orb.hue}, 80%, 70%, 0)`);
+
+        ctx.fillStyle = orbGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // --- B. Render Wavy Liquid Waves at Bottom ---
       ctx.beginPath();
       ctx.moveTo(0, height);
       for (let x = 0; x <= width; x += 15) {
-        const y = Math.sin(x * 0.002 + step) * 28 + Math.cos(x * 0.001 + step * 0.6) * 18 + (height - 110);
+        const y = Math.sin(x * 0.002 + step) * 26 + Math.cos(x * 0.0012 + step * 0.7) * 20 + (height - 110);
         ctx.lineTo(x, y);
       }
       ctx.lineTo(width, height);
@@ -85,75 +139,108 @@ const WavyParticleCanvas = () => {
       ctx.fillStyle = 'rgba(233, 213, 255, 0.45)';
       ctx.fill();
 
-      // Layer 2 (Mid Soft Wave)
       ctx.beginPath();
       ctx.moveTo(0, height);
       for (let x = 0; x <= width; x += 15) {
-        const y = Math.sin(x * 0.003 - step * 1.1) * 32 + Math.sin(x * 0.0015 + step) * 22 + (height - 75);
+        const y = Math.sin(x * 0.003 - step * 1.2) * 30 + Math.sin(x * 0.0018 + step) * 22 + (height - 75);
         ctx.lineTo(x, y);
       }
       ctx.lineTo(width, height);
       ctx.closePath();
-      ctx.fillStyle = 'rgba(192, 132, 252, 0.22)';
+      ctx.fillStyle = 'rgba(192, 132, 252, 0.25)';
       ctx.fill();
 
-      // Layer 3 (Foreground Ultra Light Wave)
       ctx.beginPath();
       ctx.moveTo(0, height);
       for (let x = 0; x <= width; x += 15) {
-        const y = Math.cos(x * 0.0025 + step * 0.8) * 24 + (height - 45);
+        const y = Math.cos(x * 0.0028 + step * 0.9) * 22 + (height - 45);
         ctx.lineTo(x, y);
       }
       ctx.lineTo(width, height);
       ctx.closePath();
-      ctx.fillStyle = 'rgba(243, 232, 255, 0.6)';
+      ctx.fillStyle = 'rgba(243, 232, 255, 0.65)';
       ctx.fill();
 
-      // 2. Draw Interactive Purple Particle JS Dots & Connecting Lines
+      // --- C. Render Shockwaves ---
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.radius += 5;
+        sw.alpha -= 0.02;
+
+        if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+          shockwaves.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(168, 85, 247, ${sw.alpha})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // --- D. Render Particles and Connections ---
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
+
+        if (mouse.x !== null && mouse.y !== null) {
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < mouse.radius) {
+            const force = (1 - dist / mouse.radius) * 0.8;
+            p.vx += (dx / dist) * force * 0.15;
+            p.vy += (dy / dist) * force * 0.15;
+          }
+        }
+
+        p.vx = p.vx * 0.96 + p.baseVx * 0.04;
+        p.vy = p.vy * 0.96 + p.baseVy * 0.04;
+
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
+        if (p.x < 0 || p.x > width) p.baseVx *= -1;
+        if (p.y < 0 || p.y > height) p.baseVy *= -1;
 
-        // Draw particle dot
+        const currentAlpha = Math.sin(step * 2 + p.pulse) * 0.15 + p.alpha;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `${p.color}${p.alpha})`;
+        ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${currentAlpha})`;
+        ctx.shadowColor = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0.6)`;
+        ctx.shadowBlur = 8;
         ctx.fill();
+        ctx.shadowBlur = 0;
 
-        // Mouse connection
         if (mouse.x !== null && mouse.y !== null) {
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < mouse.radius) {
-            const lineAlpha = (1 - dist / mouse.radius) * 0.35;
+            const lineAlpha = (1 - dist / mouse.radius) * 0.45;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `${p.color}${lineAlpha})`;
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${lineAlpha})`;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }
 
-        // Particle to particle connection
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 110) {
-            const lineAlpha = (1 - dist / 110) * 0.22;
+          if (dist < 125) {
+            const lineAlpha = (1 - dist / 125) * 0.28;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(168, 85, 247, ${lineAlpha})`;
-            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${lineAlpha})`;
+            ctx.lineWidth = 0.9;
             ctx.stroke();
           }
         }
@@ -168,6 +255,7 @@ const WavyParticleCanvas = () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('click', handleClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
