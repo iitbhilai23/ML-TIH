@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, Check, AlertCircle, KeyRound, ShieldCheck, User, ArrowLeft } from 'lucide-react';
 import api from '../../services/api';
 
-// ===== WAVY LIQUID CANVAS + INTERACTIVE PURPLE PARTICLE JS =====
-const WavyParticleCanvas = () => {
+// ===== LITERACY & EDUCATION THEMED FLOATING CANVAS (BOOKS, CAPS & WISDOM SPARKS) =====
+const LiteracyThemeCanvas = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -24,222 +24,232 @@ const WavyParticleCanvas = () => {
 
         window.addEventListener('resize', handleResize);
 
-        // 1. Background Glowing Bokeh Orbs
-        const numOrbs = 8;
-        const orbs = [];
-        for (let i = 0; i < numOrbs; i++) {
-            orbs.push({
+        // 1. Soft Ambient Glowing Orbs
+        const orbs = [
+            { x: width * 0.2, y: height * 0.3, radius: 280, hue: 250, vx: 0.12, vy: 0.08, pulseSpeed: 0.005 },
+            { x: width * 0.8, y: height * 0.4, radius: 320, hue: 270, vx: -0.08, vy: 0.12, pulseSpeed: 0.004 },
+            { x: width * 0.5, y: height * 0.7, radius: 350, hue: 280, vx: 0.08, vy: -0.1, pulseSpeed: 0.006 }
+        ];
+
+        // 2. Floating Literacy & Education Elements (Books, Caps, Sparks, Specks)
+        const elements = [];
+        const numElements = Math.min(Math.floor((width * height) / 25000), 28);
+        const types = ['book', 'cap', 'spark', 'dot'];
+
+        for (let i = 0; i < numElements; i++) {
+            elements.push({
+                type: types[i % types.length],
                 x: Math.random() * width,
                 y: Math.random() * height,
-                radius: Math.random() * 90 + 60,
-                vx: (Math.random() - 0.5) * 0.35,
-                vy: (Math.random() - 0.5) * 0.35,
-                hue: 250 + Math.random() * 45,
-                pulseSpeed: 0.008 + Math.random() * 0.012,
+                size: Math.random() * 12 + 10,
+                vy: - (Math.random() * 0.35 + 0.15),
+                vx: (Math.random() - 0.5) * 0.2,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.008,
+                alpha: Math.random() * 0.4 + 0.2,
+                pulseSpeed: Math.random() * 0.02 + 0.005,
                 pulsePhase: Math.random() * Math.PI * 2
             });
         }
 
-        // 2. Interactive Constellation Particles
-        const numParticles = Math.min(Math.floor((width * height) / 14000), 85);
-        const particles = [];
-        const colorPalette = [
-            { r: 99, g: 102, b: 241 },   // Indigo
-            { r: 139, g: 92, b: 246 },   // Violet
-            { r: 168, g: 85, b: 247 },   // Purple
-            { r: 217, g: 70, b: 239 },   // Fuchsia
-            { r: 59, g: 130, b: 246 }    // Sky Blue accent
-        ];
-
-        for (let i = 0; i < numParticles; i++) {
-            const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-            particles.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                baseVx: (Math.random() - 0.5) * 0.6,
-                baseVy: (Math.random() - 0.5) * 0.6,
-                vx: (Math.random() - 0.5) * 0.6,
-                vy: (Math.random() - 0.5) * 0.6,
-                radius: Math.random() * 2.5 + 1.2,
-                color,
-                alpha: Math.random() * 0.5 + 0.35,
-                pulse: Math.random() * Math.PI
-            });
-        }
-
-        // Mouse & Click Interaction
-        const mouse = { x: null, y: null, radius: 160 };
-        const shockwaves = [];
+        // Mouse Spotlight
+        const mouse = { x: null, y: null, targetX: null, targetY: null };
 
         const handleMouseMove = (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
+            mouse.targetX = e.clientX;
+            mouse.targetY = e.clientY;
         };
 
         const handleMouseLeave = () => {
-            mouse.x = null;
-            mouse.y = null;
-        };
-
-        const handleClick = (e) => {
-            shockwaves.push({
-                x: e.clientX,
-                y: e.clientY,
-                radius: 0,
-                maxRadius: 180,
-                alpha: 0.8
-            });
+            mouse.targetX = null;
+            mouse.targetY = null;
         };
 
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseleave', handleMouseLeave);
-        window.addEventListener('click', handleClick);
 
         let step = 0;
 
+        // Draw Open Book Symbol
+        const drawBook = (x, y, size, alpha, rot) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rot);
+            ctx.strokeStyle = `rgba(124, 58, 237, ${alpha})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(-size, -size * 0.3);
+            ctx.quadraticCurveTo(-size * 0.4, -size * 0.6, 0, -size * 0.2);
+            ctx.quadraticCurveTo(size * 0.4, -size * 0.6, size, -size * 0.3);
+            ctx.lineTo(size, size * 0.4);
+            ctx.quadraticCurveTo(size * 0.4, size * 0.1, 0, size * 0.5);
+            ctx.quadraticCurveTo(-size * 0.4, size * 0.1, -size, size * 0.4);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -size * 0.2);
+            ctx.lineTo(0, size * 0.5);
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        // Draw Graduation Cap Symbol
+        const drawCap = (x, y, size, alpha, rot) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rot);
+            ctx.strokeStyle = `rgba(147, 51, 234, ${alpha})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(0, -size * 0.5);
+            ctx.lineTo(size * 0.85, 0);
+            ctx.lineTo(0, size * 0.5);
+            ctx.lineTo(-size * 0.85, 0);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(-size * 0.4, size * 0.25);
+            ctx.quadraticCurveTo(0, size * 0.6, size * 0.4, size * 0.25);
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        // Draw Spark of Wisdom
+        const drawSpark = (x, y, size, alpha) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = `rgba(192, 132, 252, ${alpha})`;
+            ctx.beginPath();
+            for (let i = 0; i < 4; i++) {
+                ctx.rotate(Math.PI / 2);
+                ctx.lineTo(0, -size);
+                ctx.quadraticCurveTo(0, 0, size * 0.3, 0);
+            }
+            ctx.fill();
+            ctx.restore();
+        };
+
         const render = () => {
             ctx.clearRect(0, 0, width, height);
-            step += 0.014;
+            step += 0.01;
 
-            // Render Soft Glowing Bokeh Orbs
+            if (mouse.targetX !== null && mouse.targetY !== null) {
+                if (mouse.x === null) {
+                    mouse.x = mouse.targetX;
+                    mouse.y = mouse.targetY;
+                } else {
+                    mouse.x += (mouse.targetX - mouse.x) * 0.05;
+                    mouse.y += (mouse.targetY - mouse.y) * 0.05;
+                }
+            } else {
+                mouse.x = null;
+                mouse.y = null;
+            }
+
+            // A. Background Glowing Orbs
             for (let i = 0; i < orbs.length; i++) {
                 const orb = orbs[i];
                 orb.x += orb.vx;
                 orb.y += orb.vy;
 
-                if (orb.x < -100) orb.x = width + 100;
-                if (orb.x > width + 100) orb.x = -100;
-                if (orb.y < -100) orb.y = height + 100;
-                if (orb.y > height + 100) orb.y = -100;
+                if (orb.x < -150) orb.vx *= -1;
+                if (orb.x > width + 150) orb.vx *= -1;
+                if (orb.y < -150) orb.vy *= -1;
+                if (orb.y > height + 150) orb.vy *= -1;
 
-                const pulseAlpha = Math.sin(step * orb.pulseSpeed * 50 + orb.pulsePhase) * 0.06 + 0.12;
+                const pulse = Math.sin(step * orb.pulseSpeed * 60) * 30;
+                const currentRadius = Math.max(50, orb.radius + pulse);
 
-                const orbGrad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-                orbGrad.addColorStop(0, `hsla(${orb.hue}, 80%, 70%, ${pulseAlpha})`);
-                orbGrad.addColorStop(1, `hsla(${orb.hue}, 80%, 70%, 0)`);
+                const orbGrad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, currentRadius);
+                orbGrad.addColorStop(0, `hsla(${orb.hue}, 75%, 75%, 0.12)`);
+                orbGrad.addColorStop(0.5, `hsla(${orb.hue}, 70%, 70%, 0.05)`);
+                orbGrad.addColorStop(1, `hsla(${orb.hue}, 60%, 60%, 0)`);
 
                 ctx.fillStyle = orbGrad;
                 ctx.beginPath();
-                ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+                ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // Render Wavy Liquid Waves
-            ctx.beginPath();
-            ctx.moveTo(0, height);
-            for (let x = 0; x <= width; x += 15) {
-                const y = Math.sin(x * 0.002 + step) * 26 + Math.cos(x * 0.0012 + step * 0.7) * 20 + (height - 110);
-                ctx.lineTo(x, y);
-            }
-            ctx.lineTo(width, height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(233, 213, 255, 0.45)';
-            ctx.fill();
+            // B. Mouse Knowledge Glow
+            if (mouse.x !== null && mouse.y !== null) {
+                const mouseGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 220);
+                mouseGrad.addColorStop(0, 'rgba(147, 51, 234, 0.12)');
+                mouseGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.04)');
+                mouseGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
 
-            ctx.beginPath();
-            ctx.moveTo(0, height);
-            for (let x = 0; x <= width; x += 15) {
-                const y = Math.sin(x * 0.003 - step * 1.2) * 30 + Math.sin(x * 0.0018 + step) * 22 + (height - 75);
-                ctx.lineTo(x, y);
-            }
-            ctx.lineTo(width, height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(192, 132, 252, 0.25)';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(0, height);
-            for (let x = 0; x <= width; x += 15) {
-                const y = Math.cos(x * 0.0028 + step * 0.9) * 22 + (height - 45);
-                ctx.lineTo(x, y);
-            }
-            ctx.lineTo(width, height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(243, 232, 255, 0.65)';
-            ctx.fill();
-
-            // Render Shockwaves
-            for (let i = shockwaves.length - 1; i >= 0; i--) {
-                const sw = shockwaves[i];
-                sw.radius += 5;
-                sw.alpha -= 0.02;
-
-                if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
-                    shockwaves.splice(i, 1);
-                    continue;
-                }
-
+                ctx.fillStyle = mouseGrad;
                 ctx.beginPath();
-                ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(168, 85, 247, ${sw.alpha})`;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-
-            // Render Particles & Web
-            for (let i = 0; i < particles.length; i++) {
-                const p = particles[i];
-
-                if (mouse.x !== null && mouse.y !== null) {
-                    const dx = mouse.x - p.x;
-                    const dy = mouse.y - p.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < mouse.radius) {
-                        const force = (1 - dist / mouse.radius) * 0.8;
-                        p.vx += (dx / dist) * force * 0.15;
-                        p.vy += (dy / dist) * force * 0.15;
-                    }
-                }
-
-                p.vx = p.vx * 0.96 + p.baseVx * 0.04;
-                p.vy = p.vy * 0.96 + p.baseVy * 0.04;
-
-                p.x += p.vx;
-                p.y += p.vy;
-
-                if (p.x < 0 || p.x > width) p.baseVx *= -1;
-                if (p.y < 0 || p.y > height) p.baseVy *= -1;
-
-                const currentAlpha = Math.sin(step * 2 + p.pulse) * 0.15 + p.alpha;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${currentAlpha})`;
-                ctx.shadowColor = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0.6)`;
-                ctx.shadowBlur = 8;
+                ctx.arc(mouse.x, mouse.y, 220, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.shadowBlur = 0;
+            }
 
-                if (mouse.x !== null && mouse.y !== null) {
-                    const dx = mouse.x - p.x;
-                    const dy = mouse.y - p.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < mouse.radius) {
-                        const lineAlpha = (1 - dist / mouse.radius) * 0.45;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${lineAlpha})`;
-                        ctx.lineWidth = 1.2;
-                        ctx.stroke();
-                    }
+            // C. Liquid Waves
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 15) {
+                const y = Math.sin(x * 0.002 + step) * 22 + Math.cos(x * 0.001 + step * 0.6) * 16 + (height - 95);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(238, 242, 255, 0.5)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 15) {
+                const y = Math.sin(x * 0.0028 - step * 1.1) * 26 + Math.sin(x * 0.0015 + step) * 18 + (height - 65);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(224, 231, 255, 0.35)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 15) {
+                const y = Math.cos(x * 0.0025 + step * 0.8) * 18 + (height - 40);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(243, 232, 255, 0.7)';
+            ctx.fill();
+
+            // D. Literacy Symbols
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                el.y += el.vy;
+                el.x += el.vx;
+                el.rotation += el.rotationSpeed;
+
+                if (el.y < -30) {
+                    el.y = height + 30;
+                    el.x = Math.random() * width;
                 }
+                if (el.x < 0 || el.x > width) el.vx *= -1;
 
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dx = p.x - p2.x;
-                    const dy = p.y - p2.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                const currentAlpha = Math.sin(step * el.pulseSpeed * 50 + el.pulsePhase) * 0.15 + el.alpha;
+                const validAlpha = Math.max(0.1, currentAlpha);
 
-                    if (dist < 125) {
-                        const lineAlpha = (1 - dist / 125) * 0.28;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${lineAlpha})`;
-                        ctx.lineWidth = 0.9;
-                        ctx.stroke();
-                    }
+                if (el.type === 'book') {
+                    drawBook(el.x, el.y, el.size, validAlpha, el.rotation);
+                } else if (el.type === 'cap') {
+                    drawCap(el.x, el.y, el.size, validAlpha, el.rotation);
+                } else if (el.type === 'spark') {
+                    drawSpark(el.x, el.y, el.size * 0.8, validAlpha);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(el.x, el.y, el.size * 0.2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(147, 51, 234, ${validAlpha})`;
+                    ctx.shadowColor = 'rgba(168, 85, 247, 0.5)';
+                    ctx.shadowBlur = 6;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
                 }
             }
 
@@ -252,7 +262,6 @@ const WavyParticleCanvas = () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseleave', handleMouseLeave);
-            window.removeEventListener('click', handleClick);
             cancelAnimationFrame(animationFrameId);
         };
     }, []);
@@ -413,8 +422,8 @@ const ForgotPassword = () => {
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Interactive Particle JS Canvas Background */}
-            <WavyParticleCanvas />
+            {/* Literacy & Education Themed Canvas Background */}
+            <LiteracyThemeCanvas />
 
             {/* ===== CARD ===== */}
             <div style={{ ...THEME.glass, width: '100%', maxWidth: '520px', padding: '36px' }}>

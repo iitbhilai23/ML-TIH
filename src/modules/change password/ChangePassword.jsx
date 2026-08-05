@@ -4,8 +4,8 @@ import { Lock, Eye, EyeOff, Check, AlertCircle, KeyRound, ShieldCheck, User, Arr
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
-// ===== WAVY LIQUID CANVAS + INTERACTIVE PURPLE PARTICLE JS =====
-const WavyParticleCanvas = () => {
+// ===== LITERACY & EDUCATION THEMED FLOATING CANVAS (BOOKS, CAPS & WISDOM SPARKS) =====
+const LiteracyThemeCanvas = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -25,40 +25,45 @@ const WavyParticleCanvas = () => {
 
         window.addEventListener('resize', handleResize);
 
-        // Create particles
-        const numParticles = Math.min(Math.floor((width * height) / 18000), 70);
-        const particles = [];
-
-        const colors = [
-            'rgba(124, 58, 237, ',
-            'rgba(147, 51, 234, ',
-            'rgba(168, 85, 247, ',
-            'rgba(192, 132, 252, ',
-            'rgba(217, 70, 239, '
+        // 1. Soft Ambient Glowing Orbs
+        const orbs = [
+            { x: width * 0.2, y: height * 0.3, radius: 280, hue: 250, vx: 0.12, vy: 0.08, pulseSpeed: 0.005 },
+            { x: width * 0.8, y: height * 0.4, radius: 320, hue: 270, vx: -0.08, vy: 0.12, pulseSpeed: 0.004 },
+            { x: width * 0.5, y: height * 0.7, radius: 350, hue: 280, vx: 0.08, vy: -0.1, pulseSpeed: 0.006 }
         ];
 
-        for (let i = 0; i < numParticles; i++) {
-            particles.push({
+        // 2. Floating Literacy & Education Elements (Books, Caps, Sparks, Specks)
+        const elements = [];
+        const numElements = Math.min(Math.floor((width * height) / 25000), 28);
+        const types = ['book', 'cap', 'spark', 'dot'];
+
+        for (let i = 0; i < numElements; i++) {
+            elements.push({
+                type: types[i % types.length],
                 x: Math.random() * width,
                 y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.55,
-                vy: (Math.random() - 0.5) * 0.55,
-                radius: Math.random() * 2.2 + 1,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                alpha: Math.random() * 0.45 + 0.25
+                size: Math.random() * 12 + 10,
+                vy: - (Math.random() * 0.35 + 0.15),
+                vx: (Math.random() - 0.5) * 0.2,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.008,
+                alpha: Math.random() * 0.4 + 0.2,
+                pulseSpeed: Math.random() * 0.02 + 0.005,
+                pulsePhase: Math.random() * Math.PI * 2
             });
         }
 
-        const mouse = { x: null, y: null, radius: 140 };
+        // Mouse Spotlight
+        const mouse = { x: null, y: null, targetX: null, targetY: null };
 
         const handleMouseMove = (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
+            mouse.targetX = e.clientX;
+            mouse.targetY = e.clientY;
         };
 
         const handleMouseLeave = () => {
-            mouse.x = null;
-            mouse.y = null;
+            mouse.targetX = null;
+            mouse.targetY = null;
         };
 
         window.addEventListener('mousemove', handleMouseMove);
@@ -66,88 +71,186 @@ const WavyParticleCanvas = () => {
 
         let step = 0;
 
+        // Draw Open Book Symbol
+        const drawBook = (x, y, size, alpha, rot) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rot);
+            ctx.strokeStyle = `rgba(124, 58, 237, ${alpha})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(-size, -size * 0.3);
+            ctx.quadraticCurveTo(-size * 0.4, -size * 0.6, 0, -size * 0.2);
+            ctx.quadraticCurveTo(size * 0.4, -size * 0.6, size, -size * 0.3);
+            ctx.lineTo(size, size * 0.4);
+            ctx.quadraticCurveTo(size * 0.4, size * 0.1, 0, size * 0.5);
+            ctx.quadraticCurveTo(-size * 0.4, size * 0.1, -size, size * 0.4);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -size * 0.2);
+            ctx.lineTo(0, size * 0.5);
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        // Draw Graduation Cap Symbol
+        const drawCap = (x, y, size, alpha, rot) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rot);
+            ctx.strokeStyle = `rgba(147, 51, 234, ${alpha})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(0, -size * 0.5);
+            ctx.lineTo(size * 0.85, 0);
+            ctx.lineTo(0, size * 0.5);
+            ctx.lineTo(-size * 0.85, 0);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(-size * 0.4, size * 0.25);
+            ctx.quadraticCurveTo(0, size * 0.6, size * 0.4, size * 0.25);
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        // Draw Spark of Wisdom
+        const drawSpark = (x, y, size, alpha) => {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = `rgba(192, 132, 252, ${alpha})`;
+            ctx.beginPath();
+            for (let i = 0; i < 4; i++) {
+                ctx.rotate(Math.PI / 2);
+                ctx.lineTo(0, -size);
+                ctx.quadraticCurveTo(0, 0, size * 0.3, 0);
+            }
+            ctx.fill();
+            ctx.restore();
+        };
+
         const render = () => {
             ctx.clearRect(0, 0, width, height);
-            step += 0.012;
+            step += 0.01;
 
-            // 1. Draw Multi-Layered Wavy Liquid Bottom Gradients
-            ctx.beginPath();
-            ctx.moveTo(0, height);
-            for (let x = 0; x <= width; x += 15) {
-                const y = Math.sin(x * 0.002 + step) * 28 + Math.cos(x * 0.001 + step * 0.6) * 18 + (height - 110);
-                ctx.lineTo(x, y);
-            }
-            ctx.lineTo(width, height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(233, 213, 255, 0.45)';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(0, height);
-            for (let x = 0; x <= width; x += 15) {
-                const y = Math.sin(x * 0.003 - step * 1.1) * 32 + Math.sin(x * 0.0015 + step) * 22 + (height - 75);
-                ctx.lineTo(x, y);
-            }
-            ctx.lineTo(width, height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(192, 132, 252, 0.22)';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(0, height);
-            for (let x = 0; x <= width; x += 15) {
-                const y = Math.cos(x * 0.0025 + step * 0.8) * 24 + (height - 45);
-                ctx.lineTo(x, y);
-            }
-            ctx.lineTo(width, height);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(243, 232, 255, 0.6)';
-            ctx.fill();
-
-            // 2. Draw Interactive Purple Particle JS Dots & Connecting Lines
-            for (let i = 0; i < particles.length; i++) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-
-                if (p.x < 0 || p.x > width) p.vx *= -1;
-                if (p.y < 0 || p.y > height) p.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `${p.color}${p.alpha})`;
-                ctx.fill();
-
-                if (mouse.x !== null && mouse.y !== null) {
-                    const dx = mouse.x - p.x;
-                    const dy = mouse.y - p.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < mouse.radius) {
-                        const lineAlpha = (1 - dist / mouse.radius) * 0.35;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `${p.color}${lineAlpha})`;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                    }
+            if (mouse.targetX !== null && mouse.targetY !== null) {
+                if (mouse.x === null) {
+                    mouse.x = mouse.targetX;
+                    mouse.y = mouse.targetY;
+                } else {
+                    mouse.x += (mouse.targetX - mouse.x) * 0.05;
+                    mouse.y += (mouse.targetY - mouse.y) * 0.05;
                 }
+            } else {
+                mouse.x = null;
+                mouse.y = null;
+            }
 
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dx = p.x - p2.x;
-                    const dy = p.y - p2.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+            // A. Background Glowing Orbs
+            for (let i = 0; i < orbs.length; i++) {
+                const orb = orbs[i];
+                orb.x += orb.vx;
+                orb.y += orb.vy;
 
-                    if (dist < 110) {
-                        const lineAlpha = (1 - dist / 110) * 0.22;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(168, 85, 247, ${lineAlpha})`;
-                        ctx.lineWidth = 0.8;
-                        ctx.stroke();
-                    }
+                if (orb.x < -150) orb.vx *= -1;
+                if (orb.x > width + 150) orb.vx *= -1;
+                if (orb.y < -150) orb.vy *= -1;
+                if (orb.y > height + 150) orb.vy *= -1;
+
+                const pulse = Math.sin(step * orb.pulseSpeed * 60) * 30;
+                const currentRadius = Math.max(50, orb.radius + pulse);
+
+                const orbGrad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, currentRadius);
+                orbGrad.addColorStop(0, `hsla(${orb.hue}, 75%, 75%, 0.12)`);
+                orbGrad.addColorStop(0.5, `hsla(${orb.hue}, 70%, 70%, 0.05)`);
+                orbGrad.addColorStop(1, `hsla(${orb.hue}, 60%, 60%, 0)`);
+
+                ctx.fillStyle = orbGrad;
+                ctx.beginPath();
+                ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // B. Mouse Knowledge Glow
+            if (mouse.x !== null && mouse.y !== null) {
+                const mouseGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 220);
+                mouseGrad.addColorStop(0, 'rgba(147, 51, 234, 0.12)');
+                mouseGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.04)');
+                mouseGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+                ctx.fillStyle = mouseGrad;
+                ctx.beginPath();
+                ctx.arc(mouse.x, mouse.y, 220, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // C. Liquid Waves
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 15) {
+                const y = Math.sin(x * 0.002 + step) * 22 + Math.cos(x * 0.001 + step * 0.6) * 16 + (height - 95);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(238, 242, 255, 0.5)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 15) {
+                const y = Math.sin(x * 0.0028 - step * 1.1) * 26 + Math.sin(x * 0.0015 + step) * 18 + (height - 65);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(224, 231, 255, 0.35)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let x = 0; x <= width; x += 15) {
+                const y = Math.cos(x * 0.0025 + step * 0.8) * 18 + (height - 40);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(243, 232, 255, 0.7)';
+            ctx.fill();
+
+            // D. Literacy Symbols
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                el.y += el.vy;
+                el.x += el.vx;
+                el.rotation += el.rotationSpeed;
+
+                if (el.y < -30) {
+                    el.y = height + 30;
+                    el.x = Math.random() * width;
+                }
+                if (el.x < 0 || el.x > width) el.vx *= -1;
+
+                const currentAlpha = Math.sin(step * el.pulseSpeed * 50 + el.pulsePhase) * 0.15 + el.alpha;
+                const validAlpha = Math.max(0.1, currentAlpha);
+
+                if (el.type === 'book') {
+                    drawBook(el.x, el.y, el.size, validAlpha, el.rotation);
+                } else if (el.type === 'cap') {
+                    drawCap(el.x, el.y, el.size, validAlpha, el.rotation);
+                } else if (el.type === 'spark') {
+                    drawSpark(el.x, el.y, el.size * 0.8, validAlpha);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(el.x, el.y, el.size * 0.2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(147, 51, 234, ${validAlpha})`;
+                    ctx.shadowColor = 'rgba(168, 85, 247, 0.5)';
+                    ctx.shadowBlur = 6;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
                 }
             }
 
@@ -352,8 +455,8 @@ const ChangePassword = () => {
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Interactive Particle JS Canvas Background */}
-            <WavyParticleCanvas />
+            {/* Literacy & Education Themed Canvas Background */}
+            <LiteracyThemeCanvas />
 
             {/* ===== CARD ===== */}
             <div style={{ ...THEME.glass, width: '100%', maxWidth: '520px', padding: '36px' }}>
