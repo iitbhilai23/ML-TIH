@@ -318,7 +318,7 @@ const Login = () => {
         {/* Left Side: Prominent Hero Training Showcase Card */}
         <div className={styles.brandSide}>
           <div className={styles.heroCard}>
-            
+
             {/* Top Branding Header */}
             <div className={styles.heroHeader}>
               <div className={styles.portalTag}>
@@ -370,7 +370,7 @@ const Login = () => {
         {/* Right Side: Pristine Floating Login Card */}
         <div className={styles.formSide}>
           <div className={styles.formContainer}>
-            
+
             <div className={styles.formHeader}>
               <div className={styles.cardLogo}>
                 <TrendingUp size={28} color="#ffffff" />
