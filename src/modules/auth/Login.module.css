@@ -1,11 +1,11 @@
-/* Page Container with Soft Ambient Wavy Atmosphere */
+/* Page Container with Soft Ambient Wavy Light Atmosphere */
 .pageContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #faf5ff 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 25%, #f5f3ff 60%, #f0fdf4 100%);
   position: relative;
   overflow: hidden;
   font-family: inherit;
@@ -42,16 +42,17 @@
 
 .heroCard {
   width: 100%;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1px solid rgba(192, 132, 252, 0.35);
-  padding: 2rem;
-  box-shadow: 0 20px 45px -10px rgba(124, 58, 237, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 26px;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  padding: 2.2rem;
+  box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.12), 0 10px 24px -10px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .heroHeader {
@@ -62,32 +63,33 @@
 .portalTag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
+  gap: 7px;
+  font-size: 0.73rem;
   font-weight: 700;
-  color: #6b21a8;
+  color: #4f46e5;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: #f3e8ff;
-  border: 1px solid rgba(192, 132, 252, 0.4);
-  padding: 5px 14px;
+  letter-spacing: 0.07em;
+  background: #e0e7ff;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 6px 15px;
   border-radius: 9999px;
   align-self: flex-start;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
 
 .brandTitle {
-  font-size: 1.9rem;
+  font-size: 2rem;
   font-weight: 900;
-  color: #1e1b4b;
+  color: #0f172a;
   line-height: 1.15;
   letter-spacing: -0.025em;
 }
 
 .brandSubtitle {
-  font-size: 1.9rem;
+  font-size: 2rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.15;
@@ -97,10 +99,10 @@
   position: relative;
   width: 100%;
   height: 270px;
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.12);
 }
 
 .brandImage {
@@ -108,79 +110,93 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.5s ease;
+}
+
+.imageFrame:hover .brandImage {
+  transform: scale(1.03);
 }
 
 .imageOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(30, 27, 75, 0.45) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.45) 0%, transparent 60%);
 }
 
 .imageBadge {
   position: absolute;
   bottom: 14px;
   left: 14px;
-  background: rgba(30, 27, 75, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 9999px;
   font-size: 0.78rem;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .brandTagline {
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   color: #475569;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.5;
   margin: 0;
 }
 
 .metricGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .metricChip {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: #f5f3ff;
-  border: 1px solid rgba(192, 132, 252, 0.35);
-  border-radius: 14px;
+  padding: 13px 16px;
+  background: rgba(245, 243, 255, 0.85);
+  border: 1.5px solid rgba(192, 132, 252, 0.4);
+  border-radius: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metricChip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.12);
 }
 
 .chipNumber {
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 800;
-  color: #3b0764;
+  color: #312e81;
 }
 
 .chipLabel {
-  font-size: 0.73rem;
-  color: #6b21a8;
+  font-size: 0.74rem;
+  color: #4f46e5;
   font-weight: 600;
 }
 
-/* --- Right Side: Pristine Floating Login Card --- */
+/* --- Right Side: Pristine Floating Light Login Card --- */
 .formSide {
   width: 100%;
-  max-width: 430px;
+  max-width: 440px;
 }
 
 .formContainer {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 2.5rem 2.2rem;
-  box-shadow: 0 20px 50px -10px rgba(124, 58, 237, 0.15), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 26px;
+  padding: 2.6rem 2.3rem;
+  box-shadow: 0 25px 60px -15px rgba(99, 102, 241, 0.15), 0 10px 24px -10px rgba(0, 0, 0, 0.04), 0 0 0 1.5px rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
 }
@@ -191,27 +207,32 @@
 }
 
 .cardLogo {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #a855f7 100%);
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.2rem;
-  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.cardLogo:hover {
+  transform: scale(1.05);
 }
 
 .title {
-  font-size: 1.85rem;
-  font-weight: 800;
-  color: #1e1b4b;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #0f172a;
   margin-bottom: 0.35rem;
   letter-spacing: -0.025em;
 }
 
 .subtitle {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: #64748b;
   font-weight: 500;
 }
@@ -220,17 +241,18 @@
   background-color: #fef2f2;
   border: 1px solid #fecaca;
   color: #dc2626;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  margin-bottom: 1.2rem;
-  font-size: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
+  margin-bottom: 1.3rem;
+  font-size: 0.88rem;
   font-weight: 500;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.06);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.3rem;
 }
 
 .inputGroup {
@@ -240,7 +262,7 @@
 }
 
 .label {
-  font-size: 0.83rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: #334155;
 }
@@ -253,22 +275,22 @@
 
 .inputWrapper .icon {
   position: absolute;
-  left: 14px;
+  left: 15px;
   color: #94a3b8;
   pointer-events: none;
 }
 
 .input {
   width: 100%;
-  padding: 13px 14px 13px 44px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  padding: 13.5px 15px 13.5px 46px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
   color: #0f172a;
   font-size: 0.95rem;
   font-weight: 500;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
 }
 
@@ -277,31 +299,34 @@
 }
 
 .input:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
 }
 
 .passwordToggle {
   position: absolute;
-  right: 14px;
+  right: 15px;
   background: none;
   border: none;
   color: #94a3b8;
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0;
-  transition: color 0.2s ease;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 .passwordToggle:hover {
-  color: #7c3aed;
+  color: #4f46e5;
+  background: #f1f5f9;
 }
 
 .optionsRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.83rem;
+  font-size: 0.85rem;
   margin-top: 0.2rem;
 }
 
@@ -316,46 +341,46 @@
 }
 
 .checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: #7c3aed;
+  width: 17px;
+  height: 17px;
+  accent-color: #4f46e5;
   cursor: pointer;
 }
 
 .forgotLink {
-  color: #7c3aed;
+  color: #4f46e5;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 .forgotLink:hover {
-  color: #581c87;
+  color: #3730a3;
   text-decoration: underline;
 }
 
 .submitBtn {
   margin-top: 0.8rem;
   width: 100%;
-  padding: 14px;
-  border-radius: 12px;
+  padding: 14.5px;
+  border-radius: 14px;
   border: none;
-  background: linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #9333ea 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
   color: #ffffff;
   font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: 0.05em;
+  font-size: 0.98rem;
+  letter-spacing: 0.04em;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
-  transition: all 0.22s ease;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
 }
 
 .submitBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
 }
 
 .submitBtn:disabled {
@@ -367,7 +392,7 @@
 .cardFooter {
   margin-top: 2rem;
   text-align: center;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: #64748b;
   font-weight: 600;
   display: flex;
