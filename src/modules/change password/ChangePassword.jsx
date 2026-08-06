@@ -356,7 +356,13 @@ const ChangePassword = () => {
             <WavyParticleCanvas />
 
             {/* ===== CARD ===== */}
-            <div style={{ ...THEME.glass, width: '100%', maxWidth: '520px', padding: '36px' }}>
+            <div style={{
+                ...THEME.glass,
+                width: '100%',
+                maxWidth: '520px',
+                padding: '36px',
+                transform: 'translateY(-40px)'
+            }}>
 
                 {/* Success State */}
                 {isSuccess ? (
