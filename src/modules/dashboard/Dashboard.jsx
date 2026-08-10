@@ -477,8 +477,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
   const validTrainingLocations = (trainingLocations || []).filter(training => {
     const lat = Number(training?.location_details?.latitude);
     const lng = Number(training?.location_details?.longitude);
-    // return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
-    return !isNaN(lat) && !isNaN(lng);
+    return !isNaN(lat) && !isNaN(lng) && isWithinCG(lat, lng);
   });
 
   const totalTrainings = validTrainingLocations.length;
@@ -634,9 +633,12 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
       `}</style>
 
       {/* Map Control: Info Badge */}
-      <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '8px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #f1f5f9' }}>
-        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#9647bb' }}></div>
-        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}>{totalTrainings} Trainings</div>
+      <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '9px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e2e8f0' }}>
+        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: MARKER_COLOR, boxShadow: '0 0 0 4px rgba(22, 163, 74, 0.12)' }}></div>
+        <div>
+          <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}>Chhattisgarh</div>
+          <div style={{ fontSize: '0.72rem', fontWeight: '600', color: '#64748b', marginTop: '1px' }}>{totalTrainings} training locations</div>
+        </div>
       </div>
 
       {/* Map Control: Fullscreen */}
@@ -646,7 +648,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
         </button>
       </div>
 
-      <MapContainer style={{ width: '100%', height: '100%' }} zoomControl={false}>
+      <MapContainer style={{ width: '100%', height: '100%' }} zoomControl={false} minZoom={5}>
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
 
         {/* Controller to handle map movement based on selection */}
@@ -657,7 +659,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
 
         <MapResizer trigger={isFullScreen} />
 
-        {geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#3a58deff', weight: 1.5, fillOpacity: 0.03 }} />}
+        {geoJsonData && <GeoJSON data={geoJsonData} style={{ color: '#4f46e5', weight: 2, fillColor: '#818cf8', fillOpacity: 0.08, dashArray: '3 4' }} />}
 
         {/* NEW: Render Focus Marker if a target is selected */}
         {focusTarget && (
@@ -896,10 +898,15 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                         <div style={{ width: 68, height: 68, borderRadius: "50%", padding: "3px", background: "linear-gradient(135deg, #7c3aed, #c084fc)", marginBottom: 10 }}>
                           <img
                             src={
+                              training.trainer_profile_image ||
                               training.trainer_image ||
                               "https://placehold.co/110x110/f3e8ff/6b21a8?text=👤"
                             }
                             alt="Master Trainer"
+                            onError={(event) => {
+                              event.currentTarget.onerror = null;
+                              event.currentTarget.src = "https://placehold.co/110x110/f3e8ff/6b21a8?text=👤";
+                            }}
                             style={{
                               width: "100%",
                               height: "100%",
