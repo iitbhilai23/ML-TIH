@@ -47,10 +47,10 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
     
     // Prepare clean data
     const dataToSave = cleanPayload({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      bio: formData.bio,
+      name: (formData.name || '').trim(),
+      email: (formData.email || '').trim(),
+      phone: (formData.phone || '').replace(/\D/g, ''),
+      bio: (formData.bio || '').trim(),
     });
 
     // Pass data and file up to parent
@@ -170,7 +170,7 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
               <label className={styles.label}>Phone Number</label>
               <input
                 className={styles.input}
-                type="text"
+                type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />

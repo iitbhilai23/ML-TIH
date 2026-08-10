@@ -218,8 +218,16 @@ const Dashboard = () => {
 
     return trainingLocations.filter(training => {
       const loc = training.location_details || {};
-      const matchDistrict = !filters.district_cd || (loc.district?.toLowerCase() === selectedDistrictName);
-      const matchBlock = !filters.block_cd || (loc.block?.toLowerCase() === selectedBlockName);
+      const matchDistrict = !filters.district_cd || (
+        loc.district_cd != null
+          ? String(loc.district_cd) === String(filters.district_cd)
+          : loc.district?.toLowerCase() === selectedDistrictName
+      );
+      const matchBlock = !filters.block_cd || (
+        loc.block_cd != null
+          ? String(loc.block_cd) === String(filters.block_cd)
+          : loc.block?.toLowerCase() === selectedBlockName
+      );
       const matchStatus = !filters.status || training.status?.toLowerCase() === filters.status.toLowerCase();
       const matchSubject = !filters.subject || (training.subject_name?.toLowerCase() === filters.subject.toLowerCase() || training.subject?.toLowerCase() === filters.subject.toLowerCase());
       const trainingType = training.training_type?.toLowerCase() || '';

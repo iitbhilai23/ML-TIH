@@ -129,7 +129,11 @@ const TrainerList = () => {
       fetchTrainers();
     } catch (error) {
       console.error('Could not save trainer:', error);
-      toast.error('Could not save trainer: ' + (error.message || 'Something went wrong'));
+      const apiMessage = error.response?.data?.message;
+      const message = Array.isArray(apiMessage)
+        ? apiMessage.join(', ')
+        : apiMessage || error.message || 'Something went wrong';
+      toast.error('Could not save trainer: ' + message);
     } finally {
       setIsSaving(false);
     }
