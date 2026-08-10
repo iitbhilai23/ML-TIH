@@ -50,6 +50,26 @@ const THEME = {
   }
 };
 
+// --- TRAINING PHASE COLOR PALETTE ---
+
+const TRAINING_TYPE_COLORS = {
+  '': '#16a34a',                   // Default (All Training Types) — green
+
+  'Pilot Phase': '#0ea5e9',        // Group-level — sky blue
+  'Pilot Phase I': '#2563eb',      // Blue
+  'Pilot Phase II': '#16a34a',     // Green
+  'Pilot Phase III': '#f59e0b',    // Amber
+
+  'Educator Phase': '#8b5cf6',     // Group-level — violet
+  'Educator Phase I': '#7c3aed',   // Purple
+  'Educator Phase II': '#db2777',  // Pink / Magenta
+  'Educator Phase III': '#0d9488', // Teal
+  'Educator Phase IV': '#dc2626',  // Red
+};
+
+const getTrainingTypeColor = (trainingType) =>
+  TRAINING_TYPE_COLORS[trainingType] || TRAINING_TYPE_COLORS[''];
+
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const [viewData, setViewData] = useState(null);
@@ -240,6 +260,12 @@ const Dashboard = () => {
     });
   }, [trainingLocations, filters, districts, blocks]);
 
+  // NEW: resolve the active marker color from the currently selected training type
+  const activeMarkerColor = useMemo(
+    () => getTrainingTypeColor(filters.training_type),
+    [filters.training_type]
+  );
+
   if (loading) return <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: THEME.bgGradient, color: THEME.primary, fontSize: '1rem', fontWeight: '600' }}>Loading Dashboard Data...</div>;
   if (error) return <div style={{ padding: THEME.pad.xl, color: THEME.danger, textAlign: 'center' }}>Error: {error}</div>;
   if (!data) return <div style={{ padding: THEME.pad.xl, color: '#64748b', textAlign: 'center' }}>No Data Available</div>;
@@ -395,6 +421,16 @@ const Dashboard = () => {
                 }
                 return (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 600 }}>
+                    {/* NEW: small color swatch showing the active phase color */}
+                    <span
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        background: getTrainingTypeColor(selected),
+                        flexShrink: 0
+                      }}
+                    />
                     <BookOpen size={16} color="#7c3aed" />
                     <span>{selected}</span>
                   </span>
@@ -416,7 +452,17 @@ const Dashboard = () => {
                 Pilot Phase {expandedTrainingType === 'Pilot Phase' ? '▾' : '▸'}
               </MenuItem>
               {expandedTrainingType === 'Pilot Phase' && ['I', 'II', 'III'].map((phase) => (
-                <MenuItem key={phase} value={`Pilot Phase ${phase}`} sx={{ pl: 4, fontSize: '0.875rem', fontWeight: 500 }}>
+                <MenuItem key={phase} value={`Pilot Phase ${phase}`} sx={{ pl: 4, fontSize: '0.875rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {/* NEW: color swatch per phase option */}
+                  <span
+                    style={{
+                      width: 9,
+                      height: 9,
+                      borderRadius: '50%',
+                      background: getTrainingTypeColor(`Pilot Phase ${phase}`),
+                      flexShrink: 0
+                    }}
+                  />
                   Pilot Phase {phase}
                 </MenuItem>
               ))}
@@ -432,7 +478,17 @@ const Dashboard = () => {
                 Educator Phase {expandedTrainingType === 'Educator Phase' ? '▾' : '▸'}
               </MenuItem>
               {expandedTrainingType === 'Educator Phase' && ['I', 'II', 'III', 'IV'].map((phase) => (
-                <MenuItem key={phase} value={`Educator Phase ${phase}`} sx={{ pl: 4, fontSize: '0.875rem', fontWeight: 500 }}>
+                <MenuItem key={phase} value={`Educator Phase ${phase}`} sx={{ pl: 4, fontSize: '0.875rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {/* NEW: color swatch per phase option */}
+                  <span
+                    style={{
+                      width: 9,
+                      height: 9,
+                      borderRadius: '50%',
+                      background: getTrainingTypeColor(`Educator Phase ${phase}`),
+                      flexShrink: 0
+                    }}
+                  />
                   Educator Phase {phase}
                 </MenuItem>
               ))}
@@ -441,7 +497,17 @@ const Dashboard = () => {
           </div>
         </div>
       </Box>
-      {activeTab === 'summary' && <SummaryTab summary={data} viewData={viewData} locationsData={locationsData} trainingLocations={filteredTrainingLocations} focusTarget={mapFocusPoint} />}
+      {activeTab === 'summary' && (
+        <SummaryTab
+          summary={data}
+          viewData={viewData}
+          locationsData={locationsData}
+          trainingLocations={filteredTrainingLocations}
+          focusTarget={mapFocusPoint}
+          markerColor={activeMarkerColor}
+          activeTrainingType={filters.training_type}
+        />
+      )}
       {activeTab === 'detailed' && <DetailedTab viewData={viewData} />}
     </div >
   );
@@ -468,7 +534,7 @@ const MapLocationController = ({ target }) => {
 };
 
 // --- SMART MAP COMPONENT (UPDATED WITH MARKER) ---
-const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
+const TraineeLocationMap = ({ trainingLocations, focusTarget, markerColor, activeTrainingType }) => {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState(null);
@@ -514,7 +580,8 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
     return byDistrict;
   }, [groupedLocations]);
 
-  // Assign a distinct color per district (cycling through a palette)
+  // NOTE: District-based palette kept for reference/fallback use elsewhere,
+  // but marker/cluster color is now driven by the selected training phase (MARKER_COLOR below).
   const DISTRICT_PALETTE = [
     '#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626',
     '#7c3aed', '#db2777', '#0f766e', '#ca8a04', '#b45309',
@@ -529,7 +596,9 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
   }, [districtGrouped]);
 
   // --- Training Markers Icon ---
-  const MARKER_COLOR = '#16a34a';
+  // CHANGED: color now comes from the selected training-type phase (passed as `markerColor` prop),
+  // falling back to the original green when no phase filter is active.
+  const MARKER_COLOR = markerColor || '#16a34a';
 
   const createCustomIcon = (count, color = MARKER_COLOR) => {
     const stackShadow = count > 1
@@ -642,12 +711,25 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
 
       {/* Map Control: Info Badge */}
       <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '9px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e2e8f0' }}>
-        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: MARKER_COLOR, boxShadow: '0 0 0 4px rgba(22, 163, 74, 0.12)' }}></div>
+        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: MARKER_COLOR, boxShadow: `0 0 0 4px ${MARKER_COLOR}1f` }}></div>
         <div>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}>Chhattisgarh</div>
           <div style={{ fontSize: '0.72rem', fontWeight: '600', color: '#64748b', marginTop: '1px' }}>{totalTrainings} training locations</div>
         </div>
       </div>
+
+      {/* NEW: Active phase legend — shows only when a training type filter is applied */}
+      {activeTrainingType && (
+        <div style={{
+          position: 'absolute', top: '68px', left: '15px', zIndex: 1000,
+          background: 'rgba(255, 255, 255, 0.95)', padding: '7px 14px', borderRadius: '10px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '8px',
+          border: '1px solid #e2e8f0'
+        }}>
+          <span style={{ width: 9, height: 9, borderRadius: '50%', background: MARKER_COLOR, flexShrink: 0 }} />
+          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#334155' }}>{activeTrainingType}</span>
+        </div>
+      )}
 
       {/* Map Control: Fullscreen */}
       <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 1000 }}>
@@ -706,7 +788,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                       font-size: ${fontSize};
                       font-family: 'Inter', sans-serif;
                       border: 3px solid #ffffff;
-                      box-shadow: 0 4px 16px rgba(22,163,74,0.35);
+                      box-shadow: 0 4px 16px ${MARKER_COLOR}59;
                       cursor: pointer;
                       line-height: 1.1;
                     ">
@@ -740,6 +822,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
       </MapContainer>
 
       {/* MODAL */}
+      ```jsx
       {Array.isArray(selectedTraining) && selectedTraining.length > 0 && (
         <div
           style={{
@@ -775,7 +858,8 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
             <div
               style={{
                 padding: "24px 30px",
-                background: "linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7e22ce 100%)",
+                background:
+                  "linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7e22ce 100%)",
                 borderRadius: "24px 24px 0 0",
                 position: "relative",
                 display: "flex",
@@ -784,27 +868,66 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
               }}
             >
               <div>
-                <div style={{ alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                  <div style={{ fontSize: "11px", fontWeight: "700", color: "#ffffff", textTransform: "uppercase", letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: "6px" }}>
+                <div
+                  style={{
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "4px"
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#ffffff",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px"
+                    }}
+                  >
                     <BookOpen size={14} color="#e9d5ff" />
                     Subject
                   </div>
 
-                  <h2 style={{ margin: 0, color: "#ffffff", fontSize: "20px", fontWeight: "800", letterSpacing: "-0.02em" }}>
-                    {/* {selectedTraining[0]?.location_details?.village || selectedTraining[0]?.location_details?.district || "Training Details"} */}
-                    {/* {selectedTraining[0]?.subject_name || "Training Details"} */}
+                  <h2
+                    style={{
+                      margin: 0,
+                      color: "#ffffff",
+                      fontSize: "20px",
+                      fontWeight: "800",
+                      letterSpacing: "-0.02em"
+                    }}
+                  >
                     Marketplace Literacy
                   </h2>
                 </div>
-                {/* <p style={{ margin: "0 0 0 28px", color: "#e9d5ff", fontSize: "13px", fontWeight: "500" }}>
-                  {selectedTraining[0]?.location_details?.block ? `${selectedTraining[0]?.location_details?.block} Block • ` : ""}{selectedTraining[0]?.location_details?.district || "Chhattisgarh"} District
-                </p> */}
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{ background: "rgba(255, 255, 255, 0.2)", color: "#ffffff", padding: "5px 14px", borderRadius: "9999px", fontSize: "12px", fontWeight: "700" }}>
-                  {selectedTraining.length} Session{selectedTraining.length > 1 ? "s" : ""}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px"
+                }}
+              >
+                {/* Session Count */}
+                <span
+                  style={{
+                    background: "rgba(255, 255, 255, 0.2)",
+                    color: "#ffffff",
+                    padding: "5px 14px",
+                    borderRadius: "9999px",
+                    fontSize: "12px",
+                    fontWeight: "700"
+                  }}
+                >
+                  {selectedTraining.length} Session
+                  {selectedTraining.length > 1 ? "s" : ""}
                 </span>
+
+                {/* Close Button */}
                 <button
                   onClick={() => setSelectedTraining(null)}
                   style={{
@@ -820,8 +943,14 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                     justifyContent: "center",
                     transition: "all 0.2s ease"
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.4)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background =
+                      "rgba(255, 255, 255, 0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background =
+                      "rgba(255, 255, 255, 0.25)";
+                  }}
                 >
                   <X size={18} color="#ffffff" />
                 </button>
@@ -829,10 +958,24 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: "24px" }}>
+            <div
+              style={{
+                padding: "24px 28px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "24px"
+              }}
+            >
               {selectedTraining.map((training, index) => {
                 const rawSubject = training.subject || training.subject_name;
-                const subject = (rawSubject && !/advanced/i.test(rawSubject) && !/digital/i.test(rawSubject)) ? rawSubject : "Marketplace Literacy";
+
+                const subject =
+                  rawSubject &&
+                    !/advanced/i.test(rawSubject) &&
+                    !/digital/i.test(rawSubject)
+                    ? rawSubject
+                    : "Marketplace Literacy";
+
                 return (
                   <div
                     key={training.id || index}
@@ -844,8 +987,15 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                       boxShadow: "0 8px 24px rgba(124, 58, 237, 0.06)"
                     }}
                   >
-                    {/* Training Hero Image Banner */}
-                    <div style={{ position: "relative", width: "100%", height: "200px", overflow: "hidden" }}>
+                    {/* Training Hero Image */}
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "100%",
+                        height: "200px",
+                        overflow: "hidden"
+                      }}
+                    >
                       <img
                         src={
                           training.training_image ||
@@ -858,27 +1008,15 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                           objectFit: "cover"
                         }}
                       />
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(30, 27, 75, 0.75) 0%, transparent 60%)" }} />
 
-                      {/* Image Overlays */}
-                      <div style={{ position: "absolute", bottom: "14px", left: "16px", right: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        {/* <span style={{ color: "#ffffff", fontSize: "16px", fontWeight: "800", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
-                          {subject}
-                        </span> */}
-                        {/* <span
-                          style={{
-                            ...getStatusStyle(training.status),
-                            padding: "6px 14px",
-                            borderRadius: "9999px",
-                            fontSize: "12px",
-                            fontWeight: "800",
-                            letterSpacing: "0.04em",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
-                          }}
-                        >
-                          {training.status ? training.status.toUpperCase() : "SCHEDULED"}
-                        </span> */}
-                      </div>
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          background:
+                            "linear-gradient(to top, rgba(30, 27, 75, 0.75) 0%, transparent 60%)"
+                        }}
+                      />
                     </div>
 
                     {/* Content Section */}
@@ -891,7 +1029,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                         alignItems: "center"
                       }}
                     >
-                      {/* Left: Trainer Profile Box */}
+                      {/* Trainer Profile */}
                       <div
                         style={{
                           display: "flex",
@@ -904,7 +1042,17 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                           border: "1px solid #f3e8ff"
                         }}
                       >
-                        <div style={{ width: 68, height: 68, borderRadius: "50%", padding: "3px", background: "linear-gradient(135deg, #7c3aed, #c084fc)", marginBottom: 10 }}>
+                        <div
+                          style={{
+                            width: 68,
+                            height: 68,
+                            borderRadius: "50%",
+                            padding: "3px",
+                            background:
+                              "linear-gradient(135deg, #7c3aed, #c084fc)",
+                            marginBottom: 10
+                          }}
+                        >
                           <img
                             src={
                               training.trainer_profile_image ||
@@ -914,7 +1062,8 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                             alt="Master Trainer"
                             onError={(event) => {
                               event.currentTarget.onerror = null;
-                              event.currentTarget.src = "https://placehold.co/110x110/f3e8ff/6b21a8?text=👤";
+                              event.currentTarget.src =
+                                "https://placehold.co/110x110/f3e8ff/6b21a8?text=👤";
                             }}
                             style={{
                               width: "100%",
@@ -926,65 +1075,236 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
                           />
                         </div>
 
-                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "800", color: "#3b0764" }}>
+                        <h3
+                          style={{
+                            margin: 0,
+                            fontSize: "15px",
+                            fontWeight: "800",
+                            color: "#3b0764"
+                          }}
+                        >
                           {training.trainer_name || "Trainer Name"}
                         </h3>
-                        <span style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "600", marginTop: "2px" }}>
+
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: "#7c3aed",
+                            fontWeight: "600",
+                            marginTop: "2px"
+                          }}
+                        >
                           Master Trainer
                         </span>
                       </div>
 
-                      {/* Right: Grid Metadata Badges */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-
-                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                      {/* Metadata */}
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "12px"
+                        }}
+                      >
+                        {/* Participants */}
+                        <div
+                          style={{
+                            padding: "10px 14px",
+                            background: "#f8fafc",
+                            borderRadius: "12px",
+                            border: "1px solid #f1f5f9"
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              color: "#64748b",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.04em",
+                              marginBottom: "3px"
+                            }}
+                          >
                             Participants
                           </div>
-                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
-                            <Users size={15} color="#7c3aed" /> {training.total_participants || training.actual_participants || 0} Trainees
+
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "800",
+                              color: "#0f172a",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px"
+                            }}
+                          >
+                            <Users size={15} color="#7c3aed" />
+                            {training.total_participants ||
+                              training.actual_participants ||
+                              0}{" "}
+                            Trainees
                           </div>
                         </div>
 
-                        {/* <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
-                            Training ID
-                          </div>
-                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
-                            <Award size={15} color="#7c3aed" /> #{training.training_id || training.id || "N/A"}
-                          </div>
-                        </div>*/}
-
-                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                        {/* District */}
+                        <div
+                          style={{
+                            padding: "10px 14px",
+                            background: "#f8fafc",
+                            borderRadius: "12px",
+                            border: "1px solid #f1f5f9"
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              color: "#64748b",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.04em",
+                              marginBottom: "3px"
+                            }}
+                          >
                             District
                           </div>
-                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
-                            <MapPin size={15} color="#7c3aed" /> {training.location_details?.district || "Chhattisgarh"}
+
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "800",
+                              color: "#0f172a",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px"
+                            }}
+                          >
+                            <MapPin size={15} color="#7c3aed" />
+                            {training.location_details?.district ||
+                              "Chhattisgarh"}
                           </div>
                         </div>
 
-                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                        {/* Block */}
+                        <div
+                          style={{
+                            padding: "10px 14px",
+                            background: "#f8fafc",
+                            borderRadius: "12px",
+                            border: "1px solid #f1f5f9"
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              color: "#64748b",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.04em",
+                              marginBottom: "3px"
+                            }}
+                          >
                             Block
                           </div>
-                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
-                            <MapPin size={15} color="#7c3aed" /> {training.location_details?.block}
+
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "800",
+                              color: "#0f172a",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px"
+                            }}
+                          >
+                            <MapPin size={15} color="#7c3aed" />
+                            {training.location_details?.block || "-"}
                           </div>
                         </div>
 
-                        <div style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "3px" }}>
+                        {/* Village */}
+                        <div
+                          style={{
+                            padding: "10px 14px",
+                            background: "#f8fafc",
+                            borderRadius: "12px",
+                            border: "1px solid #f1f5f9"
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              color: "#64748b",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.04em",
+                              marginBottom: "3px"
+                            }}
+                          >
                             Village
                           </div>
-                          <div style={{ fontSize: "14px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
-                            <MapPin size={15} color="#7c3aed" /> {training.location_details?.village || training.location_details?.block || "-"}
+
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "800",
+                              color: "#0f172a",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px"
+                            }}
+                          >
+                            <MapPin size={15} color="#7c3aed" />
+                            {training.location_details?.village ||
+                              training.location_details?.block ||
+                              "-"}
                           </div>
                         </div>
-
                       </div>
-
                     </div>
+
+                    {/* Modern Completed Status */}
+                    {training.status?.toLowerCase() === "completed" && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          padding: "0 24px 22px"
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "9px",
+                            padding: "8px 20px",
+                            borderRadius: "999px",
+                            background:
+                              "linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)",
+                            border: "1px solid #86EFAC",
+                            color: "#166534",
+                            fontSize: "11px",
+                            fontWeight: "800",
+                            letterSpacing: "0.08em",
+                            boxShadow:
+                              "0 4px 14px rgba(22, 163, 74, 0.12)"
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: "8px",
+                              height: "8px",
+                              borderRadius: "50%",
+                              background: "#22C55E",
+                              boxShadow:
+                                "0 0 0 4px rgba(34, 197, 94, 0.12)"
+                            }}
+                          />
+
+                          COMPLETED
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1007,7 +1327,7 @@ const MapBoundsAdjuster = ({ geoJsonData, trigger, focusTarget }) => {
   return null;
 };
 
-const SummaryTab = ({ summary, viewData, locationsData, trainingLocations, focusTarget }) => (
+const SummaryTab = ({ summary, viewData, locationsData, trainingLocations, focusTarget, markerColor, activeTrainingType }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: THEME.gap.sm }}>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: THEME.gap.sm }}>
       <StatCard title="Total Trainings" value={summary?.total_trainings || 0} icon={BookOpen} gradient={THEME.gradients.kpiA} />
@@ -1016,7 +1336,12 @@ const SummaryTab = ({ summary, viewData, locationsData, trainingLocations, focus
       <StatCard title="Total Locations" value={summary?.total_locations || 0} icon={House} gradient={THEME.gradients.kpiD} />
     </div>
     <div style={{ width: '100%', height: '560px', marginTop: '8px', borderRadius: '20px', overflow: 'hidden' }}>
-      <TraineeLocationMap trainingLocations={trainingLocations} focusTarget={focusTarget} />
+      <TraineeLocationMap
+        trainingLocations={trainingLocations}
+        focusTarget={focusTarget}
+        markerColor={markerColor}
+        activeTrainingType={activeTrainingType}
+      />
     </div>
   </div>
 );
