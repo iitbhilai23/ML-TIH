@@ -792,7 +792,8 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget }) => {
 
                   <h2 style={{ margin: 0, color: "#ffffff", fontSize: "20px", fontWeight: "800", letterSpacing: "-0.02em" }}>
                     {/* {selectedTraining[0]?.location_details?.village || selectedTraining[0]?.location_details?.district || "Training Details"} */}
-                    {selectedTraining[0]?.subject_name || "Training Details"}
+                    {/* {selectedTraining[0]?.subject_name || "Training Details"} */}
+                    Marketplace Literacy
                   </h2>
                 </div>
                 {/* <p style={{ margin: "0 0 0 28px", color: "#e9d5ff", fontSize: "13px", fontWeight: "500" }}>
