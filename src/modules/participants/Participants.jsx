@@ -3,12 +3,13 @@ import { participantService } from '../../services/participantService';
 import { trainingService } from '../../services/trainingService';
 import ParticipantForm from './ParticipantForm';
 import styles from './Participants.module.css';
-import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, Search, AlertTriangle, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, Phone, Filter, ChevronLeft, ChevronRight, Search, AlertTriangle, Check, BookOpen } from 'lucide-react';
 import '../../styles/shared.css';
 import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
 import { useExport } from '../../features/export/useExport';
 import ExportButtons from '../../features/export/ExportButton';
+import DataTable from '../../components/common/DataTable';
 
 const Participants = () => {
   const [participants, setParticipants] = useState([]);
@@ -210,45 +211,82 @@ const Participants = () => {
     (t) => String(t.id) === String(selectedTrainingId)
   );
 
-  const filteredParticipants = participants.filter((p) => {
-    const matchesSearch = p.name
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  // const filteredParticipants = participants.filter((p) => {
+  //   const matchesSearch = p.name
+  //     ?.toLowerCase()
+  //     .includes(searchQuery.toLowerCase());
 
-    // Show all if no training is selected
-    if (!selectedTraining) {
-      return matchesSearch;
-    }
+  //   // Show all if no training is selected
+  //   if (!selectedTraining) {
+  //     return matchesSearch;
+  //   }
 
-    const participantDistrict =
-      p.training_details?.location_details?.district_cd;
+  //   const participantDistrict =
+  //     p.training_details?.location_details?.district_cd;
 
-    const participantBlock =
-      p.training_details?.location_details?.block_cd;
+  //   const participantBlock =
+  //     p.training_details?.location_details?.block_cd;
 
-    // const matchesDistrict =
-    //   String(participantDistrict) ===
-    //   String(selectedTraining.location_details?.district_cd);
+  //   // const matchesDistrict =
+  //   //   String(participantDistrict) ===
+  //   //   String(selectedTraining.location_details?.district_cd);
 
-    // const matchesBlock =
-    //   String(participantBlock) ===
-    //   String(selectedTraining.location_details?.block_cd);
+  //   // const matchesBlock =
+  //   //   String(participantBlock) ===
+  //   //   String(selectedTraining.location_details?.block_cd);
 
-    const selectedDistrictCd =
-      selectedTraining?.location_details?.district_cd;
+  //   const selectedDistrictCd =
+  //     selectedTraining?.location_details?.district_cd;
 
-    const selectedBlockCd =
-      selectedTraining?.location_details?.block_cd;
+  //   const selectedBlockCd =
+  //     selectedTraining?.location_details?.block_cd;
 
-    const matchesDistrict =
-      String(participantDistrict) === String(selectedDistrictCd);
+  //   const matchesDistrict =
+  //     String(participantDistrict) === String(selectedDistrictCd);
 
-    const matchesBlock =
-      String(participantBlock) === String(selectedBlockCd);
+  //   const matchesBlock =
+  //     String(participantBlock) === String(selectedBlockCd);
 
-    return matchesSearch && matchesDistrict && matchesBlock;
-  });
+  //   return matchesSearch && matchesDistrict && matchesBlock;
+  // });
 
+  const filteredParticipants = participants
+    .filter((p) => {
+      const matchesSearch = (p.name || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+      if (!selectedTraining) {
+        return matchesSearch;
+      }
+
+      const participantDistrict =
+        p.training_details?.location_details?.district_cd;
+
+      const participantBlock =
+        p.training_details?.location_details?.block_cd;
+
+      const selectedDistrictCd =
+        selectedTraining?.location_details?.district_cd;
+
+      const selectedBlockCd =
+        selectedTraining?.location_details?.block_cd;
+
+      const matchesDistrict =
+        String(participantDistrict) === String(selectedDistrictCd);
+
+      const matchesBlock =
+        String(participantBlock) === String(selectedBlockCd);
+
+      return matchesSearch && matchesDistrict && matchesBlock;
+    })
+    .sort((a, b) =>
+      (a.name || "").localeCompare(
+        b.name || "",
+        undefined,
+        { sensitivity: "base" }
+      )
+    );
 
   const { exportPDF, exportExcel } = useExport(filteredParticipants);
 
@@ -303,10 +341,10 @@ const Participants = () => {
             }}>
               Participants / Beneficiaries
             </h2>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', backgroundColor: '#f1f5f9', padding: '6px 16px', borderRadius: '9999px', border: '1px solid transparent', alignSelf: 'flex-start', transition: 'all 0.2s ease' }}>
-              <User size={18} color="#6366f1" strokeWidth={2} />
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Participants</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>{participants.length}</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%)', padding: '6px 16px', borderRadius: '9999px', border: '1px solid rgba(192, 132, 252, 0.35)', alignSelf: 'flex-start', boxShadow: '0 2px 8px rgba(124, 58, 237, 0.08)' }}>
+              <User size={18} color="#7c3aed" strokeWidth={2.2} />
+              <span style={{ fontSize: '0.75rem', color: '#6b21a8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Participants</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#3b0764', lineHeight: 1 }}>{participants.length}</span>
             </div>
           </div>
 
@@ -344,8 +382,8 @@ const Participants = () => {
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                  e.currentTarget.style.borderColor = '#a855f7';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(168, 85, 247, 0.12)';
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.backgroundColor = '#f8fafc';
@@ -384,8 +422,8 @@ const Participants = () => {
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                  e.currentTarget.style.borderColor = '#a855f7';
+                  e.currentTarget.style.boxShadow = '0 0 0 4px rgba(168, 85, 247, 0.12)';
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.backgroundColor = '#f8fafc';
@@ -440,7 +478,7 @@ const Participants = () => {
             <button
               onClick={openAdd}
               style={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
                 color: 'white',
                 padding: '14px 24px',
                 borderRadius: '12px',
@@ -451,18 +489,18 @@ const Participants = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.2s ease',
                 fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+                e.currentTarget.style.boxShadow = '0 6px 18px rgba(124, 58, 237, 0.45)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(124, 58, 237, 0.35)';
               }}
             >
               <Plus size={18} /> Add Participant
@@ -471,208 +509,161 @@ const Participants = () => {
         </div>
       </div>
 
-      {/* --- Table --- */}
-      <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Participant Name</th>
-                <th>Training Program</th>
-                <th>Category</th>
-                <th>Attendance</th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? <tr><td colSpan="5" className="p-4 text-center">
-                <Spinner overlay={false} />
-              </td></tr> :
-                filteredParticipants.length === 0 ? <tr><td colSpan="5" className="p-4 text-center">No participants found</td></tr> : (
-                  currentParticipants.map(p => (
-                    <tr key={p.id}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          {p.profile_image_url ? (
-                            <img
-                              src={p.profile_image_url}
-                              alt={p.name}
-                              style={{
-                                width: '36px',
-                                height: '36px',
-                                objectFit: 'cover',
-                                borderRadius: '50%',
-                                border: '1px solid #e2e8f0'
-                              }}
-                            />
-                          ) : (
-                            <div style={{
-                              width: '36px',
-                              height: '36px',
-                              borderRadius: '50%',
-                              background: '#e0e7ff',
-                              color: '#4338ca',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 'bold',
-                              fontSize: '14px',
-                              border: '1px solid #e2e8f0'
-                            }}>
-                              {p.name.charAt(0)}
-                            </div>
-                          )}
-
-                          <div>
-                            <div style={{ fontWeight: '700', color: '#1e293b' }}>{p.name}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Phone size={10} /> {p.phone || 'N/A'}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <b>{p.training_details?.subject_name}</b>
-                        <div className="text-xs">
-                          Trainer: {p.training_details?.trainer_name}
-                        </div>
-                        <div className="text-xs">
-                          Village: {p.training_details?.location_details?.village}
-                        </div>
-                      </td>
-                      <td>
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded border border-gray-200">
-                          {p.category}  {p.caste}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`${styles.badge} ${styles[p.attendance_status]}`}>
-                          {p.attendance_status}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          gap: '10px'
-                        }}>
-                          <button
-                            onClick={() => openEdit(p)}
-                            style={{
-                              padding: '8px 14px',
-                              background: '#ffffff',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '10px',
-                              color: '#1e293b',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '0.85rem',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#6366f1';
-                              e.currentTarget.style.color = '#4338ca';
-                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#e2e8f0';
-                              e.currentTarget.style.color = '#1e293b';
-                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                            }}
-                          >
-                            <Pencil size={14} /> Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(p.id)}
-                            style={{
-                              padding: '8px 14px',
-                              background: '#ffffff',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '10px',
-                              color: '#991b1b',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '0.85rem',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#fecaca';
-                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#e2e8f0';
-                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                            }}
-                          >
-                            <Trash2 size={14} /> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {!loading && filteredParticipants.length > 0 && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '16px 20px',
-            borderTop: '1px solid #e2e8f0',
-            background: '#ffffff',
-            borderBottomLeftRadius: '16px',
-            borderBottomRightRadius: '16px',
-            marginTop: '0px'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredParticipants.length)} of {filteredParticipants.length} entries
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: currentPage === 1 ? '#f1f5f9' : '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#475569', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-                onMouseEnter={(e) => { if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1'; }}
-                onMouseLeave={(e) => { if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0'; }}
-              >
-                <ChevronLeft size={16} /> Previous
-              </button>
-
-              <div style={{ display: 'flex', gap: '4px', margin: '0 8px' }}>
-                <span style={{ padding: '8px 12px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)' }}>
-                  {currentPage}
-                </span>
-                <span style={{ padding: '8px 4px', color: '#64748b', fontWeight: 500, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
-                  of {totalPages}
-                </span>
+      {/* --- TanStack Table v8 --- */}
+      <DataTable
+        data={filteredParticipants}
+        columns={[
+          {
+            id: 'index',
+            header: '#',
+            size: 50,
+            cell: ({ row }) => (
+              <span style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem' }}>
+                {row.index + 1}
+              </span>
+            ),
+          },
+          {
+            accessorKey: 'name',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={12} /> Participant
               </div>
-
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || totalPages === 0}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569', cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-                onMouseEnter={(e) => { if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1'; }}
-                onMouseLeave={(e) => { if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0'; }}
-              >
-                Next <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+            ),
+            cell: ({ row }) => {
+              const p = row.original;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                  {p.profile_image_url ? (
+                    <img
+                      src={p.profile_image_url}
+                      alt={p.name}
+                      style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '50%', border: '2px solid #e8edf5' }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '0.95rem',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {(p.name || '?').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.875rem' }}>{p.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                      <Phone size={10} /> {p.phone || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              );
+            },
+          },
+          {
+            id: 'training_program',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <BookOpen size={12} /> Training Program
+              </div>
+            ),
+            cell: ({ row }) => {
+              const p = row.original;
+              const rawSubject = p.training_details?.subject_name;
+              const subject = (!rawSubject || rawSubject === 'N/A' || /advanced/i.test(rawSubject) || /digital/i.test(rawSubject))
+                ? 'Marketplace Literacy'
+                : rawSubject;
+              return (
+                <div>
+                  <div style={{ fontWeight: 700, color: '#4338ca', fontSize: '0.875rem' }}>
+                    {subject}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px' }}>
+                    <span style={{ marginRight: '8px' }}>👤 {p.training_details?.trainer_name || 'N/A'}</span>
+                    <span>📍 {p.training_details?.location_details?.village || 'N/A'}</span>
+                  </div>
+                </div>
+              );
+            },
+          },
+          {
+            id: 'category',
+            header: 'Category',
+            cell: ({ row }) => {
+              const p = row.original;
+              return (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 10px',
+                    borderRadius: '999px',
+                    background: '#f1f5f9',
+                    color: '#475569',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    border: '1px solid #e2e8f0',
+                  }}
+                >
+                  {p.category} {p.caste ? `· ${p.caste}` : ''}
+                </span>
+              );
+            },
+          },
+          /* {
+            accessorKey: 'attendance_status',
+            header: 'Attendance',
+            cell: ({ getValue }) => (
+              <span className={`${styles.badge} ${styles[getValue()]}`}>
+                {getValue()}
+              </span>
+            ),
+          }, */
+          {
+            id: 'actions',
+            header: 'Actions',
+            meta: { align: 'center' },
+            cell: ({ row }) => {
+              const p = row.original;
+              return (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => openEdit(p)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 13px', borderRadius: '9px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#334155', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s ease', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#818cf8'; e.currentTarget.style.color = '#4338ca'; e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(99,102,241,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#334155'; e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <Pencil size={13} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(p.id)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 13px', borderRadius: '9px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#991b1b', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s ease', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(239,68,68,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <Trash2 size={13} /> Delete
+                  </button>
+                </div>
+              );
+            },
+          },
+        ]}
+        loading={loading}
+        globalFilter={searchQuery}
+        pageSize={itemsPerPage}
+        emptyText={searchQuery ? 'No participants match your search' : 'No participants found. Add your first participant to get started.'}
+        emptyIcon={<User size={48} style={{ margin: '0 auto 12px', opacity: 0.2, color: '#94a3b8' }} />}
+      />
 
       {/* --- PARTICIPANT FORM (Refactored) --- */}
       <ParticipantForm

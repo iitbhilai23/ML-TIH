@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Trainers.module.css';
 
-const CameraIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#94a3b8' }}>
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-    <circle cx="12" cy="13" r="4"></circle>
-  </svg>
-);
-
 // Props: initialData, onSave (callback), isSaving (boolean), onClose
 const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
   const [formData, setFormData] = useState({
@@ -33,6 +26,8 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
 
   if (!isOpen) return null;
 
+  const trainerInitial = (formData.name || '?').trim().charAt(0).toUpperCase() || '?';
+
   // Updated cleanPayload: Ab empty strings ('') ko bhi filter karega
   // Taake backend ko khali email/phone na bhejena pade.
   const cleanPayload = (data) =>
@@ -47,10 +42,10 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
     
     // Prepare clean data
     const dataToSave = cleanPayload({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      bio: formData.bio,
+      name: (formData.name || '').trim(),
+      email: (formData.email || '').trim(),
+      phone: (formData.phone || '').replace(/\D/g, ''),
+      bio: (formData.bio || '').trim(),
     });
 
     // Pass data and file up to parent
@@ -105,10 +100,16 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
                 <img
                   src={filePreview}
                   alt="preview"
+                  onError={() => setFilePreview('')}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <CameraIcon />
+                <span
+                  aria-label="Trainer initial"
+                  style={{ color: '#7B3F99', fontSize: '2rem', fontWeight: 700, lineHeight: 1 }}
+                >
+                  {trainerInitial}
+                </span>
               )}
 
               <div style={{
@@ -170,7 +171,7 @@ const TrainerForm = ({ isOpen, onClose, onSave, initialData, isSaving }) => {
               <label className={styles.label}>Phone Number</label>
               <input
                 className={styles.input}
-                type="text"
+                type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />

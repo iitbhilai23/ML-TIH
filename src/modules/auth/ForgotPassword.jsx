@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, Check, AlertCircle, KeyRound, ShieldCheck, User, ArrowLeft } from 'lucide-react';
 import api from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
 
 // ===== WAVY LIQUID CANVAS + INTERACTIVE PURPLE PARTICLE JS =====
 const WavyParticleCanvas = () => {
@@ -25,31 +24,52 @@ const WavyParticleCanvas = () => {
 
         window.addEventListener('resize', handleResize);
 
-        // Create particles
-        const numParticles = Math.min(Math.floor((width * height) / 18000), 70);
-        const particles = [];
-
-        const colors = [
-            'rgba(124, 58, 237, ',
-            'rgba(147, 51, 234, ',
-            'rgba(168, 85, 247, ',
-            'rgba(192, 132, 252, ',
-            'rgba(217, 70, 239, '
-        ];
-
-        for (let i = 0; i < numParticles; i++) {
-            particles.push({
+        // 1. Background Glowing Bokeh Orbs
+        const numOrbs = 8;
+        const orbs = [];
+        for (let i = 0; i < numOrbs; i++) {
+            orbs.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.55,
-                vy: (Math.random() - 0.5) * 0.55,
-                radius: Math.random() * 2.2 + 1,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                alpha: Math.random() * 0.45 + 0.25
+                radius: Math.random() * 90 + 60,
+                vx: (Math.random() - 0.5) * 0.35,
+                vy: (Math.random() - 0.5) * 0.35,
+                hue: 250 + Math.random() * 45,
+                pulseSpeed: 0.008 + Math.random() * 0.012,
+                pulsePhase: Math.random() * Math.PI * 2
             });
         }
 
-        const mouse = { x: null, y: null, radius: 140 };
+        // 2. Interactive Constellation Particles
+        const numParticles = Math.min(Math.floor((width * height) / 14000), 85);
+        const particles = [];
+        const colorPalette = [
+            { r: 99, g: 102, b: 241 },   // Indigo
+            { r: 139, g: 92, b: 246 },   // Violet
+            { r: 168, g: 85, b: 247 },   // Purple
+            { r: 217, g: 70, b: 239 },   // Fuchsia
+            { r: 59, g: 130, b: 246 }    // Sky Blue accent
+        ];
+
+        for (let i = 0; i < numParticles; i++) {
+            const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                baseVx: (Math.random() - 0.5) * 0.6,
+                baseVy: (Math.random() - 0.5) * 0.6,
+                vx: (Math.random() - 0.5) * 0.6,
+                vy: (Math.random() - 0.5) * 0.6,
+                radius: Math.random() * 2.5 + 1.2,
+                color,
+                alpha: Math.random() * 0.5 + 0.35,
+                pulse: Math.random() * Math.PI
+            });
+        }
+
+        // Mouse & Click Interaction
+        const mouse = { x: null, y: null, radius: 160 };
+        const shockwaves = [];
 
         const handleMouseMove = (e) => {
             mouse.x = e.clientX;
@@ -61,20 +81,54 @@ const WavyParticleCanvas = () => {
             mouse.y = null;
         };
 
+        const handleClick = (e) => {
+            shockwaves.push({
+                x: e.clientX,
+                y: e.clientY,
+                radius: 0,
+                maxRadius: 180,
+                alpha: 0.8
+            });
+        };
+
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseleave', handleMouseLeave);
+        window.addEventListener('click', handleClick);
 
         let step = 0;
 
         const render = () => {
             ctx.clearRect(0, 0, width, height);
-            step += 0.012;
+            step += 0.014;
 
-            // 1. Draw Multi-Layered Wavy Liquid Bottom Gradients
+            // Render Soft Glowing Bokeh Orbs
+            for (let i = 0; i < orbs.length; i++) {
+                const orb = orbs[i];
+                orb.x += orb.vx;
+                orb.y += orb.vy;
+
+                if (orb.x < -100) orb.x = width + 100;
+                if (orb.x > width + 100) orb.x = -100;
+                if (orb.y < -100) orb.y = height + 100;
+                if (orb.y > height + 100) orb.y = -100;
+
+                const pulseAlpha = Math.sin(step * orb.pulseSpeed * 50 + orb.pulsePhase) * 0.06 + 0.12;
+
+                const orbGrad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+                orbGrad.addColorStop(0, `hsla(${orb.hue}, 80%, 70%, ${pulseAlpha})`);
+                orbGrad.addColorStop(1, `hsla(${orb.hue}, 80%, 70%, 0)`);
+
+                ctx.fillStyle = orbGrad;
+                ctx.beginPath();
+                ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Render Wavy Liquid Waves
             ctx.beginPath();
             ctx.moveTo(0, height);
             for (let x = 0; x <= width; x += 15) {
-                const y = Math.sin(x * 0.002 + step) * 28 + Math.cos(x * 0.001 + step * 0.6) * 18 + (height - 110);
+                const y = Math.sin(x * 0.002 + step) * 26 + Math.cos(x * 0.0012 + step * 0.7) * 20 + (height - 110);
                 ctx.lineTo(x, y);
             }
             ctx.lineTo(width, height);
@@ -85,50 +139,88 @@ const WavyParticleCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(0, height);
             for (let x = 0; x <= width; x += 15) {
-                const y = Math.sin(x * 0.003 - step * 1.1) * 32 + Math.sin(x * 0.0015 + step) * 22 + (height - 75);
+                const y = Math.sin(x * 0.003 - step * 1.2) * 30 + Math.sin(x * 0.0018 + step) * 22 + (height - 75);
                 ctx.lineTo(x, y);
             }
             ctx.lineTo(width, height);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(192, 132, 252, 0.22)';
+            ctx.fillStyle = 'rgba(192, 132, 252, 0.25)';
             ctx.fill();
 
             ctx.beginPath();
             ctx.moveTo(0, height);
             for (let x = 0; x <= width; x += 15) {
-                const y = Math.cos(x * 0.0025 + step * 0.8) * 24 + (height - 45);
+                const y = Math.cos(x * 0.0028 + step * 0.9) * 22 + (height - 45);
                 ctx.lineTo(x, y);
             }
             ctx.lineTo(width, height);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(243, 232, 255, 0.6)';
+            ctx.fillStyle = 'rgba(243, 232, 255, 0.65)';
             ctx.fill();
 
-            // 2. Draw Interactive Purple Particle JS Dots & Connecting Lines
+            // Render Shockwaves
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                const sw = shockwaves[i];
+                sw.radius += 5;
+                sw.alpha -= 0.02;
+
+                if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+                    shockwaves.splice(i, 1);
+                    continue;
+                }
+
+                ctx.beginPath();
+                ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(168, 85, 247, ${sw.alpha})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Render Particles & Web
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
+
+                if (mouse.x !== null && mouse.y !== null) {
+                    const dx = mouse.x - p.x;
+                    const dy = mouse.y - p.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < mouse.radius) {
+                        const force = (1 - dist / mouse.radius) * 0.8;
+                        p.vx += (dx / dist) * force * 0.15;
+                        p.vy += (dy / dist) * force * 0.15;
+                    }
+                }
+
+                p.vx = p.vx * 0.96 + p.baseVx * 0.04;
+                p.vy = p.vy * 0.96 + p.baseVy * 0.04;
+
                 p.x += p.vx;
                 p.y += p.vy;
 
-                if (p.x < 0 || p.x > width) p.vx *= -1;
-                if (p.y < 0 || p.y > height) p.vy *= -1;
+                if (p.x < 0 || p.x > width) p.baseVx *= -1;
+                if (p.y < 0 || p.y > height) p.baseVy *= -1;
 
+                const currentAlpha = Math.sin(step * 2 + p.pulse) * 0.15 + p.alpha;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `${p.color}${p.alpha})`;
+                ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${currentAlpha})`;
+                ctx.shadowColor = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0.6)`;
+                ctx.shadowBlur = 8;
                 ctx.fill();
+                ctx.shadowBlur = 0;
 
                 if (mouse.x !== null && mouse.y !== null) {
                     const dx = mouse.x - p.x;
                     const dy = mouse.y - p.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist < mouse.radius) {
-                        const lineAlpha = (1 - dist / mouse.radius) * 0.35;
+                        const lineAlpha = (1 - dist / mouse.radius) * 0.45;
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `${p.color}${lineAlpha})`;
-                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${lineAlpha})`;
+                        ctx.lineWidth = 1.2;
                         ctx.stroke();
                     }
                 }
@@ -139,13 +231,13 @@ const WavyParticleCanvas = () => {
                     const dy = p.y - p2.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < 110) {
-                        const lineAlpha = (1 - dist / 110) * 0.22;
+                    if (dist < 125) {
+                        const lineAlpha = (1 - dist / 125) * 0.28;
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(168, 85, 247, ${lineAlpha})`;
-                        ctx.lineWidth = 0.8;
+                        ctx.strokeStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${lineAlpha})`;
+                        ctx.lineWidth = 0.9;
                         ctx.stroke();
                     }
                 }
@@ -160,6 +252,7 @@ const WavyParticleCanvas = () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseleave', handleMouseLeave);
+            window.removeEventListener('click', handleClick);
             cancelAnimationFrame(animationFrameId);
         };
     }, []);
@@ -242,14 +335,11 @@ const THEME = {
     }
 };
 
-const ChangePassword = () => {
-    const { user } = useAuth();
-    const [usernameInput, setUsernameInput] = useState(user?.username || '');
-    const [currentPassword, setCurrentPassword] = useState('');
+const ForgotPassword = () => {
+    const [usernameOrEmail, setUsernameOrEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
@@ -261,15 +351,13 @@ const ChangePassword = () => {
         e.preventDefault();
         setMessage('');
 
-        const targetUsername = user?.username || usernameInput.trim();
-
-        if (!user && !targetUsername) {
-            setMessage('Please enter your username.');
+        if (!usernameOrEmail.trim()) {
+            setMessage('Please enter your Username or Email address.');
             return;
         }
 
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            setMessage('Please fill in all required fields.');
+        if (!newPassword || !confirmPassword) {
+            setMessage('Please enter and confirm your new password.');
             return;
         }
 
@@ -283,49 +371,22 @@ const ChangePassword = () => {
             return;
         }
 
-        if (currentPassword === newPassword) {
-            setMessage('New password must be different from your current password.');
-            return;
-        }
-
         try {
             setLoading(true);
 
-            let response;
-            if (user && user.id) {
-                try {
-                    response = await api.post('/admin/change-password', {
-                        userId: user.id,
-                        currentPassword,
-                        newPassword
-                    });
-                } catch (authErr) {
-                    if ((authErr.response?.status === 403 || authErr.response?.status === 401) && targetUsername) {
-                        response = await api.post('/admin/change-password-public', {
-                            username: targetUsername,
-                            currentPassword,
-                            newPassword
-                        });
-                    } else {
-                        throw authErr;
-                    }
-                }
-            } else {
-                response = await api.post('/admin/change-password-public', {
-                    username: targetUsername,
-                    currentPassword,
-                    newPassword
-                });
-            }
+            const response = await api.post('/admin/forgot-password', {
+                usernameOrEmail: usernameOrEmail.trim(),
+                newPassword
+            });
 
             setIsSuccess(true);
-            setMessage(response.data?.message || 'Password changed successfully!');
-            setCurrentPassword('');
+            setMessage(response.data?.message || 'Password reset successfully!');
+            setUsernameOrEmail('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (error) {
             setMessage(
-                error.response?.data?.message || 'Failed to update password. Please check your username and current password.'
+                error.response?.data?.message || 'Failed to reset password. Please check your username or email address.'
             );
         } finally {
             setLoading(false);
@@ -335,7 +396,7 @@ const ChangePassword = () => {
     const handleResetForm = () => {
         setIsSuccess(false);
         setMessage('');
-        setCurrentPassword('');
+        setUsernameOrEmail('');
         setNewPassword('');
         setConfirmPassword('');
     };
@@ -356,13 +417,7 @@ const ChangePassword = () => {
             <WavyParticleCanvas />
 
             {/* ===== CARD ===== */}
-            <div style={{
-                ...THEME.glass,
-                width: '100%',
-                maxWidth: '520px',
-                padding: '36px',
-                transform: 'translateY(-40px)'
-            }}>
+            <div style={{ ...THEME.glass, width: '100%', maxWidth: '520px', padding: '36px' }}>
 
                 {/* Success State */}
                 {isSuccess ? (
@@ -382,14 +437,14 @@ const ChangePassword = () => {
                             <Check size={38} strokeWidth={2.5} />
                         </div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>
-                            Password Updated!
+                            Password Reset Complete!
                         </h2>
                         <p style={{ fontSize: '1rem', color: '#64748b', margin: '0 0 28px 0', lineHeight: '1.5' }}>
                             {message}
                         </p>
 
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <Link to={user ? "/admin/dashboard" : "/login"} style={{
+                            <Link to="/login" style={{
                                 color: 'white',
                                 fontWeight: '600',
                                 textDecoration: 'none',
@@ -399,7 +454,7 @@ const ChangePassword = () => {
                                 boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
                                 transition: 'transform 0.2s ease'
                             }}>
-                                {user ? "Return to Dashboard" : "Proceed to Login"}
+                                Proceed to Login
                             </Link>
 
                             <button
@@ -415,7 +470,7 @@ const ChangePassword = () => {
                                     transition: 'all 0.2s ease'
                                 }}
                             >
-                                Change Again
+                                Reset Another
                             </button>
                         </div>
                     </div>
@@ -450,7 +505,7 @@ const ChangePassword = () => {
                                 marginBottom: '6px',
                                 textAlign: 'center'
                             }}>
-                                Change Password
+                                Forgot Password
                             </h2>
                             <p style={{
                                 fontSize: '0.95rem',
@@ -459,11 +514,7 @@ const ChangePassword = () => {
                                 marginBottom: '28px',
                                 marginTop: '0'
                             }}>
-                                {user ? (
-                                    <>Update password for account <strong style={{ color: '#334155' }}>{user.username}</strong></>
-                                ) : (
-                                    'Enter your username and current password to update password'
-                                )}
+                                Enter your username or email address and set your new password
                             </p>
 
                             {/* Error Alert Message */}
@@ -489,38 +540,7 @@ const ChangePassword = () => {
 
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
-                                {/* 0. Username (shown if not logged in) */}
-                                {!user && (
-                                    <div>
-                                        <label style={{
-                                            fontSize: '0.9rem',
-                                            fontWeight: '600',
-                                            color: '#334155',
-                                            marginBottom: '6px',
-                                            display: 'block',
-                                            paddingLeft: '4px'
-                                        }}>
-                                            Username
-                                        </label>
-
-                                        <div style={THEME.inputWrapper}
-                                            onFocus={(e) => { e.currentTarget.style.borderColor = THEME.primary; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)'; }}
-                                            onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
-                                        >
-                                            <User size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                                            <input
-                                                type="text"
-                                                value={usernameInput}
-                                                onChange={(e) => setUsernameInput(e.target.value)}
-                                                placeholder="Enter your username"
-                                                style={THEME.input}
-                                                autoComplete="username"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 1. Current Password Row */}
+                                {/* 1. Username or Email Row */}
                                 <div>
                                     <label style={{
                                         fontSize: '0.9rem',
@@ -530,25 +550,22 @@ const ChangePassword = () => {
                                         display: 'block',
                                         paddingLeft: '4px'
                                     }}>
-                                        Current Password
+                                        Username or Email Address
                                     </label>
 
                                     <div style={THEME.inputWrapper}
                                         onFocus={(e) => { e.currentTarget.style.borderColor = THEME.primary; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)'; }}
                                         onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
                                     >
-                                        <Lock size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                                        <User size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
                                         <input
-                                            type={showCurrent ? 'text' : 'password'}
-                                            value={currentPassword}
-                                            onChange={(e) => setCurrentPassword(e.target.value)}
-                                            placeholder="Enter current password"
+                                            type="text"
+                                            value={usernameOrEmail}
+                                            onChange={(e) => setUsernameOrEmail(e.target.value)}
+                                            placeholder="Enter username or registered email"
                                             style={THEME.input}
-                                            autoComplete="current-password"
+                                            autoComplete="username"
                                         />
-                                        <div style={THEME.iconBox} onClick={() => setShowCurrent(!showCurrent)}>
-                                            {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
-                                        </div>
                                     </div>
                                 </div>
 
@@ -584,7 +601,7 @@ const ChangePassword = () => {
                                     </div>
                                 </div>
 
-                                {/* 3. Confirm Password Row */}
+                                {/* 3. Confirm New Password Row */}
                                 <div>
                                     <label style={{
                                         fontSize: '0.9rem',
@@ -641,7 +658,7 @@ const ChangePassword = () => {
                                         letterSpacing: '0.3px'
                                     }}
                                 >
-                                    {loading ? 'Updating Password...' : 'Update Password'}
+                                    {loading ? 'Resetting Password...' : 'Reset Password'}
                                     {!loading && <Lock size={18} />}
                                 </button>
                             </form>
@@ -669,4 +686,4 @@ const ChangePassword = () => {
     );
 };
 
-export default ChangePassword;
+export default ForgotPassword;

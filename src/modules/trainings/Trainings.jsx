@@ -8,13 +8,14 @@ import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
 import { useExport } from '../../features/export/useExport';
 import ExportButtons from '../../features/export/ExportButton';
+import DataTable from '../../components/common/DataTable';
 
 
 // --- HELPER FUNCTIONS MOVED OUTSIDE COMPONENT (Performance Fix) ---
 
 const getTrainingDetails = (training) => {
   if (!training) return {
-    subject_name: 'N/A',
+    subject_name: 'Marketplace Literacy',
     trainer_name: 'N/A',
     location_details: {},
     start_date: null,
@@ -25,9 +26,16 @@ const getTrainingDetails = (training) => {
     id: null
   };
 
+  let rawSubject = training.subject_name || 'Marketplace Literacy';
+  let subject = rawSubject;
+  if (!rawSubject || rawSubject === 'N/A' || /advanced/i.test(rawSubject) || /digital/i.test(rawSubject)) {
+    subject = 'Marketplace Literacy';
+  }
+
   return {
-    subject_name: training.subject_name || 'N/A',
+    subject_name: subject,
     trainer_name: training.trainer_name || 'N/A',
+    trainer_profile_image: training.trainer_profile_image || training.trainer_image || '',
     location_details: training.location_details || {},
     start_date: training.start_date,
     end_date: training.end_date,
@@ -46,7 +54,6 @@ const formatDate = (dateString) => {
     year: 'numeric'
   });
 };
-
 
 
 const Trainings = () => {
@@ -81,8 +88,23 @@ const Trainings = () => {
     setLoading(true);
     try {
       const filters = filterStatus ? { status: filterStatus } : {};
+      // const data = await trainingService.getAll(filters);
+      // setTrainings(data);
       const data = await trainingService.getAll(filters);
-      setTrainings(data);
+
+const sortedTrainings = Array.isArray(data)
+  ? [...data].sort((a, b) =>
+      (a.trainer_name || "")
+        .trim()
+        .localeCompare(
+          (b.trainer_name || "").trim(),
+          undefined,
+          { sensitivity: "base" }
+        )
+    )
+  : [];
+
+setTrainings(sortedTrainings);
     } catch (err) {
       console.error('Failed to load trainings:', err);
       toast.error('Failed to load trainings');
@@ -331,7 +353,7 @@ const Trainings = () => {
             <button
               onClick={openAdd}
               style={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
                 color: 'white',
                 padding: '14px 24px',
                 borderRadius: '12px',
@@ -342,17 +364,17 @@ const Trainings = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)',
                 transition: 'all 0.2s ease',
                 fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+                e.currentTarget.style.boxShadow = '0 6px 18px rgba(124, 58, 237, 0.45)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(124, 58, 237, 0.35)';
               }}
             >
               <Plus size={18} /> Add Training
@@ -361,188 +383,183 @@ const Trainings = () => {
         </div>
       </div>
 
-      {/* --- Table --- */}
-      <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Trainer</th>
-                <th>Subject</th>
-                <th>Location</th>
-                <th>Dates</th>
-                <th>Participants</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="p-4 text-center">
-                    <Spinner overlay={false} />
-                  </td>
-                </tr>
-              ) : trainings.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="p-4 text-center">No trainings found</td>
-                </tr>
-              ) : (
-                currentTrainings.map((t, index) => {
-                  const details = getTrainingDetails(t);
-                  return (
-                    <tr key={details.id || index}>
-                      <td>
-                        <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-                          <User size={12} /> {details.trainer_name}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="font-bold text-indigo-700 flex items-center gap-2">
-                          <BookOpen size={14} /> {details.subject_name}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="text-sm flex items-center gap-1">
-                          <MapPin size={14} className="text-gray-400" />
-                          {details.location_details?.village || 'N/A'}, {details.location_details?.block || 'N/A'}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {details.location_details?.district || 'N/A'}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="text-sm flex items-center gap-1">
-                          <Calendar size={14} className="text-gray-400" />
-                          {formatDate(details.start_date)}
-                        </div>
-                        <div className="text-xs text-gray-400 ml-5">
-                          to {formatDate(details.end_date)}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="text-sm">
-                          <span className="font-bold">{details.actual_participants}</span> / {details.max_participants}
-                        </div>
-                        <div className="w-16 h-1 bg-gray-200 mt-1 rounded">
-                          <div
-                            style={{ width: `${details.max_participants > 0 ? (details.actual_participants / details.max_participants) * 100 : 0}%` }}
-                            className="h-full bg-green-500 rounded"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`${styles.badge} ${styles[details.status]}`}>
-                          {details.status}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                          <button
-                            onClick={() => openEdit(t)}
-                            style={{
-                              padding: '8px 14px',
-                              background: '#ffffff',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '10px',
-                              color: '#1e293b',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '0.85rem',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#6366f1';
-                              e.currentTarget.style.color = '#4338ca';
-                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#e2e8f0';
-                              e.currentTarget.style.color = '#1e293b';
-                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                            }}
-                          >
-                            <Pencil size={14} /> Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(details.id)}
-                            style={{
-                              padding: '8px 14px',
-                              background: '#ffffff',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '10px',
-                              color: '#991b1b',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '0.85rem',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#fecaca';
-                              e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#e2e8f0';
-                              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                            }}
-                          >
-                            <Trash2 size={14} /> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {!loading && trainings.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderTop: '1px solid #e2e8f0', background: '#ffffff', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', marginTop: '0px' }}>
-            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, trainings.length)} of {trainings.length} entries
-            </div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: currentPage === 1 ? '#f1f5f9' : '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#475569', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-                onMouseEnter={(e) => { if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1'; }}
-                onMouseLeave={(e) => { if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0'; }}
-              >
-                <ChevronLeft size={16} /> Previous
-              </button>
-              <div style={{ display: 'flex', gap: '4px', margin: '0 8px' }}>
-                <span style={{ padding: '8px 12px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)' }}>
-                  {currentPage}
-                </span>
-                <span style={{ padding: '8px 4px', color: '#64748b', fontWeight: 500, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
-                  of {totalPages}
-                </span>
+      {/* --- TanStack Table v8 --- */}
+      <DataTable
+        data={trainings}
+        columns={[
+          {
+            id: 'index',
+            header: '#',
+            size: 50,
+            cell: ({ row }) => (
+              <span style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem' }}>
+                {row.index + 1}
+              </span>
+            ),
+          },
+          {
+            accessorKey: 'trainer_name',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={12} /> Trainer
               </div>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || totalPages === 0}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569', cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-                onMouseEnter={(e) => { if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1'; }}
-                onMouseLeave={(e) => { if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0'; }}
-              >
-                Next <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+            ),
+            cell: ({ row }) => {
+              const details = getTrainingDetails(row.original);
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      flexShrink: 0,
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <span>{(details.trainer_name || '?').charAt(0).toUpperCase()}</span>
+                    {details.trainer_profile_image && (
+                      <img
+                        src={details.trainer_profile_image}
+                        alt={`${details.trainer_name} profile`}
+                        onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', background: '#f3e8ff' }}
+                      />
+                    )}
+                  </div>
+                  <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>{details.trainer_name}</span>
+                </div>
+              );
+            },
+          },
+          {
+            accessorKey: 'subject_name',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <BookOpen size={12} /> Subject
+              </div>
+            ),
+            cell: ({ row }) => {
+              const details = getTrainingDetails(row.original);
+              return (
+                <div style={{ fontWeight: 700, color: '#6b21a8', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <BookOpen size={13} color="#a855f7" />
+                  {details.subject_name}
+                </div>
+              );
+            },
+          },
+          {
+            id: 'location',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={12} /> Location
+              </div>
+            ),
+            cell: ({ row }) => {
+              const details = getTrainingDetails(row.original);
+              return (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                    <MapPin size={13} color="#10b981" />
+                    {details.location_details?.village || 'N/A'}, {details.location_details?.block || 'N/A'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px', paddingLeft: '18px' }}>
+                    {details.location_details?.district || 'N/A'}
+                  </div>
+                </div>
+              );
+            },
+          },
+          {
+            id: 'dates',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Calendar size={12} /> Dates
+              </div>
+            ),
+            cell: ({ row }) => {
+              const details = getTrainingDetails(row.original);
+              return (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                    <Calendar size={13} color="#6366f1" />
+                    {formatDate(details.start_date)}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px', paddingLeft: '18px' }}>
+                    → {formatDate(details.end_date)}
+                  </div>
+                </div>
+              );
+            },
+          },
+          {
+            id: 'participants',
+            header: 'Participants',
+            cell: ({ row }) => {
+              const details = getTrainingDetails(row.original);
+              return (
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>
+                  {details.actual_participants}
+                </div>
+              );
+            },
+          },
+          /* {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+              const details = getTrainingDetails(row.original);
+              return (
+                <span className={`${styles.badge} ${styles[details.status]}`}>
+                  {details.status}
+                </span>
+              );
+            },
+          }, */
+          {
+            id: 'actions',
+            header: 'Actions',
+            meta: { align: 'center' },
+            cell: ({ row }) => {
+              const t = row.original;
+              const details = getTrainingDetails(t);
+              return (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                  <button
+                    onClick={() => openEdit(t)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 13px', borderRadius: '99px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#334155', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s ease', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#818cf8'; e.currentTarget.style.color = '#4338ca'; e.currentTarget.style.background = '#eef2ff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(99,102,241,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#334155'; e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <Pencil size={13} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(details.id)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 13px', borderRadius: '99px', border: '1.5px solid #e2e8f0', background: '#fff', color: '#991b1b', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.18s ease', fontFamily: 'inherit', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(239,68,68,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <Trash2 size={13} /> Delete
+                  </button>
+                </div>
+              );
+            },
+          },
+        ]}
+        loading={loading}
+        pageSize={itemsPerPage}
+        emptyText="No trainings found. Add your first training to get started."
+        emptyIcon={<BookOpen size={48} style={{ margin: '0 auto 12px', opacity: 0.2, color: '#94a3b8' }} />}
+      />
 
       {/* --- TRAINING FORM (Refactored) --- */}
       <TrainingForm

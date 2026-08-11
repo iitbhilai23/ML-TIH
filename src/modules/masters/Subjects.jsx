@@ -3,6 +3,7 @@ import { subjectService } from '../../services/subjectService';
 import styles from './Masters.module.css';
 import { Plus, Pencil, Trash2, Search, X, Book, AlertTriangle, Check } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
+import DataTable from '../../components/common/DataTable';
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
@@ -192,18 +193,18 @@ const Subjects = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
-              backgroundColor: '#f1f5f9',
+              background: 'linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%)',
               padding: '6px 16px',
               borderRadius: '9999px',
-              border: '1px solid transparent',
+              border: '1px solid rgba(192, 132, 252, 0.35)',
               alignSelf: 'flex-start',
-              transition: 'all 0.2s ease'
+              boxShadow: '0 2px 8px rgba(124, 58, 237, 0.08)'
             }}>
-              <Book size={18} color="#6366f1" strokeWidth={2} />
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <Book size={18} color="#7c3aed" strokeWidth={2.2} />
+              <span style={{ fontSize: '0.75rem', color: '#6b21a8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Total Subjects
               </span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#3b0764', lineHeight: 1 }}>
                 {subjects.length}
               </span>
             </div>
@@ -238,8 +239,8 @@ const Subjects = () => {
               }}
               onFocus={(e) => {
                 e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                e.currentTarget.style.borderColor = '#a855f7';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(168, 85, 247, 0.12)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.backgroundColor = '#f8fafc';
@@ -254,7 +255,7 @@ const Subjects = () => {
             <button
               onClick={openAdd}
               style={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
                 color: 'white',
                 padding: '14px 24px',
                 borderRadius: '12px',
@@ -265,17 +266,17 @@ const Subjects = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)',
                 transition: 'all 0.2s ease',
                 fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+                e.currentTarget.style.boxShadow = '0 6px 18px rgba(124, 58, 237, 0.45)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(124, 58, 237, 0.35)';
               }}
             >
               <Plus size={18} /> Add Subject
@@ -284,92 +285,111 @@ const Subjects = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th style={{ width: '60px' }}>ID</th>
-                <th style={{ width: '250px' }}>Subject Name</th>
-                <th>Description</th>
-                <th style={{ width: '100px', textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {subjects.map(sub => (
-                <tr key={sub.id}>
-                  <td><span style={{ fontWeight: 'bold', color: 'var(--primary)' }}>#{sub.id}</span></td>
-                  <td style={{ fontWeight: 500 }}>{sub.name}</td>
-                  <td style={{ color: '#64748b' }}>{sub.description || '-'}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                      <button
-                        onClick={() => openEdit(sub)}
-                        style={{
-                          padding: '8px 14px',
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '10px',
-                          color: '#1e293b',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '0.85rem',
-                          fontWeight: 600,
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#6366f1';
-                          e.currentTarget.style.color = '#4338ca';
-                          e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#e2e8f0';
-                          e.currentTarget.style.color = '#1e293b';
-                          e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                        }}
-                      >
-                        <Pencil size={14} /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(sub.id)}
-                        style={{
-                          padding: '8px 14px',
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '10px',
-                          color: '#991b1b',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '0.85rem',
-                          fontWeight: 600,
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#fecaca';
-                          e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#e2e8f0';
-                          e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                        }}
-                      >
-                        <Trash2 size={14} /> Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TanStack Table v8 */}
+      <DataTable
+        data={subjects}
+        columns={[
+          {
+            accessorKey: 'id',
+            header: 'ID',
+            size: 80,
+            cell: ({ getValue }) => (
+              <span style={{ fontWeight: 'bold', color: 'var(--primary, #6366f1)' }}>
+                #{getValue()}
+              </span>
+            ),
+          },
+          {
+            accessorKey: 'name',
+            header: 'Subject Name',
+            cell: ({ getValue }) => (
+              <span style={{ fontWeight: 600, color: '#0f172a' }}>{getValue()}</span>
+            ),
+          },
+          {
+            accessorKey: 'description',
+            header: 'Description',
+            cell: ({ getValue }) => (
+              <span style={{ color: '#64748b' }}>{getValue() || '-'}</span>
+            ),
+          },
+          {
+            id: 'actions',
+            header: 'Actions',
+            meta: { align: 'center' },
+            cell: ({ row }) => {
+              const sub = row.original;
+              return (
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  <button
+                    onClick={() => openEdit(sub)}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      color: '#1e293b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#6366f1';
+                      e.currentTarget.style.color = '#4338ca';
+                      e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#1e293b';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    }}
+                  >
+                    <Pencil size={14} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(sub.id)}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      color: '#991b1b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#fecaca';
+                      e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    }}
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              );
+            },
+          },
+        ]}
+        loading={loading}
+        globalFilter={searchTerm}
+        pageSize={50}
+        emptyText={searchTerm ? 'No subjects match your search' : 'No subjects found'}
+        emptyIcon={<Book size={48} style={{ margin: '0 auto 12px', opacity: 0.2, color: '#94a3b8' }} />}
+      />
 
       {/* --- EDIT/ADD MODAL --- */}
       {isModalOpen && (

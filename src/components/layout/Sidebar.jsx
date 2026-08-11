@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 import content from '../../utils/content';
 import styles from './Layout.module.css';
@@ -19,8 +19,10 @@ const SidebarItem = ({ item, onClick, isCollapsed }) => {
         }
         onClick={onClick}
       >
-        <Icon size={20} />
-        {!isCollapsed && <span>{item.label}</span>}
+        <span className={styles.iconWrapper}>
+          <Icon size={19} />
+        </span>
+        {!isCollapsed && <span className={styles.navLabel}>{item.label}</span>}
       </NavLink>
 
       <div className={styles.tooltip}>{item.label}</div>
@@ -46,23 +48,36 @@ const Sidebar = ({ isOpen, onClose, onToggleSidebar, isCollapsed }) => {
         isOpen && styles.sidebarOpen
       )}
     >
+      {/* Brand Header with Gradient Finish */}
       <div className={styles.brand}>
-        {/* CG title when open */}
-        {!isCollapsed && <span className={styles.portalTitle}>CG Training Portal</span>}
+        <div className={styles.brandContent}>
+          <div className={styles.logoBadge}>
+            <Sparkles size={18} color="#ffffff" />
+          </div>
+          {!isCollapsed && (
+            <div className={styles.titleWrap}>
+              <span className={styles.portalTitle}>CG Portal</span>
+              <span className={styles.portalSubtitle}>Training System</span>
+            </div>
+          )}
+        </div>
 
-        {/* Toggle button shows Menu or X based on state */}
-        <button className={styles.mobileToggle} onClick={onToggleSidebar}>
-          {isCollapsed ? <Menu size={24} /> : <X size={24} />}
+        {/* Toggle button */}
+        <button className={styles.mobileToggle} onClick={onToggleSidebar} title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+          {isCollapsed ? <Menu size={20} /> : <X size={20} />}
         </button>
       </div>
 
+      <div className={styles.divider} />
 
+      {/* Main Navigation */}
       <nav className={styles.navMenu}>
         {topNav.map(item => (
           <SidebarItem key={item.path} item={item} onClick={handleItemClick} isCollapsed={isCollapsed} />
         ))}
       </nav>
 
+      {/* Bottom Navigation */}
       <div className={styles.bottomNav}>
         {bottomNav.map(item => (
           <SidebarItem key={item.path} item={item} onClick={handleItemClick} isCollapsed={isCollapsed} />

@@ -8,6 +8,86 @@ import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
 import { useExport } from '../../features/export/useExport';
 import ExportButtons from '../../features/export/ExportButton';
+import DataTable from '../../components/common/DataTable';
+import { createColumnHelper } from '@tanstack/react-table';
+
+const hasProfileImage = (imageUrl) => {
+  if (typeof imageUrl !== 'string') return false;
+
+  const value = imageUrl.trim().toLowerCase();
+  return Boolean(value) && value !== 'null' && value !== 'undefined';
+};
+
+const trainerInitial = (name) => (name || '?').trim().charAt(0).toUpperCase() || '?';
+
+const InitialAvatar = ({ name, size = 40 }) => (
+  <div
+    aria-label={`${name || 'Trainer'} has no profile image`}
+    style={{
+      width: `${size}px`, height: `${size}px`, borderRadius: '50%',
+      background: 'linear-gradient(135deg, #7B3F99, #9B59B6)', color: 'white',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontWeight: 700, fontSize: size <= 28 ? '0.8rem' : '1.1rem', flexShrink: 0,
+    }}
+  >
+    {trainerInitial(name)}
+  </div>
+);
+
+const TrainerAvatar = ({ name, imageUrl }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = hasProfileImage(imageUrl) && !imageFailed;
+
+  if (!showImage) return <InitialAvatar name={name} />;
+
+  return (
+    <img
+      src={`${imageUrl}?t=${Date.now()}`}
+      alt={name}
+      onError={() => setImageFailed(true)}
+      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+    />
+  );
+};
+
+const ProfileStatus = ({ name, imageUrl }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(!hasProfileImage(imageUrl));
+  const imageIsSet = imageLoaded && !imageFailed;
+
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(!hasProfileImage(imageUrl));
+  }, [imageUrl]);
+
+  return (
+    <>
+      {hasProfileImage(imageUrl) && !imageFailed && (
+        <img
+          src={`${imageUrl}?t=${Date.now()}`}
+          alt=""
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageFailed(true)}
+          style={{ display: 'none' }}
+        />
+      )}
+      {imageIsSet ? (
+        <span
+          style={{
+            background: 'linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%)', color: '#065f46',
+            padding: '6px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+            letterSpacing: '0.02em', border: '1px solid #a7f3d0', boxShadow: '0 2px 6px rgba(5, 150, 105, 0.15)',
+            display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap',
+          }}
+        >
+          ✓ Set
+        </span>
+      ) : (
+        <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>Not set</span>
+      )}
+    </>
+  );
+};
 
 const TrainerList = () => {
   const [trainers, setTrainers] = useState([]);
@@ -56,8 +136,17 @@ const TrainerList = () => {
     setLoading(true);
     try {
       const data = await trainerService.getAllTrainers(searchTerm);
+      // const sortedData = Array.isArray(data)
+      //   ? [...data].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      //   : [];
       const sortedData = Array.isArray(data)
-        ? [...data].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        ? [...data].sort((a, b) =>
+          (a.name || "")
+            .trim()
+            .localeCompare((b.name || "").trim(), undefined, {
+              sensitivity: "base",
+            })
+        )
         : [];
       setTrainers(sortedData);
     } catch (error) {
@@ -118,7 +207,11 @@ const TrainerList = () => {
       fetchTrainers();
     } catch (error) {
       console.error('Could not save trainer:', error);
-      toast.error('Could not save trainer: ' + (error.message || 'Something went wrong'));
+      const apiMessage = error.response?.data?.message;
+      const message = Array.isArray(apiMessage)
+        ? apiMessage.join(', ')
+        : apiMessage || error.message || 'Something went wrong';
+      toast.error('Could not save trainer: ' + message);
     } finally {
       setIsSaving(false);
     }
@@ -220,10 +313,10 @@ const TrainerList = () => {
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b', margin: 0, letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '12px' }}>
               Trainers Management
             </h2>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', backgroundColor: '#f1f5f9', padding: '6px 16px', borderRadius: '9999px', border: '1px solid transparent', alignSelf: 'flex-start', transition: 'all 0.2s ease' }}>
-              <Users size={18} color="#6366f1" strokeWidth={2} />
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Trainers</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>{trainers.length}</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: 'linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%)', padding: '6px 16px', borderRadius: '9999px', border: '1px solid rgba(192, 132, 252, 0.35)', alignSelf: 'flex-start', boxShadow: '0 2px 8px rgba(124, 58, 237, 0.08)' }}>
+              <Users size={18} color="#7c3aed" strokeWidth={2.2} />
+              <span style={{ fontSize: '0.75rem', color: '#6b21a8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Trainers</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#3b0764', lineHeight: 1 }}>{trainers.length}</span>
             </div>
           </div>
 
@@ -234,7 +327,7 @@ const TrainerList = () => {
               placeholder="Search by name..."
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ width: '100%', padding: '14px 16px 14px 46px', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '0.95rem', fontWeight: 500, color: '#334155', backgroundColor: '#f8fafc', outline: 'none', transition: 'all 0.2s ease' }}
-              onFocus={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)'; }}
+              onFocus={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#a855f7'; e.currentTarget.style.boxShadow = '0 0 0 4px rgba(168, 85, 247, 0.12)'; }}
               onBlur={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
             />
           </div>
@@ -263,100 +356,129 @@ const TrainerList = () => {
               }
             />
 
-            <button onClick={openAddModal} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', padding: '14px 24px', borderRadius: '12px', border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)', transition: 'all 0.2s ease', fontFamily: 'inherit' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)'; }}>
+            <button onClick={openAddModal} style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)', color: 'white', padding: '14px 24px', borderRadius: '12px', border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)', transition: 'all 0.2s ease', fontFamily: 'inherit' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(124, 58, 237, 0.45)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(124, 58, 237, 0.35)'; }}>
               <Plus size={18} /> Add Trainer
             </button>
           </div>
         </div>
       </div>
 
-      {/* --- Table --- */}
-      <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> Trainer</div></th>
-                <th>Bio / Specialization</th>
-                <th style={{ textAlign: 'center' }}>Profile</th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}><Spinner overlay={false} /></td></tr>
-              ) : trainers.length === 0 ? (
-                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '60px' }}>
-                  <Users size={64} style={{ margin: '0 auto 16px', opacity: 0.2, color: '#94a3b8' }} />
-                  <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b', marginBottom: '8px' }}>No Trainers Found</div>
-                  <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>{searchTerm ? 'Try adjusting your search' : 'Add your first trainer to get started'}</div>
-                </td></tr>
-              ) : (
-                currentTrainers.map((trainer) => (
-                  <tr key={trainer.id}>
-                    {/* Trainer Name Column */}
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {trainer.profile_image_url ? (
-                          <img src={`${trainer.profile_image_url}?t=${Date.now()}`} alt={trainer.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }} />
-                        ) : (
-                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #7B3F99, #9B59B6)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem' }}>
-                            {(trainer.name || '?').charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <span style={{ fontWeight: 600, color: '#1e293b' }}>{trainer.name || 'Unknown Trainer'}</span>
-                      </div>
-                    </td>
-
-                    {/* Bio Column */}
-                    <td style={{ maxWidth: '250px', fontSize: '0.85rem', color: '#64748b', lineHeight: '1.4' }}>
-                      {trainer.bio || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>No bio provided</span>}
-                    </td>
-
-                    {/* Profile Status Column */}
-                    <td style={{ textAlign: 'center' }}>
-                      {trainer.profile_image_url && (
-                        <span style={{ background: 'linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%)', color: '#065f46', padding: '6px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.02em', border: '1px solid #a7f3d0', boxShadow: '0 2px 6px rgba(5, 150, 105, 0.15)', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>✓ Set</span>
-                      )}
-                    </td>
-
-                    {/* Actions Column */}
-                    <td>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                        <button onClick={() => openEditModal(trainer)} style={{ padding: '8px 14px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#1e293b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#4338ca'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}>
-                          <Pencil size={14} /> Edit
-                        </button>
-                        <button onClick={() => handleDeleteClick(trainer.id)} style={{ padding: '8px 14px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#991b1b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', transition: 'all 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#fecaca'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'; }}>
-                          <Trash2 size={14} /> Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {!loading && trainers.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderTop: '1px solid #e2e8f0', background: '#ffffff', borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px', marginTop: '0px' }}>
-            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, trainers.length)} of {trainers.length} entries</div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: currentPage === 1 ? '#f1f5f9' : '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#475569', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }} onMouseEnter={(e) => { if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1'; }} onMouseLeave={(e) => { if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0'; }}>
-                <ChevronLeft size={16} /> Previous
-              </button>
-              <div style={{ display: 'flex', gap: '4px', margin: '0 8px' }}>
-                <span style={{ padding: '8px 12px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', borderRadius: '8px', fontWeight: 600, fontSize: '0.9rem', boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)' }}>{currentPage}</span>
-                <span style={{ padding: '8px 4px', color: '#64748b', fontWeight: 500, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}> of {totalPages}</span>
+      {/* --- TanStack Table v8 --- */}
+      <DataTable
+        data={trainers}
+        columns={[
+          {
+            accessorKey: 'name',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={14} /> Trainer
               </div>
-              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages || totalPages === 0} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569', cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }} onMouseEnter={(e) => { if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1'; }} onMouseLeave={(e) => { if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0'; }}>
-                Next <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+            ),
+            cell: ({ row }) => {
+              const trainer = row.original;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <TrainerAvatar name={trainer.name} imageUrl={trainer.profile_image_url} />
+                  <span style={{ fontWeight: 600, color: '#1e293b' }}>{trainer.name || 'Unknown Trainer'}</span>
+                </div>
+              );
+            },
+          },
+          {
+            accessorKey: 'bio',
+            header: 'Bio / Specialization',
+            cell: ({ getValue }) => (
+              <div style={{ maxWidth: '250px', fontSize: '0.85rem', color: '#64748b', lineHeight: '1.4' }}>
+                {getValue() || <span style={{ color: '#cbd5e1', fontStyle: 'italic' }}>No bio provided</span>}
+              </div>
+            ),
+          },
+          {
+            accessorKey: 'profile_image_url',
+            id: 'profile',
+            header: 'Profile',
+            meta: { align: 'center' },
+            cell: ({ getValue, row }) => (
+              <ProfileStatus name={row.original.name} imageUrl={getValue()} />
+            ),
+          },
+          {
+            id: 'actions',
+            header: 'Actions',
+            meta: { align: 'center' },
+            cell: ({ row }) => {
+              const trainer = row.original;
+              return (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                  <button
+                    onClick={() => openEditModal(trainer)}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      color: '#1e293b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#6366f1';
+                      e.currentTarget.style.color = '#4338ca';
+                      e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#1e293b';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    }}
+                  >
+                    <Pencil size={14} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(trainer.id)}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      color: '#991b1b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#fecaca';
+                      e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    }}
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              );
+            },
+          },
+        ]}
+        loading={loading}
+        globalFilter={searchTerm}
+        pageSize={itemsPerPage}
+        emptyText={searchTerm ? 'No trainers match your search' : 'No trainers found. Add your first trainer to get started.'}
+        emptyIcon={<Users size={56} style={{ margin: '0 auto 12px', opacity: 0.25, color: '#94a3b8' }} />}
+      />
 
       {/* --- TRAINER FORM (Refactored) --- */}
       <TrainerForm

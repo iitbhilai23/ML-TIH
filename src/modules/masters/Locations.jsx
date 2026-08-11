@@ -6,6 +6,7 @@ import Spinner from '../../components/common/Spinner';
 import { toast, Toaster } from 'sonner';
 import { useExport } from '../../features/export/useExport';
 import ExportButtons from '../../features/export/ExportButton';
+import DataTable from '../../components/common/DataTable';
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -137,19 +138,48 @@ const Locations = () => {
       ];
 
       setCountries(uniqueCountries);
-      setLocations(
-        Array.isArray(data)
-          ? [...data].sort((a, b) => {
-            const aHasDistrict = a.district && a.district.trim() !== '';
-            const bHasDistrict = b.district && b.district.trim() !== '';
+      const sortedLocations = Array.isArray(data)
+        ? [...data].sort((a, b) => {
+          const districtCompare = (a.district || "")
+            .trim()
+            .localeCompare((b.district || "").trim(), undefined, {
+              sensitivity: "base",
+            });
 
-            if (aHasDistrict && bHasDistrict) return 0;
-            if (aHasDistrict) return -1;
-            if (bHasDistrict) return 1;
-            return 0;
-          })
-          : []
-      );
+          if (districtCompare !== 0) return districtCompare;
+
+          // If district is same, sort by block
+          const blockCompare = (a.block || "")
+            .trim()
+            .localeCompare((b.block || "").trim(), undefined, {
+              sensitivity: "base",
+            });
+
+          if (blockCompare !== 0) return blockCompare;
+
+          // If block is same, sort by village
+          return (a.village || "")
+            .trim()
+            .localeCompare((b.village || "").trim(), undefined, {
+              sensitivity: "base",
+            });
+        })
+        : [];
+
+      setLocations(sortedLocations);
+      // setLocations(
+      //   Array.isArray(data)
+      //     ? [...data].sort((a, b) => {
+      //       const aHasDistrict = a.district && a.district.trim() !== '';
+      //       const bHasDistrict = b.district && b.district.trim() !== '';
+
+      //       if (aHasDistrict && bHasDistrict) return 0;
+      //       if (aHasDistrict) return -1;
+      //       if (bHasDistrict) return 1;
+      //       return 0;
+      //     })
+      //     : []
+      // );
     } catch (err) {
       console.error("Load Locations Error:", err);
       setError('Failed to load locations. Please try again.');
@@ -355,8 +385,8 @@ const Locations = () => {
               <span
                 style={{
                   fontSize: '0.75rem',
-                  color: '#64748b',
-                  fontWeight: 600,
+                  color: '#6b21a8',
+                  fontWeight: 700,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em'
                 }}
@@ -366,8 +396,8 @@ const Locations = () => {
               <span
                 style={{
                   fontSize: '1.1rem',
-                  fontWeight: 800,
-                  color: '#1e293b',
+                  fontWeight: 900,
+                  color: '#3b0764',
                   lineHeight: 1
                 }}
               >
@@ -401,8 +431,8 @@ const Locations = () => {
               }}
               onFocus={(e) => {
                 e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                e.currentTarget.style.borderColor = '#a855f7';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(168, 85, 247, 0.12)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.backgroundColor = '#f8fafc';
@@ -429,8 +459,8 @@ const Locations = () => {
               }}
               onFocus={(e) => {
                 e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)';
+                e.currentTarget.style.borderColor = '#a855f7';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(168, 85, 247, 0.12)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.backgroundColor = '#f8fafc';
@@ -486,7 +516,7 @@ const Locations = () => {
             <button
               onClick={openAdd}
               style={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
                 color: 'white',
                 padding: '14px 24px',
                 borderRadius: '12px',
@@ -497,17 +527,17 @@ const Locations = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)',
                 transition: 'all 0.2s ease',
                 fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+                e.currentTarget.style.boxShadow = '0 6px 18px rgba(124, 58, 237, 0.45)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(124, 58, 237, 0.35)';
               }}
             >
               <Plus size={18} /> Add Location
@@ -534,257 +564,152 @@ const Locations = () => {
         </div>
       )}
 
-      <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={14} />
-                    District
-                  </div>
-                </th>
-                <th>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={14} />
-                    Block
-                  </div>
-                </th>
-                <th>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={14} />
-                    Village
-                  </div>
-                </th>
-                <th>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    📍 Pincode
-                  </div>
-                </th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                  <Spinner overlay={false} />
-                </td></tr>
-              ) : locations.length === 0 ? (
-                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '60px' }}>
-                  <MapPin size={64} style={{ margin: '0 auto 16px', opacity: 0.2, color: '#94a3b8' }} />
-                  <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64748b', marginBottom: '8px' }}>
-                    No Locations Found
-                  </div>
-                  <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
-                    {filters.district || filters.block ? 'Try adjusting your filters' : 'Add your first location to get started'}
-                  </div>
-                </td></tr>
-              ) : (
-                currentLocations.map(loc => (
-                  <tr key={loc.id}>
-                    <td style={{ fontWeight: 600, color: '#1e293b' }}>{loc.district}</td>
-                    <td style={{ color: '#475569' }}>{loc.block}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
-                        <MapPin size={14} style={{ color: '#6366f1' }} />
-                        {loc.village}
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{
-                        background: '#ffffff',
-                        color: '#0f172a',
-                        padding: '6px 12px',
-                        borderRadius: '10px',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        fontFamily: 'monospace',
-                        letterSpacing: '0.08em',
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '86px'
-                      }}>
-                        {loc.pincode || 'N/A'}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                        <button
-                          onClick={() => openEdit(loc)}
-                          style={{
-                            padding: '8px 14px',
-                            background: '#ffffff',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '10px',
-                            color: '#1e293b',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#6366f1';
-                            e.currentTarget.style.color = '#4338ca';
-                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#e2e8f0';
-                            e.currentTarget.style.color = '#1e293b';
-                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                          }}
-                        >
-                          <Pencil size={14} /> Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(loc.id)}
-                          style={{
-                            padding: '8px 14px',
-                            background: '#ffffff',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '10px',
-                            color: '#991b1b',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#fecaca';
-                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#e2e8f0';
-                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                          }}
-                        >
-                          <Trash2 size={14} /> Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Controls */}
-        {!loading && locations.length > 0 && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '16px 20px',
-            borderTop: '1px solid #e2e8f0',
-            background: '#ffffff',
-            borderBottomLeftRadius: '16px',
-            borderBottomRightRadius: '16px',
-            marginTop: '0px'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, locations.length)} of {locations.length} entries
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  background: currentPage === 1 ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === 1 ? '#cbd5e1' : '#475569',
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                }}
-                onMouseEnter={(e) => {
-                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#6366f1';
-                }}
-                onMouseLeave={(e) => {
-                  if (currentPage !== 1) e.currentTarget.style.borderColor = '#e2e8f0';
-                }}
-              >
-                <ChevronLeft size={16} /> Previous
-              </button>
-
-              <div style={{
-                display: 'flex',
-                gap: '4px',
-                margin: '0 8px'
-              }}>
-                <span style={{
-                  padding: '8px 12px',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                  color: 'white',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
-                }}>
-                  {currentPage}
-                </span>
-                <span style={{
-                  padding: '8px 4px',
-                  color: '#64748b',
-                  fontWeight: 500,
-                  fontSize: '0.9rem',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  of {totalPages}
-                </span>
+      {/* --- TanStack Table v8 --- */}
+      <DataTable
+        data={locations}
+        columns={[
+          {
+            accessorKey: 'district',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={14} /> District
               </div>
-
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages || totalPages === 0}
+            ),
+            cell: ({ getValue }) => (
+              <span style={{ fontWeight: 600, color: '#1e293b' }}>{getValue()}</span>
+            ),
+          },
+          {
+            accessorKey: 'block',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={14} /> Block
+              </div>
+            ),
+            cell: ({ getValue }) => (
+              <span style={{ color: '#475569' }}>{getValue()}</span>
+            ),
+          },
+          {
+            accessorKey: 'village',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={14} /> Village
+              </div>
+            ),
+            cell: ({ getValue }) => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+                <MapPin size={14} style={{ color: '#6366f1' }} />
+                {getValue()}
+              </div>
+            ),
+          },
+          {
+            accessorKey: 'pincode',
+            header: () => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                📍 Pincode
+              </div>
+            ),
+            cell: ({ getValue }) => (
+              <span
                 style={{
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.08em',
                   border: '1px solid #e2e8f0',
-                  background: currentPage === totalPages || totalPages === 0 ? '#f1f5f9' : '#ffffff',
-                  color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#475569',
-                  cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer',
-                  display: 'flex',
+                  boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                }}
-                onMouseEnter={(e) => {
-                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#6366f1';
-                }}
-                onMouseLeave={(e) => {
-                  if (currentPage !== totalPages && totalPages !== 0) e.currentTarget.style.borderColor = '#e2e8f0';
+                  justifyContent: 'center',
+                  minWidth: '86px',
                 }}
               >
-                Next <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+                {getValue() || 'N/A'}
+              </span>
+            ),
+          },
+          {
+            id: 'actions',
+            header: 'Actions',
+            meta: { align: 'center' },
+            cell: ({ row }) => {
+              const loc = row.original;
+              return (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                  <button
+                    onClick={() => openEdit(loc)}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      color: '#1e293b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#6366f1';
+                      e.currentTarget.style.color = '#4338ca';
+                      e.currentTarget.style.boxShadow = '0 6px 14px rgba(99, 102, 241, 0.18)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#1e293b';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    }}
+                  >
+                    <Pencil size={14} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(loc.id)}
+                    style={{
+                      padding: '8px 14px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      color: '#991b1b',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#fecaca';
+                      e.currentTarget.style.boxShadow = '0 6px 14px rgba(239, 68, 68, 0.18)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    }}
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              );
+            },
+          },
+        ]}
+        loading={loading}
+        pageSize={itemsPerPage}
+        emptyText={filters.district || filters.block ? 'No locations match your filters' : 'No locations found. Add your first location to get started.'}
+        emptyIcon={<MapPin size={56} style={{ margin: '0 auto 12px', opacity: 0.25, color: '#94a3b8' }} />}
+      />
 
 
       {/* --- ADD/EDIT MODAL --- */}
