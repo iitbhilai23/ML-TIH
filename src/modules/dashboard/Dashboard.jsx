@@ -53,18 +53,21 @@ const THEME = {
 // --- TRAINING PHASE COLOR PALETTE ---
 
 const TRAINING_TYPE_COLORS = {
-  '': '#16a34a',                   // Default (All Training Types) — green
+  '': '#16a34a',                   // Default (All Training Types)
 
-  'Pilot Phase': '#0ea5e9',        // Group-level — sky blue
-  'Pilot Phase I': '#2563eb',      // Blue
-  'Pilot Phase II': '#16a34a',     // Green
-  'Pilot Phase III': '#f59e0b',    // Amber
+  // Pilot Phase: distinct, non-repeating colors
+  'Pilot Phase': '#2563eb',
+  'Pilot Phase I': '#2563eb',
+  'Pilot Phase II': '#f59e0b',
+  'Pilot Phase III': '#10b981',
 
-  'Educator Phase': '#8b5cf6',     // Group-level — violet
-  'Educator Phase I': '#7c3aed',   // Purple
-  'Educator Phase II': '#db2777',  // Pink / Magenta
-  'Educator Phase III': '#0d9488', // Teal
-  'Educator Phase IV': '#dc2626',  // Red
+  // Educator Phase: rich, distinct, non-repeating colors
+  'Educator Phase': '#C4B5FD',
+
+  'Educator Phase I': '#F472B6',   // Refined Rose
+  'Educator Phase II': '#FB923C',  // Refined Peach
+  'Educator Phase III': '#818CF8', // Refined Indigo
+  'Educator Phase IV': '#22D3EE',  // Refined Cyan
 };
 
 const getTrainingTypeColor = (trainingType) =>
@@ -349,11 +352,6 @@ const Dashboard = () => {
             <div>
               <div style={{ fontSize: '0.925rem', fontWeight: '700', color: '#0f172a', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Dashboard Controls
-                {isFiltered && (
-                  <span style={{ fontSize: '0.7rem', fontWeight: '700', background: '#e0e7ff', color: '#4338ca', padding: '2px 9px', borderRadius: '20px', letterSpacing: '0.02em' }}>
-                    Active Filters
-                  </span>
-                )}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '500' }}>
                 Filter trainings & map view by district or type
@@ -375,7 +373,7 @@ const Dashboard = () => {
                 if (!selected) {
                   return (
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-                      <MapPin size={16} color="#6366f1" />
+                      <MapPin size={16} color="#5356edff" />
                       <span>All Districts</span>
                     </span>
                   );
@@ -414,7 +412,7 @@ const Dashboard = () => {
                 if (!selected) {
                   return (
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-                      <BookOpen size={16} color="#7c3aed" />
+                      <BookOpen size={16} color="#16a34a" />
                       <span>All Training Types</span>
                     </span>
                   );
@@ -431,7 +429,7 @@ const Dashboard = () => {
                         flexShrink: 0
                       }}
                     />
-                    <BookOpen size={16} color="#7c3aed" />
+                    <BookOpen size={16} color={getTrainingTypeColor(selected)} />
                     <span>{selected}</span>
                   </span>
                 );
@@ -710,7 +708,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget, markerColor, activ
       `}</style>
 
       {/* Map Control: Info Badge */}
-      <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 1000, background: 'rgba(255, 255, 255, 0.95)', padding: '9px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e2e8f0' }}>
+      <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 900, background: 'rgba(255, 255, 255, 0.95)', padding: '9px 14px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e2e8f0' }}>
         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: MARKER_COLOR, boxShadow: `0 0 0 4px ${MARKER_COLOR}1f` }}></div>
         <div>
           <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1e293b' }}>Chhattisgarh</div>
@@ -718,21 +716,8 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget, markerColor, activ
         </div>
       </div>
 
-      {/* NEW: Active phase legend — shows only when a training type filter is applied */}
-      {activeTrainingType && (
-        <div style={{
-          position: 'absolute', top: '68px', left: '15px', zIndex: 1000,
-          background: 'rgba(255, 255, 255, 0.95)', padding: '7px 14px', borderRadius: '10px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '8px',
-          border: '1px solid #e2e8f0'
-        }}>
-          <span style={{ width: 9, height: 9, borderRadius: '50%', background: MARKER_COLOR, flexShrink: 0 }} />
-          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#334155' }}>{activeTrainingType}</span>
-        </div>
-      )}
-
       {/* Map Control: Fullscreen */}
-      <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 1000 }}>
+      <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 900 }}>
         <button onClick={() => setIsFullScreen(!isFullScreen)} style={{ background: 'white', border: '1px solid #f1f5f9', borderRadius: '10px', padding: '8px', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
           {isFullScreen ? <Minimize size={18} color="#64748b" /> : <Maximize size={18} color="#64748b" />}
         </button>
@@ -822,7 +807,6 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget, markerColor, activ
       </MapContainer>
 
       {/* MODAL */}
-      ```jsx
       {Array.isArray(selectedTraining) && selectedTraining.length > 0 && (
         <div
           style={{
@@ -1142,7 +1126,7 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget, markerColor, activ
                             {training.total_participants ||
                               training.actual_participants ||
                               0}{" "}
-                            Trainees
+                            Participants
                           </div>
                         </div>
 
