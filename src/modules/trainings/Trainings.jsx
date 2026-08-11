@@ -35,6 +35,7 @@ const getTrainingDetails = (training) => {
   return {
     subject_name: subject,
     trainer_name: training.trainer_name || 'N/A',
+    trainer_profile_image: training.trainer_profile_image || training.trainer_image || '',
     location_details: training.location_details || {},
     start_date: training.start_date,
     end_date: training.end_date,
@@ -420,9 +421,19 @@ setTrainings(sortedTrainings);
                       fontWeight: 700,
                       fontSize: '0.9rem',
                       flexShrink: 0,
+                      position: 'relative',
+                      overflow: 'hidden',
                     }}
                   >
-                    {(details.trainer_name || '?').charAt(0).toUpperCase()}
+                    <span>{(details.trainer_name || '?').charAt(0).toUpperCase()}</span>
+                    {details.trainer_profile_image && (
+                      <img
+                        src={details.trainer_profile_image}
+                        alt={`${details.trainer_name} profile`}
+                        onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', background: '#f3e8ff' }}
+                      />
+                    )}
                   </div>
                   <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>{details.trainer_name}</span>
                 </div>

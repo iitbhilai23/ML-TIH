@@ -460,32 +460,13 @@ const ChangePassword = () => {
             <LiteracyThemeCanvas />
 
             {/* ===== CARD ===== */}
-            <div style={{ ...THEME.glass, width: '100%', maxWidth: '480px', padding: '38px 32px' }}>
-
-                {/* Top Portal Tag */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    marginBottom: '20px'
-                }}>
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontSize: '0.73rem',
-                        fontWeight: '700',
-                        color: THEME.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.07em',
-                        background: THEME.primaryLight,
-                        border: '1px solid rgba(99, 102, 241, 0.3)',
-                        padding: '6px 14px',
-                        borderRadius: '9999px',
-                        boxShadow: '0 2px 8px rgba(99, 102, 241, 0.08)'
-                    }}>
-                        <Award size={14} style={{ color: THEME.primary }} /> Marketplace Literacy Portal
-                    </div>
-                </div>
+            <div style={{
+                ...THEME.glass,
+                width: '100%',
+                maxWidth: '520px',
+                padding: '36px',
+                transform: 'translateY(-40px)'
+            }}>
 
                 {/* Success State */}
                 {isSuccess ? (

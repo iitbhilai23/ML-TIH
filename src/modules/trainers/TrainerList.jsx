@@ -11,6 +11,84 @@ import ExportButtons from '../../features/export/ExportButton';
 import DataTable from '../../components/common/DataTable';
 import { createColumnHelper } from '@tanstack/react-table';
 
+const hasProfileImage = (imageUrl) => {
+  if (typeof imageUrl !== 'string') return false;
+
+  const value = imageUrl.trim().toLowerCase();
+  return Boolean(value) && value !== 'null' && value !== 'undefined';
+};
+
+const trainerInitial = (name) => (name || '?').trim().charAt(0).toUpperCase() || '?';
+
+const InitialAvatar = ({ name, size = 40 }) => (
+  <div
+    aria-label={`${name || 'Trainer'} has no profile image`}
+    style={{
+      width: `${size}px`, height: `${size}px`, borderRadius: '50%',
+      background: 'linear-gradient(135deg, #7B3F99, #9B59B6)', color: 'white',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontWeight: 700, fontSize: size <= 28 ? '0.8rem' : '1.1rem', flexShrink: 0,
+    }}
+  >
+    {trainerInitial(name)}
+  </div>
+);
+
+const TrainerAvatar = ({ name, imageUrl }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = hasProfileImage(imageUrl) && !imageFailed;
+
+  if (!showImage) return <InitialAvatar name={name} />;
+
+  return (
+    <img
+      src={`${imageUrl}?t=${Date.now()}`}
+      alt={name}
+      onError={() => setImageFailed(true)}
+      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+    />
+  );
+};
+
+const ProfileStatus = ({ name, imageUrl }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(!hasProfileImage(imageUrl));
+  const imageIsSet = imageLoaded && !imageFailed;
+
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(!hasProfileImage(imageUrl));
+  }, [imageUrl]);
+
+  return (
+    <>
+      {hasProfileImage(imageUrl) && !imageFailed && (
+        <img
+          src={`${imageUrl}?t=${Date.now()}`}
+          alt=""
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageFailed(true)}
+          style={{ display: 'none' }}
+        />
+      )}
+      {imageIsSet ? (
+        <span
+          style={{
+            background: 'linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%)', color: '#065f46',
+            padding: '6px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+            letterSpacing: '0.02em', border: '1px solid #a7f3d0', boxShadow: '0 2px 6px rgba(5, 150, 105, 0.15)',
+            display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap',
+          }}
+        >
+          ✓ Set
+        </span>
+      ) : (
+        <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>Not set</span>
+      )}
+    </>
+  );
+};
+
 const TrainerList = () => {
   const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -129,7 +207,11 @@ const TrainerList = () => {
       fetchTrainers();
     } catch (error) {
       console.error('Could not save trainer:', error);
-      toast.error('Could not save trainer: ' + (error.message || 'Something went wrong'));
+      const apiMessage = error.response?.data?.message;
+      const message = Array.isArray(apiMessage)
+        ? apiMessage.join(', ')
+        : apiMessage || error.message || 'Something went wrong';
+      toast.error('Could not save trainer: ' + message);
     } finally {
       setIsSaving(false);
     }
@@ -296,30 +378,7 @@ const TrainerList = () => {
               const trainer = row.original;
               return (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {trainer.profile_image_url ? (
-                    <img
-                      src={`${trainer.profile_image_url}?t=${Date.now()}`}
-                      alt={trainer.name}
-                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #7B3F99, #9B59B6)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                      }}
-                    >
-                      {(trainer.name || '?').charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <TrainerAvatar name={trainer.name} imageUrl={trainer.profile_image_url} />
                   <span style={{ fontWeight: 600, color: '#1e293b' }}>{trainer.name || 'Unknown Trainer'}</span>
                 </div>
               );
@@ -339,28 +398,9 @@ const TrainerList = () => {
             id: 'profile',
             header: 'Profile',
             meta: { align: 'center' },
-            cell: ({ getValue }) =>
-              getValue() ? (
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #ecfdf3 0%, #d1fae5 100%)',
-                    color: '#065f46',
-                    padding: '6px 12px',
-                    borderRadius: '999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.02em',
-                    border: '1px solid #a7f3d0',
-                    boxShadow: '0 2px 6px rgba(5, 150, 105, 0.15)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  ✓ Set
-                </span>
-              ) : null,
+            cell: ({ getValue, row }) => (
+              <ProfileStatus name={row.original.name} imageUrl={getValue()} />
+            ),
           },
           {
             id: 'actions',
