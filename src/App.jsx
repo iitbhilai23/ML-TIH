@@ -10,13 +10,8 @@ import Subjects from './modules/masters/Subjects';
 import Locations from './modules/masters/Locations';
 import Trainings from './modules/trainings/Trainings';
 import Participants from './modules/participants/Participants';
-// import PublicReport from './modules/reports/PublicReport';
-<<<<<<< HEAD
+
 import ChangePassword from './modules/change_password/ChangePassword';
-=======
-import ChangePassword from './modules/change password/ChangePassword';
-import ForgotPassword from './modules/auth/ForgotPassword';
->>>>>>> origin/vedprakash
 import Development from './modules/testdev/development';
 function App() {
   return (
