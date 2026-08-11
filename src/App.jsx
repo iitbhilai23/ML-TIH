@@ -12,7 +12,10 @@ import Trainings from './modules/trainings/Trainings';
 import Participants from './modules/participants/Participants';
 
 import ChangePassword from './modules/change_password/ChangePassword';
+import ForgotPassword from './modules/auth/ForgotPassword';
 import Development from './modules/testdev/development';
+
+
 function App() {
   return (
     <AuthProvider>
