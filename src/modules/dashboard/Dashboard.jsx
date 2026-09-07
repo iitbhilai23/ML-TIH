@@ -419,7 +419,7 @@ const Dashboard = () => {
                 }
                 return (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 600 }}>
-                    {/* NEW: small color swatch showing the active phase color */}
+
                     <span
                       style={{
                         width: 10,
@@ -723,8 +723,12 @@ const TraineeLocationMap = ({ trainingLocations, focusTarget, markerColor, activ
         </button>
       </div>
 
-      <MapContainer style={{ width: '100%', height: '100%' }} zoomControl={false} minZoom={5}>
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+      <MapContainer style={{ width: '100%', height: '100%' }} zoomControl={false} minZoom={7}>
+        {/* <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" /> */}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
         {/* Controller to handle map movement based on selection */}
         <MapLocationController target={focusTarget} />
